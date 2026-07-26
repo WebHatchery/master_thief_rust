@@ -79,6 +79,11 @@ impl Game {
                     .map(|entry| entry.target_id.clone());
                 Screen::Board
             }
+            "shop" | "outfitter" => Screen::Shop,
+            "hiring" => {
+                self.selection.hiring = true;
+                Screen::Crew
+            }
             "planning" | "plan" => {
                 self.open_capture_plan();
                 Screen::Planning
@@ -142,7 +147,8 @@ impl Game {
         if is_key_pressed(KeyCode::Tab) {
             let next = match self.selection.screen {
                 Screen::Crew => Screen::Board,
-                Screen::Board => Screen::Results,
+                Screen::Board => Screen::Shop,
+                Screen::Shop => Screen::Results,
                 // Tab never walks out of a plan under construction, and never
                 // out of a run in progress.
                 Screen::Planning => Screen::Planning,
@@ -174,6 +180,7 @@ impl Game {
             screen: self.selection.screen,
             selected_member: self.selection.member.as_deref(),
             selected_target: self.selection.target.as_deref(),
+            hiring: self.selection.hiring,
             draft: self.selection.draft.as_ref(),
             playback: self.playback.as_ref(),
             last_report: self.selection.last_report.as_ref(),

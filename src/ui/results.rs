@@ -21,7 +21,7 @@ pub fn draw(ctx: &UiContext<'_>) {
     };
 
     draw_doors(ctx, report);
-    draw_ledger(report);
+    draw_ledger(ctx, report);
 }
 
 /// The results screen splits differently from the browsing screens: the doors
@@ -143,7 +143,7 @@ fn modifier_summary(result: &EncounterResult) -> String {
         .join("  ")
 }
 
-fn draw_ledger(report: &JobReport) {
+fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
     let content = draw_panel(
         ledger_rect(),
         if report.success { "Paid" } else { "Burned" },
@@ -195,6 +195,39 @@ fn draw_ledger(report: &JobReport) {
         3.0,
         dark::TEXT_DIM,
     );
+
+    if !report.loot.is_empty() {
+        draw_ui_text_ex(
+            "Carried out",
+            content.x,
+            content.y + 240.0,
+            TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
+        );
+        let names: Vec<&str> = report
+            .loot
+            .iter()
+            .map(|id| {
+                ctx.data
+                    .equipment
+                    .get(id)
+                    .map(|item| item.name.as_str())
+                    .unwrap_or(id.as_str())
+            })
+            .collect();
+        draw_text_block(
+            &names.join(
+                "
+",
+            ),
+            content.x,
+            content.y + 248.0,
+            content.w,
+            60.0,
+            14.0,
+            3.0,
+            Color::new(0.56, 0.82, 0.60, 1.0),
+        );
+    }
 
     let injuries: Vec<&str> = report
         .doors

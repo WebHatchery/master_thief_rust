@@ -25,6 +25,20 @@ pub struct JobPlan {
     pub delegated: bool,
 }
 
+impl JobPlan {
+    /// Everybody down for this job, each named once.
+    pub fn crew_on_job(&self) -> Vec<String> {
+        let mut crew: Vec<String> = self
+            .assignments
+            .iter()
+            .map(|assignment| assignment.member_id.clone())
+            .collect();
+        crew.sort();
+        crew.dedup();
+        crew
+    }
+}
+
 /// One resolved door.
 #[derive(Debug, Clone)]
 pub struct DoorOutcome {
@@ -43,6 +57,8 @@ pub struct JobReport {
     pub target_name: String,
     pub doors: Vec<DoorOutcome>,
     pub success: bool,
+    /// Equipment ids carried out along with the money.
+    pub loot: Vec<String>,
     pub payout: i64,
     pub notoriety_gained: i32,
     pub reputation_gained: i32,
@@ -79,12 +95,21 @@ pub fn auto_assign(session: &GameSession, data: &GameData, target: &HeistTarget)
         let mut best: Option<(i32, String)> = None;
 
         for member in session.available_crew() {
+            // A pair that refuses to work together is not a choice the
+            // auto-assigner gets to make either (GDD 5.5).
+            if used
+                .iter()
+                .any(|other| session.chemistry.refuses(&member.id, other))
+            {
+                continue;
+            }
+
             let loadout = session.loadout(member, data);
             let check = build_check(CheckInputs {
                 member,
                 loadout: &loadout,
                 encounter,
-                extra: &situational_modifiers(data, target, encounter, session),
+                extra: &situational_modifiers(data, target, encounter, session, &member.id, &used),
             });
             let mut score = check.bonus();
             if used.contains(&member.id) {
@@ -97,7 +122,9 @@ pub fn auto_assign(session: &GameSession, data: &GameData, target: &HeistTarget)
         }
 
         if let Some((_, member_id)) = best {
-            used.push(member_id.clone());
+            if !used.contains(&member_id) {
+                used.push(member_id.clone());
+            }
             assignments.push(Assignment {
                 encounter_id: encounter.id.clone(),
                 member_id,
@@ -119,6 +146,7 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
         return empty_report(plan);
     };
 
+    let crew_on_job = plan.crew_on_job();
     let mut doors = Vec::new();
     let mut queue: Vec<(String, bool)> = plan
         .assignments
@@ -138,7 +166,7 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
             continue;
         };
 
-        let outcome = resolve_door(session, data, &target, &encounter, &member_id);
+        let outcome = resolve_door(session, data, &target, &encounter, &member_id, &crew_on_job);
 
         match outcome.result.run_effect {
             RunEffect::SkipNext => {
@@ -155,10 +183,37 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
         }
 
         let _ = was_complication;
+        record_chemistry(
+            session,
+            &outcome.result.check.member_id,
+            &crew_on_job,
+            outcome.result.outcome,
+        );
         doors.push(outcome);
     }
 
     settle(session, data, &target, plan, doors)
+}
+
+/// Everybody else on the job watched that door. What they made of it depends
+/// on who they are (GDD 5.5).
+fn record_chemistry(
+    session: &mut GameSession,
+    actor: &str,
+    crew_on_job: &[String],
+    outcome: Outcome,
+) {
+    let watchers: Vec<(String, Vec<String>)> = crew_on_job
+        .iter()
+        .filter(|id| id.as_str() != actor)
+        .filter_map(|id| {
+            session
+                .member(id)
+                .map(|member| (member.id.clone(), member.personality_traits.clone()))
+        })
+        .collect();
+
+    crate::rules::chemistry::record_outcome(&mut session.chemistry, actor, &watchers, outcome);
 }
 
 fn assigned_member(plan: &JobPlan, encounter_id: &str, session: &GameSession) -> Option<String> {
@@ -198,13 +253,13 @@ fn resolve_door(
     target: &HeistTarget,
     encounter: &Encounter,
     member_id: &str,
+    crew_on_job: &[String],
 ) -> DoorOutcome {
     let extras = {
-        let Some(member) = session.member(member_id) else {
+        if session.member(member_id).is_none() {
             return missed_door(encounter);
-        };
-        let _ = member;
-        situational_modifiers(data, target, encounter, session)
+        }
+        situational_modifiers(data, target, encounter, session, member_id, crew_on_job)
     };
 
     let check = {
@@ -324,6 +379,11 @@ fn settle(
         0
     };
 
+    // What the crew carried out besides the money (GDD 0, "Build").
+    let outcomes: Vec<Outcome> = doors.iter().map(|door| door.result.outcome).collect();
+    let loot = super::loot::roll_loot(&mut session.rng, data, target, &outcomes, success);
+    session.inventory.extend(loot.iter().cloned());
+
     session.budget += net;
     session.notoriety += notoriety;
     session.heat += notoriety;
@@ -335,6 +395,7 @@ fn settle(
         target_name: target.name.clone(),
         doors,
         success,
+        loot,
         payout: net,
         notoriety_gained: notoriety,
         reputation_gained: reputation,
@@ -359,6 +420,7 @@ fn empty_report(plan: &JobPlan) -> JobReport {
         target_name: plan.target_id.clone(),
         doors: Vec::new(),
         success: false,
+        loot: Vec::new(),
         payout: 0,
         notoriety_gained: 0,
         reputation_gained: 0,
@@ -438,14 +500,26 @@ mod tests {
     }
 
     #[test]
-    fn a_job_tires_the_crew_that_worked_it() {
+    fn a_job_leaves_its_mark_on_the_crew_that_worked_it() {
         let (data, mut session) = setup(555);
         let target = first_target(&data, &session).clone();
         let plan = auto_assign(&session, &data, &target);
         let worked = plan.assignments[0].member_id.clone();
 
-        run_job(&mut session, &data, &plan);
-        assert!(session.member(&worked).unwrap().condition.fatigue > 0);
+        let report = run_job(&mut session, &data, &plan);
+        assert!(session.member(&worked).unwrap().progression.jobs_completed > 0);
+
+        // Only a flawless run costs nothing: a critical success inflicts no
+        // fatigue at all, so the assertion has to allow for one.
+        let tired: i32 = session.crew.iter().map(|m| m.condition.fatigue).sum();
+        let flawless = report
+            .doors
+            .iter()
+            .all(|door| door.result.outcome == Outcome::CriticalSuccess);
+        assert!(
+            tired > 0 || flawless,
+            "a whole job and nobody broke a sweat"
+        );
     }
 
     #[test]
@@ -475,29 +549,51 @@ mod tests {
     }
 
     #[test]
-    fn a_soak_of_jobs_keeps_outcomes_inside_designed_bands() {
+    fn a_soak_of_jobs_keeps_the_difficulty_bands_apart() {
+        // The soak's job is catching DC drift as content lands. An easy mark
+        // worked by the right specialist should be reliable; the same crew
+        // walking into an extreme one should not be. If those two numbers ever
+        // converge, the bands have stopped meaning anything.
         let data = GameData::load().unwrap();
+        let easy = door_pass_rate(&data, "velvet_room", 200);
+        let extreme = door_pass_rate(&data, "harbour_vault", 200);
+
+        assert!(
+            (0.75..=0.95).contains(&easy),
+            "an easy mark clears {:.0}% of its doors",
+            easy * 100.0
+        );
+        assert!(
+            (0.20..=0.70).contains(&extreme),
+            "an extreme mark clears {:.0}% of its doors",
+            extreme * 100.0
+        );
+        assert!(
+            easy - extreme > 0.2,
+            "easy {:.0}% and extreme {:.0}% are too close to be different jobs",
+            easy * 100.0,
+            extreme * 100.0
+        );
+    }
+
+    /// Run one mark many times with a fresh starting crew and report the share
+    /// of doors they got through.
+    fn door_pass_rate(data: &GameData, target_id: &str, runs: u64) -> f32 {
+        let target = data.targets.get(target_id).expect("known mark").clone();
         let mut passed = 0usize;
         let mut total = 0usize;
 
-        for seed in 0..200u64 {
-            let mut session = GameSession::new(&data.config, &data, seed);
-            let Some(entry) = session.board.first().cloned() else {
+        for seed in 0..runs {
+            let mut session = GameSession::new(&data.config, data, seed);
+            let plan = auto_assign(&session, data, &target);
+            if plan.assignments.is_empty() {
                 continue;
-            };
-            let target = data.targets.get(&entry.target_id).unwrap().clone();
-            let plan = auto_assign(&session, &data, &target);
-            let report = run_job(&mut session, &data, &plan);
-
+            }
+            let report = run_job(&mut session, data, &plan);
             passed += report.doors_passed();
             total += report.doors.len();
         }
 
-        let rate = passed as f32 / total as f32;
-        assert!(
-            (0.55..=0.90).contains(&rate),
-            "starting crew clears {:.0}% of early doors",
-            rate * 100.0
-        );
+        passed as f32 / total.max(1) as f32
     }
 }

@@ -197,7 +197,7 @@ fn draw_node(
                 TextStyle::new(14.0, Color::new(0.56, 0.80, 0.60, 1.0)).params(),
             );
             if cased {
-                if let Some(chance) = assigned_chance(ctx, draft, index, encounter, member_id) {
+                if let Some(chance) = assigned_chance(ctx, draft, encounter, member_id) {
                     draw_text_right(
                         &format!("{:.0}%", chance * 100.0),
                         rect.right() - 12.0,
@@ -223,16 +223,21 @@ fn draw_node(
 fn assigned_chance(
     ctx: &UiContext<'_>,
     draft: &PlanDraft,
-    index: usize,
     encounter: &Encounter,
     member_id: &str,
 ) -> Option<f32> {
     let target = ctx.data.targets.get(&draft.target_id)?;
     let member = ctx.session.member(member_id)?;
-    let _ = index;
     Some(
-        crate::sim::plan::candidate_check(ctx.session, ctx.data, target, encounter, member)
-            .success_chance(),
+        crate::sim::plan::candidate_check(
+            ctx.session,
+            ctx.data,
+            target,
+            encounter,
+            member,
+            &draft.crew_on_job(),
+        )
+        .success_chance(),
     )
 }
 

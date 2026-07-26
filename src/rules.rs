@@ -5,6 +5,7 @@
 //! thousands of jobs without opening a window.
 
 pub mod attributes;
+pub mod chemistry;
 pub mod encounter;
 pub mod environment;
 pub mod outcome;

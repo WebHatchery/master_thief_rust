@@ -56,6 +56,11 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
     session.refresh_board(config, data);
     let new_marks = session.board.len().saturating_sub(marks_before);
 
+    // Word gets around; a different set of people come asking each week.
+    session.refresh_recruits(config, data);
+    let crew = session.crew_ids();
+    session.chemistry.retain_crew(&crew);
+
     session.week += 1;
 
     WeekSummary {

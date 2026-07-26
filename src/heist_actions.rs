@@ -14,6 +14,8 @@ pub struct Selection {
     pub screen: Screen,
     pub member: Option<String>,
     pub target: Option<String>,
+    /// True while the crew screen is showing applicants rather than payroll.
+    pub hiring: bool,
     /// The plan under construction, if the fixer is at the planning table.
     pub draft: Option<PlanDraft>,
     pub last_report: Option<JobReport>,
@@ -64,6 +66,37 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
 
         UiAction::CaseTarget(id) => case_target(data, session, notifications, &id),
 
+        UiAction::ShowHiring(hiring) => selection.hiring = hiring,
+        UiAction::HireRecruit(id) => report(
+            notifications,
+            session
+                .hire(data, &id)
+                .map(|name| format!("{} is on the payroll", name)),
+        ),
+        UiAction::BuyItem(id) => report(
+            notifications,
+            session
+                .buy(data, &id)
+                .map(|name| format!("{} bought", name)),
+        ),
+        UiAction::EquipItem { member_id, item_id } => report(
+            notifications,
+            session
+                .equip(data, &member_id, &item_id)
+                .map(|()| String::new()),
+        ),
+        UiAction::UnequipSlot { member_id, slot } => session.unequip(&member_id, slot),
+        UiAction::SpendAttribute { member_id, kind } => {
+            if session.spend_attribute_point(&member_id, kind) {
+                notifications.info(format!("{} raised", kind.short_label()));
+            }
+        }
+        UiAction::SpendSkill { member_id, skill } => {
+            if session.spend_skill_point(&member_id, skill) {
+                notifications.info(format!("{} trained", skill.label()));
+            }
+        }
+
         UiAction::PlanJob(id) => open_plan(data, session, selection, notifications, &id),
         UiAction::FocusDoor(door) => {
             if let Some(draft) = selection.draft.as_mut() {
@@ -94,6 +127,16 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
     }
 
     None
+}
+
+/// Turn a session result into a notification. An empty message means the change
+/// speaks for itself on screen.
+fn report(notifications: &mut NotificationManager, outcome: Result<String, String>) {
+    match outcome {
+        Ok(message) if !message.is_empty() => notifications.success(message),
+        Ok(_) => {}
+        Err(problem) => notifications.warning(problem),
+    }
 }
 
 /// Spend the week's attention on a mark: its DCs and conditions become visible
@@ -223,6 +266,9 @@ fn announce(notifications: &mut NotificationManager, report: &JobReport) {
             report.doors.len(),
             format_money(report.payout)
         ));
+        if !report.loot.is_empty() {
+            notifications.info(format!("{} carried out as well", report.loot.len()));
+        }
     } else {
         notifications.danger(format!(
             "{} went wrong - {}/{} doors",

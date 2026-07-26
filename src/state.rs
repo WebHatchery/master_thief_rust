@@ -1,7 +1,8 @@
 //! The safehouse ledger: everything a campaign remembers between weeks.
 
 use crate::data::{GameConfig, GameData};
-use crate::model::{CrewMember, EquipmentDef, HeistTarget, Loadout};
+use crate::model::{CrewMember, EquipmentDef, EquipmentSlot, HeistTarget, Loadout};
+use crate::rules::chemistry::Chemistry;
 use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -42,6 +43,12 @@ pub struct GameSession {
     /// Equipment ids in the lockup, including items currently assigned.
     pub inventory: Vec<String>,
     pub board: Vec<BoardEntry>,
+    /// Who works well with whom (GDD 5.5).
+    #[serde(default)]
+    pub chemistry: Chemistry,
+    /// Crew-pool ids on offer this week.
+    #[serde(default)]
+    pub recruits: Vec<String>,
 }
 
 impl GameSession {
@@ -63,10 +70,131 @@ impl GameSession {
             crew,
             inventory: config.starting_inventory.clone(),
             board: Vec::new(),
+            chemistry: Chemistry::default(),
+            recruits: Vec::new(),
         };
         session.issue_starting_kit(data);
         session.refresh_board(config, data);
+        session.refresh_recruits(config, data);
         session
+    }
+
+    pub fn crew_ids(&self) -> Vec<String> {
+        self.crew.iter().map(|member| member.id.clone()).collect()
+    }
+
+    /// Redraw the hiring pool from everyone not already on the payroll.
+    pub fn refresh_recruits(&mut self, config: &GameConfig, data: &GameData) {
+        let mut pool: Vec<String> = data
+            .crew_pool
+            .ids()
+            .filter(|id| !self.crew.iter().any(|member| &member.id == *id))
+            .cloned()
+            .collect();
+        pool.sort();
+
+        self.recruits.clear();
+        while self.recruits.len() < config.recruit_pool_size && !pool.is_empty() {
+            let index = self.rng.below(pool.len());
+            self.recruits.push(pool.remove(index));
+        }
+    }
+
+    /// Put a candidate on the payroll. Returns what went wrong, if anything.
+    pub fn hire(&mut self, data: &GameData, recruit_id: &str) -> Result<String, String> {
+        let Some(recruit) = data.crew_pool.get(recruit_id) else {
+            return Err("Nobody by that name is asking for work".to_owned());
+        };
+        if self.crew.iter().any(|member| member.id == recruit.id) {
+            return Err(format!("{} already works for you", recruit.name));
+        }
+        if self.budget < recruit.hire_cost {
+            return Err(format!("{} wants more than the outfit has", recruit.name));
+        }
+
+        self.budget -= recruit.hire_cost;
+        self.crew.push(recruit.clone());
+        self.recruits.retain(|id| id != recruit_id);
+        Ok(recruit.name.clone())
+    }
+
+    /// Buy a piece of kit into the lockup.
+    pub fn buy(&mut self, data: &GameData, item_id: &str) -> Result<String, String> {
+        let Some(item) = data.equipment.get(item_id) else {
+            return Err("Nobody sells that".to_owned());
+        };
+        if self.budget < item.cost {
+            return Err(format!("{} costs more than the outfit has", item.name));
+        }
+
+        self.budget -= item.cost;
+        self.inventory.push(item.id.clone());
+        Ok(item.name.clone())
+    }
+
+    /// Hand a piece of kit to somebody, swapping out whatever was in the slot.
+    pub fn equip(&mut self, data: &GameData, member_id: &str, item_id: &str) -> Result<(), String> {
+        let Some(item) = data.equipment.get(item_id) else {
+            return Err("Nobody has one of those".to_owned());
+        };
+        if !self
+            .unassigned_inventory(data)
+            .iter()
+            .any(|def| def.id == item.id)
+        {
+            return Err(format!("{} is already on somebody", item.name));
+        }
+
+        let Some(member) = self.member_mut(member_id) else {
+            return Err("They are not on the payroll".to_owned());
+        };
+        if member.progression.level < item.required_level {
+            return Err(format!(
+                "{} needs level {} before they can use that",
+                member.name, item.required_level
+            ));
+        }
+        if !item.required_class.is_empty() && !item.required_class.contains(&member.class) {
+            return Err(format!("{} is not trained for that", member.name));
+        }
+
+        member.equipment.set(item.slot, Some(item.id.clone()));
+        Ok(())
+    }
+
+    pub fn unequip(&mut self, member_id: &str, slot: EquipmentSlot) {
+        if let Some(member) = self.member_mut(member_id) {
+            member.equipment.set(slot, None);
+        }
+    }
+
+    /// Spend a level-up point. Returns false when there is none to spend.
+    pub fn spend_attribute_point(
+        &mut self,
+        member_id: &str,
+        kind: crate::model::AttributeKind,
+    ) -> bool {
+        let Some(member) = self.member_mut(member_id) else {
+            return false;
+        };
+        if member.progression.attribute_points <= 0 || member.attributes.get(kind) >= 20 {
+            return false;
+        }
+        member.progression.attribute_points -= 1;
+        member.attributes.add(kind, 1);
+        true
+    }
+
+    pub fn spend_skill_point(&mut self, member_id: &str, skill: crate::model::Skill) -> bool {
+        let Some(member) = self.member_mut(member_id) else {
+            return false;
+        };
+        if member.progression.skill_points <= 0 {
+            return false;
+        }
+        member.progression.skill_points -= 1;
+        member.training.add(skill, 1);
+        true
     }
 
     /// Put the opening lockup on the people who can use it: each item goes to

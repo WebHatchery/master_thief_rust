@@ -13,8 +13,27 @@ use macroquad_toolkit::ui::draw_ui_text_ex;
 const ROW_HEIGHT: f32 = 76.0;
 
 pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
-    draw_roster(ctx, actions);
-    draw_dossier(ctx);
+    let content = draw_panel(list_rect(), "The Crew");
+    let strip = Rect::new(content.x, content.y, content.w, 30.0);
+    let body = Rect::new(content.x, content.y + 38.0, content.w, content.h - 38.0);
+
+    if let Some(index) = tab_bar_styled_at(
+        strip,
+        &["Payroll", "For Hire"],
+        usize::from(ctx.hiring),
+        TabOrientation::Horizontal,
+        &TabStyle::default(),
+        ctx.mouse(),
+    ) {
+        actions.push(UiAction::ShowHiring(index == 1));
+    }
+
+    if ctx.hiring {
+        super::hiring::draw(ctx, body, actions);
+    } else {
+        draw_roster(ctx, body, actions);
+    }
+    draw_dossier(ctx, actions);
 }
 
 fn selected_member<'a>(ctx: &'a UiContext<'a>) -> Option<&'a CrewMember> {
@@ -23,8 +42,7 @@ fn selected_member<'a>(ctx: &'a UiContext<'a>) -> Option<&'a CrewMember> {
         .or_else(|| ctx.session.crew.first())
 }
 
-fn draw_roster(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
-    let content = draw_panel(list_rect(), "Payroll");
+fn draw_roster(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) {
     if ctx.session.crew.is_empty() {
         empty_notice(content, "Nobody on the books.");
         return;
@@ -106,7 +124,7 @@ fn fatigue_color(fatigue: i32) -> Color {
     }
 }
 
-fn draw_dossier(ctx: &UiContext<'_>) {
+fn draw_dossier(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     let rect = detail_rect();
     let Some(member) = selected_member(ctx) else {
         draw_surface_with_title(rect, Some("Dossier"), &panel_style(), title_style());
@@ -136,13 +154,17 @@ fn draw_dossier(ctx: &UiContext<'_>) {
 
     draw_attributes(
         Rect::new(content.x, columns_y, column_w, 190.0),
+        ctx,
+        member,
         &attributes,
+        actions,
     );
     draw_skills(
         Rect::new(content.x + column_w + 12.0, columns_y, column_w, 190.0),
         ctx,
         member,
         &skills,
+        actions,
     );
     draw_condition(
         Rect::new(
@@ -164,18 +186,56 @@ fn draw_dossier(ctx: &UiContext<'_>) {
     );
 }
 
-fn draw_attributes(rect: Rect, attributes: &crate::model::Attributes) {
+fn draw_attributes(
+    rect: Rect,
+    ctx: &UiContext<'_>,
+    member: &CrewMember,
+    attributes: &crate::model::Attributes,
+    actions: &mut Vec<UiAction>,
+) {
+    let points = member.progression.attribute_points;
     section_title(rect, "Attributes");
+    if points > 0 {
+        draw_text_right(
+            &format!("{} to spend", points),
+            rect.right(),
+            rect.y + 16.0,
+            TextStyle::new(13.0, dark::ACCENT),
+        );
+    }
+
     for (index, kind) in AttributeKind::ALL.iter().enumerate() {
         let score = attributes.get(*kind);
         let modifier = crate::rules::attribute_modifier(score);
+        let row = Rect::new(rect.x, rect.y + 26.0 + index as f32 * 24.0, rect.w, 20.0);
+        let spendable = points > 0 && member.attributes.get(*kind) < 20;
+
         stat_row(
-            Rect::new(rect.x, rect.y + 26.0 + index as f32 * 24.0, rect.w, 20.0),
+            Rect::new(
+                row.x,
+                row.y,
+                row.w - if spendable { 26.0 } else { 0.0 },
+                row.h,
+            ),
             kind.short_label(),
             &format!("{} ({:+})", score, modifier),
             16.0,
             dark::TEXT,
         );
+        if spendable
+            && button_rect_tone_at(
+                Rect::new(row.right() - 22.0, row.y + 1.0, 22.0, 18.0),
+                "+",
+                true,
+                ButtonTone::Positive,
+                ctx.mouse(),
+            )
+        {
+            actions.push(UiAction::SpendAttribute {
+                member_id: member.id.clone(),
+                kind: *kind,
+            });
+        }
     }
 }
 
@@ -184,9 +244,19 @@ fn draw_skills(
     ctx: &UiContext<'_>,
     member: &CrewMember,
     skills: &crate::model::Skills,
+    actions: &mut Vec<UiAction>,
 ) {
+    let points = member.progression.skill_points;
     section_title(rect, "Skills");
-    let _ = ctx;
+    if points > 0 {
+        draw_text_right(
+            &format!("{} to spend", points),
+            rect.right(),
+            rect.y + 16.0,
+            TextStyle::new(13.0, dark::ACCENT),
+        );
+    }
+
     for (index, skill) in Skill::ALL.iter().enumerate() {
         let is_specialty = *skill == member.specialty_skill;
         let label = if is_specialty {
@@ -194,8 +264,15 @@ fn draw_skills(
         } else {
             skill.label().to_owned()
         };
+        let row = Rect::new(rect.x, rect.y + 26.0 + index as f32 * 24.0, rect.w, 20.0);
+
         stat_row(
-            Rect::new(rect.x, rect.y + 26.0 + index as f32 * 24.0, rect.w, 20.0),
+            Rect::new(
+                row.x,
+                row.y,
+                row.w - if points > 0 { 26.0 } else { 0.0 },
+                row.h,
+            ),
             &label,
             &skills.get(*skill).to_string(),
             16.0,
@@ -205,6 +282,20 @@ fn draw_skills(
                 dark::TEXT
             },
         );
+        if points > 0
+            && button_rect_tone_at(
+                Rect::new(row.right() - 22.0, row.y + 1.0, 22.0, 18.0),
+                "+",
+                true,
+                ButtonTone::Positive,
+                ctx.mouse(),
+            )
+        {
+            actions.push(UiAction::SpendSkill {
+                member_id: member.id.clone(),
+                skill: *skill,
+            });
+        }
     }
 }
 
@@ -345,6 +436,58 @@ fn draw_kit(rect: Rect, ctx: &UiContext<'_>, member: &CrewMember, power: i32) {
             TextStyle::new(14.0, Color::new(0.62, 0.68, 0.82, 1.0)).params(),
         );
     }
+
+    draw_chemistry(rect, ctx, member);
+}
+
+/// How this hand gets on with everybody else on the payroll (GDD 5.5).
+fn draw_chemistry(rect: Rect, ctx: &UiContext<'_>, member: &CrewMember) {
+    let mut lines: Vec<(String, i32)> = ctx
+        .session
+        .crew
+        .iter()
+        .filter(|other| other.id != member.id)
+        .map(|other| {
+            (
+                other.name.clone(),
+                ctx.session.chemistry.get(&member.id, &other.id),
+            )
+        })
+        .filter(|(_, value)| *value != 0)
+        .collect();
+    lines.sort_by_key(|(name, value)| (-value, name.clone()));
+
+    if lines.is_empty() {
+        return;
+    }
+
+    draw_ui_text_ex(
+        "Chemistry",
+        rect.x,
+        rect.y + 158.0,
+        TextStyle::new(15.0, dark::TEXT_BRIGHT).params(),
+    );
+    let summary = lines
+        .iter()
+        .take(4)
+        .map(|(name, value)| {
+            let mood = if ctx.session.chemistry.refuses(&member.id, name) {
+                "refuses"
+            } else if *value > 0 {
+                "+"
+            } else {
+                ""
+            };
+            format!("{} {}{}", name, mood, value)
+        })
+        .collect::<Vec<_>>()
+        .join("   ");
+    draw_ui_text_ex(
+        &summary,
+        rect.x,
+        rect.y + 178.0,
+        TextStyle::new(13.0, Color::new(0.66, 0.72, 0.84, 1.0)).params(),
+    );
 }
 
 fn section_title(rect: Rect, text: &str) {

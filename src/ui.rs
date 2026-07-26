@@ -5,9 +5,11 @@ pub mod board;
 pub mod chrome;
 pub mod crew;
 pub mod floorplan;
+pub mod hiring;
 pub mod planning;
 pub mod results;
 pub mod run;
+pub mod shop;
 
 use crate::data::GameData;
 use crate::game::playback::RunPlayback;
@@ -25,6 +27,7 @@ pub enum Screen {
     #[default]
     Crew,
     Board,
+    Shop,
     /// Reached from a mark, not from the tab bar — it needs a job to plan.
     Planning,
     /// The committed job, resolving door by door.
@@ -33,13 +36,15 @@ pub enum Screen {
 }
 
 impl Screen {
-    /// The screens the tab bar offers. Planning is deliberately not among them.
-    pub const TABS: [Screen; 3] = [Screen::Crew, Screen::Board, Screen::Results];
+    /// The screens the tab bar offers. Planning and the run are deliberately
+    /// not among them — each needs a job to exist first.
+    pub const TABS: [Screen; 4] = [Screen::Crew, Screen::Board, Screen::Shop, Screen::Results];
 
     pub fn label(self) -> &'static str {
         match self {
             Screen::Crew => "Crew",
             Screen::Board => "The Board",
+            Screen::Shop => "Outfitter",
             Screen::Planning => "Planning",
             Screen::Run => "The Run",
             Screen::Results => "Last Job",
@@ -57,6 +62,26 @@ pub enum UiAction {
     ShowScreen(Screen),
     SelectMember(String),
     SelectTarget(String),
+    /// Switch the crew screen's left panel between payroll and applicants.
+    ShowHiring(bool),
+    HireRecruit(String),
+    BuyItem(String),
+    EquipItem {
+        member_id: String,
+        item_id: String,
+    },
+    UnequipSlot {
+        member_id: String,
+        slot: crate::model::EquipmentSlot,
+    },
+    SpendAttribute {
+        member_id: String,
+        kind: crate::model::AttributeKind,
+    },
+    SpendSkill {
+        member_id: String,
+        skill: crate::model::Skill,
+    },
     CaseTarget(String),
     /// Open the planning screen on a mark.
     PlanJob(String),
@@ -87,6 +112,8 @@ pub struct UiContext<'a> {
     pub screen: Screen,
     pub selected_member: Option<&'a str>,
     pub selected_target: Option<&'a str>,
+    /// True while the crew screen is showing applicants rather than payroll.
+    pub hiring: bool,
     pub draft: Option<&'a PlanDraft>,
     pub playback: Option<&'a RunPlayback>,
     pub last_report: Option<&'a JobReport>,
@@ -131,6 +158,7 @@ pub fn draw_game_ui(ctx: UiContext<'_>) -> Vec<UiAction> {
     match ctx.screen {
         Screen::Crew => crew::draw(&ctx, &mut actions),
         Screen::Board => board::draw(&ctx, &mut actions),
+        Screen::Shop => shop::draw(&ctx, &mut actions),
         Screen::Planning => planning::draw(&ctx, &mut actions),
         Screen::Run => run::draw(&ctx, &mut actions),
         Screen::Results => results::draw(&ctx),

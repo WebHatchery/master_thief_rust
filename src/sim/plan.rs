@@ -13,13 +13,17 @@ use crate::rules::environment::environment_entries;
 use crate::rules::outcome::ModifierEntry;
 use crate::state::GameSession;
 
-/// The environment and city-wide modifiers a door carries, named. Shared by the
-/// planning screen and the run so neither can drift from the other.
+/// The environment, the city's attention, and the company a hand is keeping —
+/// every modifier that comes from outside the member and their kit, named.
+/// Shared by the planning screen and the run so neither can drift from the
+/// other.
 pub fn situational_modifiers(
     data: &GameData,
     target: &HeistTarget,
     encounter: &Encounter,
     session: &GameSession,
+    member_id: &str,
+    crew_on_job: &[String],
 ) -> Vec<ModifierEntry> {
     let mut extras = environment_entries(&target.environment, encounter.primary_skill, |id| {
         data.environment.get(id)
@@ -28,6 +32,10 @@ pub fn situational_modifiers(
     let heat = session.heat_dc_penalty(&data.config);
     if heat > 0 {
         extras.push(ModifierEntry::new("City heat", -heat));
+    }
+
+    if let Some(entry) = session.chemistry.modifier(member_id, crew_on_job) {
+        extras.push(entry);
     }
     extras
 }
@@ -43,6 +51,15 @@ pub struct Candidate {
     pub doubled_up: bool,
     /// True when fatigue or injury has put them out of the running entirely.
     pub unfit: bool,
+    /// Somebody already on this job will not stand beside them (GDD 5.5).
+    pub refused_by: Vec<String>,
+}
+
+impl Candidate {
+    /// Can this hand be put on the door at all?
+    pub fn selectable(&self) -> bool {
+        !self.unfit && self.refused_by.is_empty()
+    }
 }
 
 impl Candidate {
@@ -52,19 +69,22 @@ impl Candidate {
 }
 
 /// The check one member would make on one door, computed without rolling.
+/// `crew_on_job` is everybody else down for this job, which is what chemistry
+/// reads.
 pub fn candidate_check(
     session: &GameSession,
     data: &GameData,
     target: &HeistTarget,
     encounter: &Encounter,
     member: &CrewMember,
+    crew_on_job: &[String],
 ) -> CheckBreakdown {
     let loadout = session.loadout(member, data);
     build_check(CheckInputs {
         member,
         loadout: &loadout,
         encounter,
-        extra: &situational_modifiers(data, target, encounter, session),
+        extra: &situational_modifiers(data, target, encounter, session, &member.id, crew_on_job),
     })
 }
 
@@ -78,6 +98,7 @@ pub fn candidates(
     encounter: &Encounter,
     draft: &PlanDraft,
 ) -> Vec<Candidate> {
+    let crew_on_job = draft.crew_on_job();
     let mut candidates: Vec<Candidate> = session
         .crew
         .iter()
@@ -85,15 +106,27 @@ pub fn candidates(
             member_id: member.id.clone(),
             member_name: member.name.clone(),
             specialty: member.specialty.clone(),
-            check: candidate_check(session, data, target, encounter, member),
+            check: candidate_check(session, data, target, encounter, member, &crew_on_job),
             doubled_up: draft.assigned_elsewhere(&member.id, encounter),
             unfit: !member.condition.is_fit_for_work(),
+            refused_by: session
+                .chemistry
+                .refusals(&member.id, crew_on_job.iter().map(|id| id.as_str()))
+                .into_iter()
+                .map(|id| {
+                    session
+                        .member(&id)
+                        .map(|other| other.name.clone())
+                        .unwrap_or(id)
+                })
+                .collect(),
         })
         .collect();
 
     candidates.sort_by(|a, b| {
-        a.unfit
-            .cmp(&b.unfit)
+        a.selectable()
+            .cmp(&b.selectable())
+            .reverse()
             .then(b.check.bonus().cmp(&a.check.bonus()))
             .then(a.member_name.cmp(&b.member_name))
     });
@@ -168,6 +201,14 @@ impl PlanDraft {
 
     pub fn assigned(&self, door: usize) -> Option<&str> {
         self.assignments.get(door).and_then(|id| id.as_deref())
+    }
+
+    /// Everybody currently down for this job, each named once.
+    pub fn crew_on_job(&self) -> Vec<String> {
+        let mut crew: Vec<String> = self.assignments.iter().flatten().cloned().collect();
+        crew.sort();
+        crew.dedup();
+        crew
     }
 
     pub fn focused_door(&self) -> Option<&str> {
@@ -362,7 +403,7 @@ mod tests {
                 .filter_map(|assignment| {
                     let encounter = data.encounters.get(&assignment.encounter_id)?;
                     let member = session.member(&assignment.member_id)?;
-                    Some(candidate_check(&session, &data, target, encounter, member).bonus())
+                    Some(candidate_check(&session, &data, target, encounter, member, &[]).bonus())
                 })
                 .sum();
 
@@ -383,8 +424,9 @@ mod tests {
         let encounter = data.encounters.get(&draft.doors[0]).unwrap();
         let member = session.member(draft.assigned(0).unwrap()).unwrap();
 
-        let planned = candidate_check(&session, &data, &target, encounter, member);
-        let at_run_time = candidate_check(&session, &data, &target, encounter, member);
+        let crew = draft.crew_on_job();
+        let planned = candidate_check(&session, &data, &target, encounter, member, &crew);
+        let at_run_time = candidate_check(&session, &data, &target, encounter, member, &crew);
         assert_eq!(planned, at_run_time);
     }
 }
