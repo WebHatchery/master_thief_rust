@@ -319,5 +319,895 @@
       "ballistic_liner",
       "field_terminal"
     ]
+  },
+  {
+    "id": "corner_pawnshop",
+    "name": "Kessler's Pawnshop",
+    "description": "Three generations of other people's emergencies, behind one shutter.",
+    "difficulty": "easy",
+    "potential_payout": 95000,
+    "encounters": [
+      "window_latch",
+      "meter_cupboard",
+      "alley_exit"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "understaffed"
+      ]
+    },
+    "required_reputation": 0,
+    "notoriety": 3,
+    "possible_loot": [
+      "basic_picks",
+      "soft_soles",
+      "weighted_sap"
+    ]
+  },
+  {
+    "id": "hotel_bellamy",
+    "name": "The Bellamy Hotel",
+    "description": "Two hundred rooms, one safe behind the desk, and a porter who never sleeps.",
+    "difficulty": "easy",
+    "potential_payout": 165000,
+    "encounters": [
+      "coat_check",
+      "porter_desk",
+      "service_stair"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "rain",
+      "factors": [
+        "crowded"
+      ]
+    },
+    "required_reputation": 2,
+    "notoriety": 4,
+    "possible_loot": [
+      "dark_coat",
+      "forged_credentials",
+      "soft_soles"
+    ]
+  },
+  {
+    "id": "brasserie_ninon",
+    "name": "Brasserie Ninon",
+    "description": "The till is nothing. The room upstairs is not.",
+    "difficulty": "easy",
+    "potential_payout": 130000,
+    "encounters": [
+      "kitchen_pass",
+      "cloakroom_lock",
+      "alley_exit"
+    ],
+    "environment": {
+      "time_of_day": "dusk",
+      "weather": "clear",
+      "factors": [
+        "crowded",
+        "noisy"
+      ]
+    },
+    "required_reputation": 2,
+    "notoriety": 3,
+    "possible_loot": [
+      "weighted_sap",
+      "soft_soles",
+      "glass_cutter"
+    ]
+  },
+  {
+    "id": "goods_depot",
+    "name": "Ashby Goods Depot",
+    "description": "Everything the city ordered this week, stacked and unwatched.",
+    "difficulty": "easy",
+    "potential_payout": 155000,
+    "encounters": [
+      "delivery_book",
+      "loading_dock",
+      "yard_wall"
+    ],
+    "environment": {
+      "time_of_day": "dawn",
+      "weather": "fog",
+      "factors": [
+        "understaffed",
+        "noisy"
+      ]
+    },
+    "required_reputation": 4,
+    "notoriety": 4,
+    "possible_loot": [
+      "grapple_line",
+      "basic_picks",
+      "burner_deck"
+    ]
+  },
+  {
+    "id": "surveyors_office",
+    "name": "The Surveyor's Office",
+    "description": "Plans of every building worth entering, in one filing cabinet.",
+    "difficulty": "easy",
+    "potential_payout": 110000,
+    "encounters": [
+      "service_stair",
+      "private_office",
+      "records_room"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "well_lit"
+      ]
+    },
+    "required_reputation": 6,
+    "notoriety": 4,
+    "possible_loot": [
+      "burner_deck",
+      "tension_set",
+      "forged_credentials"
+    ]
+  },
+  {
+    "id": "clarion_press",
+    "name": "The Clarion Press",
+    "description": "A printworks that stopped printing news and started printing something else.",
+    "difficulty": "medium",
+    "potential_payout": 285000,
+    "encounters": [
+      "yard_wall",
+      "meter_cupboard",
+      "watchman_round",
+      "strongroom_grille"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "storm",
+      "factors": [
+        "noisy",
+        "understaffed"
+      ]
+    },
+    "required_reputation": 8,
+    "notoriety": 6,
+    "possible_loot": [
+      "tension_set",
+      "signal_jammer",
+      "padded_vest"
+    ]
+  },
+  {
+    "id": "meridian_clinic",
+    "name": "The Meridian Clinic",
+    "description": "Discreet, expensive, and keeping records it should not.",
+    "difficulty": "medium",
+    "potential_payout": 320000,
+    "encounters": [
+      "guest_register",
+      "alarm_panel",
+      "private_office"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "well_lit",
+        "wired"
+      ]
+    },
+    "required_reputation": 10,
+    "notoriety": 6,
+    "possible_loot": [
+      "signal_jammer",
+      "service_uniform",
+      "tension_set"
+    ]
+  },
+  {
+    "id": "customs_house",
+    "name": "The Old Customs House",
+    "description": "Bonded goods, tidal cellars, and a rota nobody has updated since the war.",
+    "difficulty": "medium",
+    "potential_payout": 360000,
+    "encounters": [
+      "cellar_route",
+      "strongroom_grille",
+      "watchman_round"
+    ],
+    "environment": {
+      "time_of_day": "dawn",
+      "weather": "fog",
+      "factors": [
+        "understaffed"
+      ]
+    },
+    "required_reputation": 12,
+    "notoriety": 7,
+    "possible_loot": [
+      "climbing_rig",
+      "collapsible_baton",
+      "glass_cutter"
+    ]
+  },
+  {
+    "id": "vaudeville",
+    "name": "The Rialto",
+    "description": "A theatre with a week's takings and a stage door that never locks.",
+    "difficulty": "medium",
+    "potential_payout": 275000,
+    "encounters": [
+      "coat_check",
+      "dumbwaiter",
+      "counting_room"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "crowded",
+        "noisy"
+      ]
+    },
+    "required_reputation": 12,
+    "notoriety": 6,
+    "possible_loot": [
+      "tailored_suit",
+      "forged_credentials",
+      "soft_soles"
+    ]
+  },
+  {
+    "id": "telephone_exchange",
+    "name": "Ward Street Exchange",
+    "description": "Every line in the district passes through one very boring room.",
+    "difficulty": "medium",
+    "potential_payout": 340000,
+    "encounters": [
+      "service_stair",
+      "switchboard",
+      "records_room"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "wired",
+        "understaffed"
+      ]
+    },
+    "required_reputation": 14,
+    "notoriety": 7,
+    "possible_loot": [
+      "signal_jammer",
+      "burner_deck",
+      "loop_box"
+    ]
+  },
+  {
+    "id": "shipping_agent",
+    "name": "Vandel & Coe",
+    "description": "A shipping agent whose real business is what does not appear on the manifest.",
+    "difficulty": "medium",
+    "potential_payout": 395000,
+    "encounters": [
+      "loading_manifest",
+      "yard_wall",
+      "ledger_safe"
+    ],
+    "environment": {
+      "time_of_day": "dusk",
+      "weather": "rain",
+      "factors": [
+        "noisy"
+      ]
+    },
+    "required_reputation": 16,
+    "notoriety": 8,
+    "possible_loot": [
+      "tension_set",
+      "optics_rig",
+      "padded_vest"
+    ]
+  },
+  {
+    "id": "riding_club",
+    "name": "The Farrow Riding Club",
+    "description": "Old money at leisure, and a trophy room worth more than the horses.",
+    "difficulty": "medium",
+    "potential_payout": 305000,
+    "encounters": [
+      "porter_desk",
+      "trophy_case",
+      "yard_wall"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "old_money",
+        "understaffed"
+      ]
+    },
+    "required_reputation": 18,
+    "notoriety": 7,
+    "possible_loot": [
+      "duelling_cane",
+      "tailored_suit",
+      "grapple_line"
+    ]
+  },
+  {
+    "id": "bonded_warehouse",
+    "name": "Bonded Warehouse 9",
+    "description": "Cold storage, sealed crates, and eight minutes of usable hands.",
+    "difficulty": "medium",
+    "potential_payout": 430000,
+    "encounters": [
+      "sluice_gate",
+      "cold_store",
+      "loading_manifest"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "storm",
+      "factors": [
+        "understaffed"
+      ]
+    },
+    "required_reputation": 20,
+    "notoriety": 9,
+    "possible_loot": [
+      "ballistic_liner",
+      "climbing_rig",
+      "collapsible_baton"
+    ]
+  },
+  {
+    "id": "solicitors_chambers",
+    "name": "Grieve & Partners",
+    "description": "Nothing here is worth stealing except what the letters say.",
+    "difficulty": "medium",
+    "potential_payout": 375000,
+    "encounters": [
+      "guest_register",
+      "private_office",
+      "ledger_safe"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "rain",
+      "factors": [
+        "old_money",
+        "well_lit"
+      ]
+    },
+    "required_reputation": 22,
+    "notoriety": 8,
+    "possible_loot": [
+      "the_ledger",
+      "master_kit",
+      "forged_credentials"
+    ]
+  },
+  {
+    "id": "assay_office",
+    "name": "The Assay Office",
+    "description": "Where the city decides what its gold is worth, and keeps some to check.",
+    "difficulty": "hard",
+    "potential_payout": 590000,
+    "encounters": [
+      "alarm_panel",
+      "strongroom_grille",
+      "vault_timer"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "high_security",
+        "wired"
+      ]
+    },
+    "required_reputation": 24,
+    "notoriety": 12,
+    "possible_loot": [
+      "diamond_picks",
+      "field_terminal",
+      "loop_box"
+    ]
+  },
+  {
+    "id": "conservatory",
+    "name": "The Winter Conservatory",
+    "description": "Glass, orchids, and a private collection nobody admits to owning.",
+    "difficulty": "hard",
+    "potential_payout": 620000,
+    "encounters": [
+      "gallery_balcony",
+      "pressure_case",
+      "trophy_case"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "fog",
+      "factors": [
+        "old_money",
+        "private_security"
+      ]
+    },
+    "required_reputation": 26,
+    "notoriety": 12,
+    "possible_loot": [
+      "glass_cutter",
+      "optics_rig",
+      "diamond_picks"
+    ]
+  },
+  {
+    "id": "casino_carrow",
+    "name": "The Carrow Rooms",
+    "description": "A members' floor upstairs where the counting never stops.",
+    "difficulty": "hard",
+    "potential_payout": 710000,
+    "encounters": [
+      "bouncer_line",
+      "counting_floor",
+      "guard_room"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "crowded",
+        "private_security"
+      ]
+    },
+    "required_reputation": 28,
+    "notoriety": 14,
+    "possible_loot": [
+      "tranq_pistol",
+      "duelling_cane",
+      "ballistic_liner"
+    ]
+  },
+  {
+    "id": "chandlery",
+    "name": "The Chandlery",
+    "description": "A quiet shop on the water that has never once been robbed.",
+    "difficulty": "hard",
+    "potential_payout": 545000,
+    "encounters": [
+      "cellar_route",
+      "wine_cellar",
+      "wall_safe"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "rain",
+      "factors": [
+        "understaffed",
+        "old_money"
+      ]
+    },
+    "required_reputation": 30,
+    "notoriety": 11,
+    "possible_loot": [
+      "master_kit",
+      "optics_rig",
+      "climbing_rig"
+    ]
+  },
+  {
+    "id": "embassy_annexe",
+    "name": "The Embassy Annexe",
+    "description": "Technically another country, practically a building with doors.",
+    "difficulty": "hard",
+    "potential_payout": 780000,
+    "encounters": [
+      "keyholder",
+      "alarm_panel",
+      "records_room"
+    ],
+    "environment": {
+      "time_of_day": "dusk",
+      "weather": "clear",
+      "factors": [
+        "private_security",
+        "wired"
+      ]
+    },
+    "required_reputation": 33,
+    "notoriety": 16,
+    "possible_loot": [
+      "field_terminal",
+      "the_ledger",
+      "tailored_suit"
+    ]
+  },
+  {
+    "id": "observatory",
+    "name": "The Barrow Observatory",
+    "description": "Instruments worth a fortune, on a hill, in the dark, unguarded but for the climb.",
+    "difficulty": "hard",
+    "potential_payout": 505000,
+    "encounters": [
+      "rooftop_run",
+      "atrium_crossing",
+      "private_office"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "storm",
+      "factors": [
+        "understaffed"
+      ]
+    },
+    "required_reputation": 34,
+    "notoriety": 10,
+    "possible_loot": [
+      "climbing_rig",
+      "optics_rig",
+      "grapple_line"
+    ]
+  },
+  {
+    "id": "textile_mill",
+    "name": "Halloran Mill",
+    "description": "Nine hundred looms, one office, and a payroll that arrives on Thursdays.",
+    "difficulty": "hard",
+    "potential_payout": 660000,
+    "encounters": [
+      "dumbwaiter",
+      "counting_floor",
+      "guard_room"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "noisy",
+        "private_security"
+      ]
+    },
+    "required_reputation": 36,
+    "notoriety": 13,
+    "possible_loot": [
+      "ballistic_liner",
+      "tranq_pistol",
+      "padded_vest"
+    ]
+  },
+  {
+    "id": "collectors_house",
+    "name": "The Collector's House",
+    "description": "One man, one obsession, and forty years of buying what should not be sold.",
+    "difficulty": "hard",
+    "potential_payout": 840000,
+    "encounters": [
+      "private_wing",
+      "wall_safe",
+      "trophy_case",
+      "chauffeur"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "old_money",
+        "private_security"
+      ]
+    },
+    "required_reputation": 38,
+    "notoriety": 15,
+    "possible_loot": [
+      "the_ledger",
+      "duelling_cane",
+      "master_kit"
+    ]
+  },
+  {
+    "id": "clearing_bank",
+    "name": "Threadneedle Clearing",
+    "description": "Not a bank the public uses. The one the banks use.",
+    "difficulty": "hard",
+    "potential_payout": 920000,
+    "encounters": [
+      "switchboard",
+      "vault_timer",
+      "strongroom_grille"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "fog",
+      "factors": [
+        "high_security",
+        "wired"
+      ]
+    },
+    "required_reputation": 40,
+    "notoriety": 17,
+    "possible_loot": [
+      "field_terminal",
+      "diamond_picks",
+      "loop_box"
+    ]
+  },
+  {
+    "id": "film_vault",
+    "name": "The Nitrate Vault",
+    "description": "Reels nobody is supposed to still have, in a building that cannot risk a spark.",
+    "difficulty": "hard",
+    "potential_payout": 575000,
+    "encounters": [
+      "cold_store",
+      "meter_cupboard",
+      "server_cage"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "wired",
+        "understaffed"
+      ]
+    },
+    "required_reputation": 42,
+    "notoriety": 12,
+    "possible_loot": [
+      "field_terminal",
+      "loop_box",
+      "signal_jammer"
+    ]
+  },
+  {
+    "id": "diamond_house",
+    "name": "Kestrel & Sons",
+    "description": "Four rooms, one of which is lined with steel and the other three with excuses.",
+    "difficulty": "hard",
+    "potential_payout": 980000,
+    "encounters": [
+      "porter_desk",
+      "wall_safe",
+      "bodyguards"
+    ],
+    "environment": {
+      "time_of_day": "day",
+      "weather": "clear",
+      "factors": [
+        "well_lit",
+        "private_security"
+      ]
+    },
+    "required_reputation": 44,
+    "notoriety": 18,
+    "possible_loot": [
+      "diamond_picks",
+      "duelling_cane",
+      "ballistic_liner"
+    ]
+  },
+  {
+    "id": "curators_flat",
+    "name": "The Curator's Flat",
+    "description": "Everything that never made it onto the museum's inventory.",
+    "difficulty": "hard",
+    "potential_payout": 690000,
+    "encounters": [
+      "service_stair",
+      "private_wing",
+      "wall_safe"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "rain",
+      "factors": [
+        "old_money"
+      ]
+    },
+    "required_reputation": 46,
+    "notoriety": 14,
+    "possible_loot": [
+      "master_kit",
+      "the_ledger",
+      "optics_rig"
+    ]
+  },
+  {
+    "id": "data_haven",
+    "name": "The Haven",
+    "description": "A building that exists to keep other people's secrets, for a fee.",
+    "difficulty": "extreme",
+    "potential_payout": 1250000,
+    "encounters": [
+      "the_arbiter",
+      "server_vault",
+      "atrium_crossing"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "storm",
+      "factors": [
+        "high_security",
+        "wired"
+      ]
+    },
+    "required_reputation": 50,
+    "notoriety": 20,
+    "possible_loot": [
+      "field_terminal",
+      "the_ledger",
+      "loop_box"
+    ]
+  },
+  {
+    "id": "royal_mint_annexe",
+    "name": "The Mint Annexe",
+    "description": "Where the plates are kept between runs, which is most of the year.",
+    "difficulty": "extreme",
+    "potential_payout": 1600000,
+    "encounters": [
+      "pressure_floor",
+      "vault_timer",
+      "guard_room"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "high_security",
+        "private_security"
+      ]
+    },
+    "required_reputation": 53,
+    "notoriety": 23,
+    "possible_loot": [
+      "master_kit",
+      "ballistic_liner",
+      "field_terminal"
+    ]
+  },
+  {
+    "id": "the_repository",
+    "name": "The Repository",
+    "description": "No sign, no listing, and a floor that is not on any plan of the building.",
+    "difficulty": "extreme",
+    "potential_payout": 1380000,
+    "encounters": [
+      "black_room",
+      "wall_safe",
+      "private_wing"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "fog",
+      "factors": [
+        "high_security"
+      ]
+    },
+    "required_reputation": 56,
+    "notoriety": 21,
+    "possible_loot": [
+      "the_ledger",
+      "master_kit",
+      "optics_rig"
+    ]
+  },
+  {
+    "id": "grand_auction",
+    "name": "The Michaelmas Sale",
+    "description": "One night a year, everything worth having is in one room at the same time.",
+    "difficulty": "extreme",
+    "potential_payout": 1720000,
+    "encounters": [
+      "auction_floor",
+      "auction_lot",
+      "keyholder",
+      "bodyguards"
+    ],
+    "environment": {
+      "time_of_day": "dusk",
+      "weather": "clear",
+      "factors": [
+        "crowded",
+        "old_money",
+        "private_security"
+      ]
+    },
+    "required_reputation": 60,
+    "notoriety": 24,
+    "possible_loot": [
+      "the_ledger",
+      "duelling_cane",
+      "master_kit"
+    ]
+  },
+  {
+    "id": "consortium_tower",
+    "name": "The Consortium",
+    "description": "Forty floors that own most of the others.",
+    "difficulty": "extreme",
+    "potential_payout": 1900000,
+    "encounters": [
+      "atrium_crossing",
+      "the_arbiter",
+      "penthouse_safe",
+      "bodyguards"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "storm",
+      "factors": [
+        "high_security",
+        "wired",
+        "private_security"
+      ]
+    },
+    "required_reputation": 63,
+    "notoriety": 26,
+    "possible_loot": [
+      "field_terminal",
+      "the_ledger",
+      "ballistic_liner"
+    ]
+  },
+  {
+    "id": "cliffside_estate",
+    "name": "Wrenmoor",
+    "description": "A house on a cliff, one road in, and nobody who wants visitors.",
+    "difficulty": "extreme",
+    "potential_payout": 1450000,
+    "encounters": [
+      "rooftop_run",
+      "private_wing",
+      "ledger_safe",
+      "chauffeur"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "storm",
+      "factors": [
+        "old_money",
+        "private_security"
+      ]
+    },
+    "required_reputation": 66,
+    "notoriety": 22,
+    "possible_loot": [
+      "duelling_cane",
+      "master_kit",
+      "climbing_rig"
+    ]
+  },
+  {
+    "id": "the_deep_vault",
+    "name": "The Deep Vault",
+    "description": "Sixty feet down, one lift, and a door that has never been opened by a stranger.",
+    "difficulty": "extreme",
+    "potential_payout": 2100000,
+    "encounters": [
+      "pressure_floor",
+      "black_room",
+      "deposit_boxes",
+      "the_arbiter"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "high_security",
+        "private_security"
+      ]
+    },
+    "required_reputation": 70,
+    "notoriety": 28,
+    "possible_loot": [
+      "the_ledger",
+      "field_terminal",
+      "master_kit"
+    ]
   }
 ]

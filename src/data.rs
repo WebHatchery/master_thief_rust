@@ -276,30 +276,59 @@ mod tests {
     }
 
     #[test]
-    fn the_content_inventory_holds_its_authored_floors() {
-        // GDD 8 sets a prototype column and a full column. These are floors,
-        // never ceilings: content may only grow, and this fails when it shrinks.
+    fn every_content_axis_meets_its_full_gdd_target() {
+        // The full column of the GDD 8 table, not the prototype one. These are
+        // floors, never ceilings: content may only grow, and this fails the
+        // moment any axis shrinks below what was shipped.
         let inventory = GameData::load().unwrap().inventory();
 
-        assert!(inventory.recruits >= 15, "{:?}", inventory);
-        assert!(inventory.personality_traits >= 12, "{:?}", inventory);
-        assert!(inventory.equipment >= 25, "{:?}", inventory);
-        assert!(inventory.encounters >= 25, "{:?}", inventory);
-        assert!(inventory.targets >= 12, "{:?}", inventory);
+        assert!(inventory.outcome_lines >= 400, "{:?}", inventory);
+        assert!(inventory.encounters >= 70, "{:?}", inventory);
+        assert!(inventory.equipment >= 60, "{:?}", inventory);
+        assert!(inventory.targets >= 45, "{:?}", inventory);
+        assert!(inventory.recruits >= 40, "{:?}", inventory);
+        assert!(inventory.personality_traits >= 30, "{:?}", inventory);
+        assert!(inventory.critical_effects >= 50, "{:?}", inventory);
         assert!(inventory.environment_factors >= 15, "{:?}", inventory);
-        assert!(inventory.critical_effects >= 10, "{:?}", inventory);
     }
 
     #[test]
-    fn the_outcome_tables_have_reached_their_full_target() {
-        // The one axis GDD 8 calls the deliberate outlier: 400 lines, because
-        // the narrative layer over the dice is the game's whole texture.
-        let inventory = GameData::load().unwrap().inventory();
-        assert!(
-            inventory.outcome_lines >= 380,
-            "only {} outcome lines authored",
-            inventory.outcome_lines
-        );
+    fn the_ladder_of_marks_runs_all_the_way_up() {
+        // Reputation is the campaign's spine. There has to be something to open
+        // at every rung of it, or the ladder has a missing step.
+        let data = GameData::load().unwrap();
+        let mut gates: Vec<i32> = data
+            .targets
+            .iter()
+            .map(|(_, target)| target.required_reputation)
+            .collect();
+        gates.sort_unstable();
+
+        assert!(gates.first() == Some(&0), "nothing is open at week one");
+        assert!(*gates.last().unwrap() >= 60, "the ladder stops too early");
+        for pair in gates.windows(2) {
+            assert!(
+                pair[1] - pair[0] <= 6,
+                "a {}-point gap between marks at reputation {}",
+                pair[1] - pair[0],
+                pair[0]
+            );
+        }
+    }
+
+    #[test]
+    fn every_difficulty_band_has_marks_in_it() {
+        use crate::model::DifficultyBand;
+        let data = GameData::load().unwrap();
+
+        for band in DifficultyBand::ALL {
+            let count = data
+                .targets
+                .iter()
+                .filter(|(_, target)| target.difficulty == band)
+                .count();
+            assert!(count >= 5, "only {} {} marks", count, band.label());
+        }
     }
 
     #[test]

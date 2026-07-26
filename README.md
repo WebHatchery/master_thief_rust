@@ -5,28 +5,28 @@ through which door — then watch the plan survive contact with the building, or
 not. Jobs resolve as runs of d20 checks against encounter difficulty classes;
 the crew is the campaign.
 
-**Status:** M0–M5 landed, M6 part-way. Everything through delegation and its
-differential reporting is in, and a headless twenty-week campaign is a test
-rather than a claim (`sim::campaign`). The outcome tables have reached their
-full GDD §8 target at 390 lines; the other content axes have not — see below.
+**Status:** M0–M6 landed. Everything through delegation and its differential
+reporting is in, a headless twenty-week campaign is a test rather than a claim
+(`sim::campaign`), and every content axis in GDD §8 has reached its **full**
+target except achievements, which need the toolkit wiring M7 brings.
 Read [`gdd.md`](gdd.md) first; it is the source of truth for what to build.
 
 ### Content against GDD §8
 
 | Axis | Authored | Full target |
 | --- | ---: | ---: |
-| Outcome narrative lines | 390 | 400 |
+| Outcome narrative lines | 400 | 400 |
+| Encounter templates | 71 | 70 |
+| Equipment templates | 67 | 60 |
+| Heist targets | 45 | 45 |
+| Recruit archetypes | 40 | 40 |
+| Personality traits | 30 | 30 |
+| Critical success/failure effects | 56 | 50 |
 | Environmental factors | 16 | 15 |
-| Encounter templates | 28 | 70 |
-| Equipment templates | 26 | 60 |
-| Recruit archetypes | 15 | 40 |
-| Heist targets | 12 | 45 |
-| Critical success/failure effects | 15 | 50 |
-| Personality traits | 14 | 30 |
 | Achievements | 0 | 40 |
 
-`GameData::inventory()` reports these, and `data.rs` holds the counts as floors
-so content can only grow.
+`GameData::inventory()` reports these and `data.rs` holds the full targets as
+floors, so content can only grow.
 
 The crate is a library with a thin binary on top (`src/lib.rs` + `src/main.rs`)
 so `rules` and `sim` can be exercised headlessly — that is what the ported

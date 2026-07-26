@@ -383,5 +383,607 @@
     "equipment_bonuses": {
       "armor": 2
     }
+  },
+  {
+    "id": "coat_check",
+    "name": "The Coat Check",
+    "description": "A girl with a ledger and four hundred pockets behind her.",
+    "primary_skill": "social",
+    "difficulty": 15,
+    "complexity": "simple",
+    "failure_consequence": "She keeps the ticket stub and the description that goes with it.",
+    "critical_success_reward": "She hands over somebody else's key along with the coat.",
+    "equipment_bonuses": {
+      "armor": 2,
+      "accessory": 1
+    }
+  },
+  {
+    "id": "service_stair",
+    "name": "Service Stair",
+    "description": "Concrete, echo, and a door at every landing.",
+    "primary_skill": "stealth",
+    "difficulty": 16,
+    "complexity": "simple",
+    "failure_consequence": "Footsteps carry up four floors and somebody counts them.",
+    "equipment_bonuses": {
+      "accessory": 2
+    },
+    "critical_success_reward": "The stairwell turns out to run all the way to the roof.",
+    "critical_failure_effect": "A fire door slams four floors down and the sound climbs."
+  },
+  {
+    "id": "delivery_book",
+    "name": "The Delivery Book",
+    "description": "Sign for something nobody ordered and walk it inside.",
+    "primary_skill": "social",
+    "difficulty": 16,
+    "complexity": "simple",
+    "failure_consequence": "The clerk phones the depot to check, and the depot answers.",
+    "critical_success_reward": "The crew is given a trolley and directions to the vault corridor.",
+    "critical_success_run_effect": "skip_next",
+    "equipment_bonuses": {
+      "accessory": 3
+    }
+  },
+  {
+    "id": "window_latch",
+    "name": "The Sash Window",
+    "description": "Painted shut in 1931 and never opened since.",
+    "primary_skill": "lockpicking",
+    "difficulty": 16,
+    "complexity": "simple",
+    "failure_consequence": "The frame splinters and the noise carries into the street.",
+    "equipment_bonuses": {
+      "tool": 2
+    }
+  },
+  {
+    "id": "yard_wall",
+    "name": "The Yard Wall",
+    "description": "Three metres of brick with glass set into the top of it.",
+    "primary_skill": "athletics",
+    "difficulty": 17,
+    "complexity": "simple",
+    "failure_consequence": "A shredded palm and a stain on the coping that will be found.",
+    "equipment_bonuses": {
+      "armor": 2,
+      "accessory": 2
+    }
+  },
+  {
+    "id": "porter_desk",
+    "name": "The Night Porter",
+    "description": "Forty years on this desk and an opinion about everybody.",
+    "primary_skill": "social",
+    "primary_attribute": "wisdom",
+    "difficulty": 17,
+    "complexity": "moderate",
+    "failure_consequence": "He remembers a face and matches it to a name by morning.",
+    "critical_failure_effect": "He rings the residents' bell and half the building wakes.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "armor": 2
+    }
+  },
+  {
+    "id": "meter_cupboard",
+    "name": "The Meter Cupboard",
+    "description": "Everything the building runs on, behind a lock worth six pounds.",
+    "primary_skill": "lockpicking",
+    "difficulty": 17,
+    "complexity": "simple",
+    "failure_consequence": "The door hangs open and announces that somebody was interested.",
+    "critical_success_reward": "The whole floor's lighting circuit is theirs to turn off.",
+    "critical_success_run_effect": "skip_next",
+    "equipment_bonuses": {
+      "tool": 3
+    }
+  },
+  {
+    "id": "kitchen_pass",
+    "name": "Through the Kitchen",
+    "description": "Steam, shouting, and nobody with time to look up.",
+    "primary_skill": "stealth",
+    "difficulty": 17,
+    "complexity": "simple",
+    "failure_consequence": "A chef takes exception and remembers taking it.",
+    "equipment_bonuses": {
+      "armor": 2
+    },
+    "critical_success_reward": "A chef assumes they are the new supplier and holds the door.",
+    "critical_failure_effect": "A pan goes over and the whole service stops to look."
+  },
+  {
+    "id": "guest_register",
+    "name": "The Guest Register",
+    "description": "A name in a book, written badly enough to be anyone's.",
+    "primary_skill": "social",
+    "difficulty": 18,
+    "complexity": "moderate",
+    "failure_consequence": "The signature does not match the one already on the page.",
+    "equipment_bonuses": {
+      "accessory": 3
+    },
+    "critical_success_reward": "The name they signed turns out to have an account here.",
+    "critical_failure_effect": "The signature is compared to one on the page above it."
+  },
+  {
+    "id": "alarm_panel",
+    "name": "The Alarm Panel",
+    "description": "Eight zones, one keypad, and ninety seconds of entry delay.",
+    "primary_skill": "hacking",
+    "difficulty": 18,
+    "complexity": "moderate",
+    "failure_consequence": "Zone four reports open and the monitoring station calls back.",
+    "critical_success_reward": "Every zone reads secure for the rest of the night.",
+    "critical_failure_effect": "The panel dials out before anybody can stop it.",
+    "critical_success_run_effect": "skip_next",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "gadget": 4
+    }
+  },
+  {
+    "id": "dumbwaiter",
+    "name": "The Dumbwaiter",
+    "description": "A shaft built for soup, being asked to carry a person.",
+    "primary_skill": "athletics",
+    "difficulty": 18,
+    "complexity": "moderate",
+    "failure_consequence": "The cable slips and the car drops a floor with somebody in it.",
+    "equipment_bonuses": {
+      "armor": 2,
+      "accessory": 2
+    },
+    "critical_success_reward": "The shaft runs to a floor that is not on the plan.",
+    "critical_failure_effect": "The car jams with somebody in it, between floors."
+  },
+  {
+    "id": "strongroom_grille",
+    "name": "The Strongroom Grille",
+    "description": "Bars set in stone, and a gate lock older than the bank.",
+    "primary_skill": "lockpicking",
+    "difficulty": 18,
+    "complexity": "moderate",
+    "failure_consequence": "The wards jam and the gate is now a wall.",
+    "equipment_bonuses": {
+      "tool": 3
+    }
+  },
+  {
+    "id": "cellar_route",
+    "name": "The Cellar Route",
+    "description": "A coal chute, a flooded corridor, and the building's own foundations.",
+    "primary_skill": "athletics",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "A slip in the dark, and everything gets wet including the tools.",
+    "equipment_bonuses": {
+      "armor": 3
+    },
+    "critical_success_reward": "The old service tunnel comes out inside the vault corridor.",
+    "critical_failure_effect": "The chute collapses behind them and takes the way back."
+  },
+  {
+    "id": "records_room",
+    "name": "The Records Room",
+    "description": "Nine hundred boxes and one that matters.",
+    "primary_skill": "hacking",
+    "primary_attribute": "intelligence",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "The index is wrong and the search costs twenty minutes nobody has.",
+    "critical_success_reward": "The file is found, copied, and put back the right way round.",
+    "equipment_bonuses": {
+      "gadget": 3
+    }
+  },
+  {
+    "id": "watchman_round",
+    "name": "The Watchman's Round",
+    "description": "A key clock on every floor, punched to the minute.",
+    "primary_skill": "stealth",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "He punches early, which is the same as noticing.",
+    "critical_success_reward": "His route is learned well enough to use on the way out.",
+    "equipment_bonuses": {
+      "accessory": 2
+    }
+  },
+  {
+    "id": "private_office",
+    "name": "The Private Office",
+    "description": "The door with no nameplate, on the floor with no visitors.",
+    "primary_skill": "lockpicking",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "The lock is changed by morning and the file inside is moved.",
+    "equipment_bonuses": {
+      "tool": 3,
+      "gadget": 1
+    }
+  },
+  {
+    "id": "loading_manifest",
+    "name": "The Manifest",
+    "description": "Talk a clerk into the crate number that matters.",
+    "primary_skill": "social",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "He fetches the supervisor to be helpful, which he is not.",
+    "equipment_bonuses": {
+      "accessory": 2,
+      "armor": 1
+    }
+  },
+  {
+    "id": "sluice_gate",
+    "name": "The Sluice Gate",
+    "description": "Cold water, a rusted wheel, and eleven minutes of tide.",
+    "primary_skill": "athletics",
+    "difficulty": 20,
+    "complexity": "complex",
+    "failure_consequence": "The gate sticks half open and the channel floods behind them.",
+    "critical_failure_effect": "Somebody goes into the water and the yard hears the splash.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "armor": 3,
+      "accessory": 2
+    }
+  },
+  {
+    "id": "switchboard",
+    "name": "The Switchboard",
+    "description": "Every line in the building, and a woman who knows all of them.",
+    "primary_skill": "hacking",
+    "difficulty": 20,
+    "complexity": "moderate",
+    "failure_consequence": "A call gets through that should not have.",
+    "critical_success_reward": "The building's outside lines are theirs to cut for an hour.",
+    "equipment_bonuses": {
+      "gadget": 4
+    }
+  },
+  {
+    "id": "gallery_balcony",
+    "name": "The Gallery Balcony",
+    "description": "A rail, a drop, and the piece hanging just out of reach.",
+    "primary_skill": "athletics",
+    "difficulty": 20,
+    "complexity": "complex",
+    "failure_consequence": "A hand slips and the whole gallery hears the rail take the weight.",
+    "equipment_bonuses": {
+      "accessory": 3,
+      "armor": 2
+    }
+  },
+  {
+    "id": "trophy_case",
+    "name": "The Trophy Case",
+    "description": "Glass, brass, and a hinge that has never been opened quietly.",
+    "primary_skill": "lockpicking",
+    "difficulty": 20,
+    "complexity": "moderate",
+    "failure_consequence": "The hinge shrieks and the room stops pretending it did not hear.",
+    "critical_success_reward": "The case closes behind them exactly as it was.",
+    "equipment_bonuses": {
+      "tool": 3
+    }
+  },
+  {
+    "id": "chauffeur",
+    "name": "The Chauffeur",
+    "description": "He is paid to wait, and he is very good at waiting.",
+    "primary_skill": "social",
+    "difficulty": 20,
+    "complexity": "moderate",
+    "failure_consequence": "He walks the car round the block and finds a reason to mention it.",
+    "critical_failure_effect": "He drives straight to the house and tells them who was asking.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "armor": 3
+    }
+  },
+  {
+    "id": "guard_room",
+    "name": "The Guard Room",
+    "description": "Four of them, a kettle, and a monitor wall.",
+    "primary_skill": "combat",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "Four is more than anybody planned for, and they all stand up.",
+    "critical_success_reward": "The monitor wall is theirs and nobody is awake to mind.",
+    "critical_failure_effect": "One reaches the wall panel before anyone reaches him.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "weapon": 4,
+      "armor": 4
+    }
+  },
+  {
+    "id": "cold_store",
+    "name": "The Cold Store",
+    "description": "Minus twenty, a sealed door, and eight minutes of usable hands.",
+    "primary_skill": "athletics",
+    "primary_attribute": "constitution",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "Fingers stop working before the job is finished.",
+    "equipment_bonuses": {
+      "armor": 4
+    }
+  },
+  {
+    "id": "ledger_safe",
+    "name": "The Ledger Safe",
+    "description": "Not money. Names, and what they paid.",
+    "primary_skill": "lockpicking",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "The relocker arms and the safe becomes furniture.",
+    "critical_success_reward": "The ledger is photographed and returned to its shelf.",
+    "equipment_bonuses": {
+      "tool": 4,
+      "gadget": 2
+    }
+  },
+  {
+    "id": "rooftop_run",
+    "name": "The Rooftop Run",
+    "description": "Six buildings, four gaps, and one skylight that is not boarded.",
+    "primary_skill": "athletics",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "A gap is misjudged and the rest of the run is done limping.",
+    "critical_success_reward": "The whole rooftop line becomes the way out as well.",
+    "critical_success_run_effect": "skip_next",
+    "equipment_bonuses": {
+      "accessory": 3,
+      "armor": 3
+    }
+  },
+  {
+    "id": "vault_timer",
+    "name": "The Time Lock",
+    "description": "A clock that only opens the door when it feels like it.",
+    "primary_skill": "hacking",
+    "difficulty": 22,
+    "complexity": "complex",
+    "failure_consequence": "The clock is nudged, notices, and adds an hour out of spite.",
+    "critical_success_reward": "The clock is persuaded that it is already Monday.",
+    "equipment_bonuses": {
+      "gadget": 4,
+      "tool": 2
+    }
+  },
+  {
+    "id": "wine_cellar",
+    "name": "The Wine Cellar",
+    "description": "Two thousand bottles, one of which is a door handle.",
+    "primary_skill": "stealth",
+    "primary_attribute": "intelligence",
+    "difficulty": 22,
+    "complexity": "complex",
+    "failure_consequence": "A rack goes over, and two thousand bottles disagree loudly.",
+    "critical_success_reward": "The hidden door is found in half the expected time.",
+    "equipment_bonuses": {
+      "accessory": 2,
+      "tool": 2
+    }
+  },
+  {
+    "id": "private_wing",
+    "name": "The Private Wing",
+    "description": "Where the family sleeps, and nobody is paid to be quiet.",
+    "primary_skill": "stealth",
+    "difficulty": 22,
+    "complexity": "complex",
+    "failure_consequence": "A light comes on in a bedroom and stays on.",
+    "critical_failure_effect": "Somebody screams, which is the worst possible alarm.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "accessory": 3
+    }
+  },
+  {
+    "id": "counting_floor",
+    "name": "The Counting Floor",
+    "description": "Twenty clerks, forty eyes, and the night's take on the table.",
+    "primary_skill": "social",
+    "difficulty": 22,
+    "complexity": "complex",
+    "failure_consequence": "One clerk stops counting and looks up, and then they all do.",
+    "equipment_bonuses": {
+      "armor": 4,
+      "accessory": 2
+    },
+    "critical_success_reward": "A supervisor hands them a tray to carry and looks away.",
+    "critical_failure_effect": "Twenty clerks stop counting at once, which is its own alarm."
+  },
+  {
+    "id": "server_vault",
+    "name": "The Server Vault",
+    "description": "Cold, loud, and the only room in the building that is really locked.",
+    "primary_skill": "hacking",
+    "difficulty": 23,
+    "complexity": "complex",
+    "failure_consequence": "The rack logs a physical intrusion, which is a different kind of trouble.",
+    "critical_success_reward": "The whole array is mirrored and nobody is any the wiser.",
+    "equipment_bonuses": {
+      "gadget": 5
+    }
+  },
+  {
+    "id": "wall_safe",
+    "name": "The Wall Safe",
+    "description": "Behind the portrait, exactly where the film said it would be.",
+    "primary_skill": "lockpicking",
+    "difficulty": 23,
+    "complexity": "complex",
+    "failure_consequence": "The dial spins free and the mechanism behind it does not.",
+    "critical_success_reward": "It opens on the first combination they try, which is unnerving.",
+    "equipment_bonuses": {
+      "tool": 4,
+      "gadget": 2
+    }
+  },
+  {
+    "id": "bodyguards",
+    "name": "The Bodyguards",
+    "description": "Two men whose entire job is the next thirty seconds.",
+    "primary_skill": "combat",
+    "difficulty": 23,
+    "complexity": "complex",
+    "failure_consequence": "They are better at this than the crew, and it shows immediately.",
+    "critical_failure_effect": "One of them draws, and after that it is a different night.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "weapon": 5,
+      "armor": 4
+    }
+  },
+  {
+    "id": "atrium_crossing",
+    "name": "The Atrium",
+    "description": "Nine floors of open air with a marble floor at the bottom.",
+    "primary_skill": "athletics",
+    "difficulty": 23,
+    "complexity": "complex",
+    "failure_consequence": "The line swings wide and puts somebody against the glass.",
+    "critical_success_reward": "They cross unseen and leave the line rigged for the return.",
+    "critical_success_run_effect": "skip_next",
+    "equipment_bonuses": {
+      "accessory": 4,
+      "armor": 3
+    }
+  },
+  {
+    "id": "auction_lot",
+    "name": "The Lot Itself",
+    "description": "Under glass, under guard, and under a hundred pairs of eyes.",
+    "primary_skill": "lockpicking",
+    "difficulty": 24,
+    "complexity": "legendary",
+    "failure_consequence": "The case is opened badly and the room notices before the guard does.",
+    "critical_success_reward": "The swap is so good the house sells the copy that evening.",
+    "equipment_bonuses": {
+      "tool": 5,
+      "gadget": 2
+    }
+  },
+  {
+    "id": "keyholder",
+    "name": "The Keyholder",
+    "description": "One person in the city can open this, and they are at dinner.",
+    "primary_skill": "social",
+    "primary_attribute": "charisma",
+    "difficulty": 24,
+    "complexity": "legendary",
+    "failure_consequence": "They excuse themselves, and they do not come back alone.",
+    "critical_success_reward": "They open it themselves, apologising for the delay.",
+    "critical_success_run_effect": "skip_next",
+    "equipment_bonuses": {
+      "armor": 4,
+      "accessory": 4
+    }
+  },
+  {
+    "id": "pressure_floor",
+    "name": "The Pressure Floor",
+    "description": "Every tile weighed, every weight logged, and one route across.",
+    "primary_skill": "athletics",
+    "difficulty": 24,
+    "complexity": "legendary",
+    "failure_consequence": "A tile registers four kilos too many and the room seals.",
+    "critical_failure_effect": "The floor locks down with the crew standing on it.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "accessory": 4,
+      "armor": 2
+    }
+  },
+  {
+    "id": "black_room",
+    "name": "The Black Room",
+    "description": "No windows, no lights, no plan of it anywhere in the city.",
+    "primary_skill": "stealth",
+    "difficulty": 25,
+    "complexity": "legendary",
+    "failure_consequence": "They come out of it having learned only that it is bigger than expected.",
+    "critical_success_reward": "They map it in one pass and know it better than the owner.",
+    "equipment_bonuses": {
+      "accessory": 5
+    }
+  },
+  {
+    "id": "the_arbiter",
+    "name": "The Arbiter",
+    "description": "The system that decides who the building believes.",
+    "primary_skill": "hacking",
+    "difficulty": 25,
+    "complexity": "legendary",
+    "failure_consequence": "It stops believing anybody, including the people who work there.",
+    "critical_success_reward": "It believes the crew works here, and keeps believing it.",
+    "critical_failure_effect": "It writes them into a report that goes out at midnight.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "gadget": 6
+    }
+  },
+  {
+    "id": "fire_marshal",
+    "name": "The Fire Marshal",
+    "description": "An alarm brought a man with a clipboard and a headcount.",
+    "primary_skill": "social",
+    "difficulty": 18,
+    "complexity": "moderate",
+    "failure_consequence": "The headcount comes out one too many, twice.",
+    "complication_only": true,
+    "equipment_bonuses": {
+      "armor": 2,
+      "accessory": 2
+    }
+  },
+  {
+    "id": "dog_handler",
+    "name": "The Dog Handler",
+    "description": "The dog found something. The handler is coming to see what.",
+    "primary_skill": "stealth",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "The dog is right, and everybody now knows the dog is right.",
+    "complication_only": true,
+    "equipment_bonuses": {
+      "accessory": 3
+    }
+  },
+  {
+    "id": "jammed_exit",
+    "name": "The Jammed Exit",
+    "description": "The way out picked tonight to stop being a way out.",
+    "primary_skill": "athletics",
+    "difficulty": 20,
+    "complexity": "complex",
+    "failure_consequence": "The door holds, and the corridor behind them does not stay empty.",
+    "complication_only": true,
+    "equipment_bonuses": {
+      "tool": 3,
+      "armor": 2
+    }
+  },
+  {
+    "id": "second_safe",
+    "name": "The Second Safe",
+    "description": "There was another one. Nobody's file mentioned another one.",
+    "primary_skill": "lockpicking",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "Time spent on a safe that turns out to hold stationery.",
+    "complication_only": true,
+    "equipment_bonuses": {
+      "tool": 4
+    }
   }
 ]

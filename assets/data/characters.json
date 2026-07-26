@@ -7,10 +7,24 @@
     "background": "Twelve years fitting the locks she now opens.",
     "rarity": "rare",
     "class": "infiltrator",
-    "attributes": { "strength": 10, "dexterity": 16, "intelligence": 14, "wisdom": 13, "charisma": 10, "constitution": 12 },
-    "training": { "lockpicking": 5, "stealth": 4, "hacking": 2 },
+    "attributes": {
+      "strength": 10,
+      "dexterity": 16,
+      "intelligence": 14,
+      "wisdom": 13,
+      "charisma": 10,
+      "constitution": 12
+    },
+    "training": {
+      "lockpicking": 5,
+      "stealth": 4,
+      "hacking": 2
+    },
     "special_ability": "Reads a tumbler by feel; never needs the light.",
-    "personality_traits": ["Methodical", "Private"],
+    "personality_traits": [
+      "Methodical",
+      "Private"
+    ],
     "hire_cost": 6500
   },
   {
@@ -21,10 +35,23 @@
     "background": "Twenty years of standing between people and rooms.",
     "rarity": "common",
     "class": "muscle",
-    "attributes": { "strength": 16, "dexterity": 11, "intelligence": 9, "wisdom": 11, "charisma": 10, "constitution": 15 },
-    "training": { "athletics": 4, "combat": 4 },
+    "attributes": {
+      "strength": 16,
+      "dexterity": 11,
+      "intelligence": 9,
+      "wisdom": 11,
+      "charisma": 10,
+      "constitution": 15
+    },
+    "training": {
+      "athletics": 4,
+      "combat": 4
+    },
     "special_ability": "Carries what two people should; complains about neither.",
-    "personality_traits": ["Steady", "Blunt"],
+    "personality_traits": [
+      "Steady",
+      "Blunt"
+    ],
     "hire_cost": 3200
   },
   {
@@ -35,10 +62,23 @@
     "background": "Sold insurance until she understood what she was selling.",
     "rarity": "uncommon",
     "class": "face",
-    "attributes": { "strength": 9, "dexterity": 12, "intelligence": 13, "wisdom": 14, "charisma": 17, "constitution": 10 },
-    "training": { "social": 5, "stealth": 2 },
+    "attributes": {
+      "strength": 9,
+      "dexterity": 12,
+      "intelligence": 13,
+      "wisdom": 14,
+      "charisma": 17,
+      "constitution": 10
+    },
+    "training": {
+      "social": 5,
+      "stealth": 2
+    },
     "special_ability": "Names the one person in a room who can say yes.",
-    "personality_traits": ["Optimistic", "Impulsive"],
+    "personality_traits": [
+      "Optimistic",
+      "Impulsive"
+    ],
     "hire_cost": 4800
   },
   {
@@ -49,10 +89,23 @@
     "background": "Wrote the alarm firmware three companies still license.",
     "rarity": "rare",
     "class": "tech",
-    "attributes": { "strength": 9, "dexterity": 12, "intelligence": 17, "wisdom": 14, "charisma": 10, "constitution": 10 },
-    "training": { "hacking": 6, "lockpicking": 2 },
+    "attributes": {
+      "strength": 9,
+      "dexterity": 12,
+      "intelligence": 17,
+      "wisdom": 14,
+      "charisma": 10,
+      "constitution": 10
+    },
+    "training": {
+      "hacking": 6,
+      "lockpicking": 2
+    },
     "special_ability": "Knows which alarms phone home and which only shout.",
-    "personality_traits": ["Cynical", "Methodical"],
+    "personality_traits": [
+      "Cynical",
+      "Methodical"
+    ],
     "hire_cost": 7200
   },
   {
@@ -63,10 +116,23 @@
     "background": "Competition free-climber, banned for a stunt on a bank facade.",
     "rarity": "uncommon",
     "class": "acrobat",
-    "attributes": { "strength": 13, "dexterity": 17, "intelligence": 11, "wisdom": 12, "charisma": 11, "constitution": 14 },
-    "training": { "athletics": 5, "stealth": 3 },
+    "attributes": {
+      "strength": 13,
+      "dexterity": 17,
+      "intelligence": 11,
+      "wisdom": 12,
+      "charisma": 11,
+      "constitution": 14
+    },
+    "training": {
+      "athletics": 5,
+      "stealth": 3
+    },
     "special_ability": "Treats a sheer wall as a corridor with a longer walk.",
-    "personality_traits": ["Reckless", "Optimistic"],
+    "personality_traits": [
+      "Reckless",
+      "Optimistic"
+    ],
     "hire_cost": 5100
   },
   {
@@ -77,10 +143,24 @@
     "background": "Ran logistics for a shipping line, then for himself.",
     "rarity": "epic",
     "class": "mastermind",
-    "attributes": { "strength": 10, "dexterity": 12, "intelligence": 18, "wisdom": 16, "charisma": 14, "constitution": 11 },
-    "training": { "hacking": 4, "social": 4, "lockpicking": 3 },
+    "attributes": {
+      "strength": 10,
+      "dexterity": 12,
+      "intelligence": 18,
+      "wisdom": 16,
+      "charisma": 14,
+      "constitution": 11
+    },
+    "training": {
+      "hacking": 4,
+      "social": 4,
+      "lockpicking": 3
+    },
     "special_ability": "Sees the second-best route before the first one closes.",
-    "personality_traits": ["Methodical", "Guarded"],
+    "personality_traits": [
+      "Methodical",
+      "Guarded"
+    ],
     "hire_cost": 11500
   },
   {
@@ -91,10 +171,23 @@
     "background": "Six years of night custodial work in the buildings that matter.",
     "rarity": "rare",
     "class": "infiltrator",
-    "attributes": { "strength": 11, "dexterity": 17, "intelligence": 12, "wisdom": 16, "charisma": 10, "constitution": 12 },
-    "training": { "stealth": 6, "athletics": 3 },
+    "attributes": {
+      "strength": 11,
+      "dexterity": 17,
+      "intelligence": 12,
+      "wisdom": 16,
+      "charisma": 10,
+      "constitution": 12
+    },
+    "training": {
+      "stealth": 6,
+      "athletics": 3
+    },
     "special_ability": "Knows a building's blind hour by its cleaning roster.",
-    "personality_traits": ["Patient", "Private"],
+    "personality_traits": [
+      "Patient",
+      "Private"
+    ],
     "hire_cost": 6900
   },
   {
@@ -105,10 +198,24 @@
     "background": "Drove ambulances until the hours stopped paying.",
     "rarity": "common",
     "class": "wildcard",
-    "attributes": { "strength": 12, "dexterity": 14, "intelligence": 11, "wisdom": 13, "charisma": 11, "constitution": 13 },
-    "training": { "athletics": 3, "combat": 2, "social": 2 },
+    "attributes": {
+      "strength": 12,
+      "dexterity": 14,
+      "intelligence": 11,
+      "wisdom": 13,
+      "charisma": 11,
+      "constitution": 13
+    },
+    "training": {
+      "athletics": 3,
+      "combat": 2,
+      "social": 2
+    },
     "special_ability": "Never late, never early, never parked where he was seen.",
-    "personality_traits": ["Steady", "Cynical"],
+    "personality_traits": [
+      "Steady",
+      "Cynical"
+    ],
     "hire_cost": 3400
   },
   {
@@ -119,10 +226,24 @@
     "background": "Authenticated art for auction houses; learned what forgery costs.",
     "rarity": "epic",
     "class": "face",
-    "attributes": { "strength": 9, "dexterity": 13, "intelligence": 16, "wisdom": 15, "charisma": 18, "constitution": 10 },
-    "training": { "social": 6, "lockpicking": 2, "stealth": 2 },
+    "attributes": {
+      "strength": 9,
+      "dexterity": 13,
+      "intelligence": 16,
+      "wisdom": 15,
+      "charisma": 18,
+      "constitution": 10
+    },
+    "training": {
+      "social": 6,
+      "lockpicking": 2,
+      "stealth": 2
+    },
     "special_ability": "Values the take on sight; never carries out the cheap thing.",
-    "personality_traits": ["Vain", "Methodical"],
+    "personality_traits": [
+      "Vain",
+      "Methodical"
+    ],
     "hire_cost": 12800
   },
   {
@@ -133,10 +254,23 @@
     "background": "Regimental boxer, dishonourably discharged, unbothered by it.",
     "rarity": "uncommon",
     "class": "muscle",
-    "attributes": { "strength": 17, "dexterity": 13, "intelligence": 9, "wisdom": 10, "charisma": 9, "constitution": 16 },
-    "training": { "combat": 5, "athletics": 3 },
+    "attributes": {
+      "strength": 17,
+      "dexterity": 13,
+      "intelligence": 9,
+      "wisdom": 10,
+      "charisma": 9,
+      "constitution": 16
+    },
+    "training": {
+      "combat": 5,
+      "athletics": 3
+    },
     "special_ability": "Ends a confrontation before it becomes a report.",
-    "personality_traits": ["Reckless", "Blunt"],
+    "personality_traits": [
+      "Reckless",
+      "Blunt"
+    ],
     "hire_cost": 4600
   },
   {
@@ -147,10 +281,23 @@
     "background": "Municipal traffic control. Every camera in the district, once.",
     "rarity": "uncommon",
     "class": "tech",
-    "attributes": { "strength": 9, "dexterity": 13, "intelligence": 16, "wisdom": 13, "charisma": 11, "constitution": 10 },
-    "training": { "hacking": 5, "stealth": 2 },
+    "attributes": {
+      "strength": 9,
+      "dexterity": 13,
+      "intelligence": 16,
+      "wisdom": 13,
+      "charisma": 11,
+      "constitution": 10
+    },
+    "training": {
+      "hacking": 5,
+      "stealth": 2
+    },
     "special_ability": "Buys ninety seconds of blind camera, reliably.",
-    "personality_traits": ["Impulsive", "Curious"],
+    "personality_traits": [
+      "Impulsive",
+      "Curious"
+    ],
     "hire_cost": 5400
   },
   {
@@ -161,10 +308,23 @@
     "background": "Forty years, one shop, and a very complete key catalogue.",
     "rarity": "common",
     "class": "infiltrator",
-    "attributes": { "strength": 10, "dexterity": 14, "intelligence": 13, "wisdom": 12, "charisma": 10, "constitution": 10 },
-    "training": { "lockpicking": 4, "stealth": 2 },
+    "attributes": {
+      "strength": 10,
+      "dexterity": 14,
+      "intelligence": 13,
+      "wisdom": 12,
+      "charisma": 10,
+      "constitution": 10
+    },
+    "training": {
+      "lockpicking": 4,
+      "stealth": 2
+    },
     "special_ability": "Has seen this lock before, and probably sold it.",
-    "personality_traits": ["Patient", "Guarded"],
+    "personality_traits": [
+      "Patient",
+      "Guarded"
+    ],
     "hire_cost": 3000
   },
   {
@@ -175,10 +335,24 @@
     "background": "Structural surveyor. Knows which floors carry weight quietly.",
     "rarity": "rare",
     "class": "acrobat",
-    "attributes": { "strength": 13, "dexterity": 17, "intelligence": 14, "wisdom": 13, "charisma": 11, "constitution": 13 },
-    "training": { "stealth": 4, "athletics": 4, "lockpicking": 2 },
+    "attributes": {
+      "strength": 13,
+      "dexterity": 17,
+      "intelligence": 14,
+      "wisdom": 13,
+      "charisma": 11,
+      "constitution": 13
+    },
+    "training": {
+      "stealth": 4,
+      "athletics": 4,
+      "lockpicking": 2
+    },
     "special_ability": "Finds the service route the architect drew and forgot.",
-    "personality_traits": ["Curious", "Steady"],
+    "personality_traits": [
+      "Curious",
+      "Steady"
+    ],
     "hire_cost": 7400
   },
   {
@@ -189,10 +363,27 @@
     "background": "Nobody agrees on what Rook did before this. Rook included.",
     "rarity": "legendary",
     "class": "wildcard",
-    "attributes": { "strength": 14, "dexterity": 16, "intelligence": 16, "wisdom": 16, "charisma": 16, "constitution": 14 },
-    "training": { "stealth": 3, "athletics": 3, "combat": 3, "lockpicking": 3, "hacking": 3, "social": 3 },
+    "attributes": {
+      "strength": 14,
+      "dexterity": 16,
+      "intelligence": 16,
+      "wisdom": 16,
+      "charisma": 16,
+      "constitution": 14
+    },
+    "training": {
+      "stealth": 3,
+      "athletics": 3,
+      "combat": 3,
+      "lockpicking": 3,
+      "hacking": 3,
+      "social": 3
+    },
     "special_ability": "Competent at the wrong thing at exactly the right moment.",
-    "personality_traits": ["Unpredictable", "Charming"],
+    "personality_traits": [
+      "Unpredictable",
+      "Charming"
+    ],
     "hire_cost": 24000
   },
   {
@@ -203,10 +394,708 @@
     "background": "Corporate HR for nine years. Knows what a badge photo hides.",
     "rarity": "rare",
     "class": "mastermind",
-    "attributes": { "strength": 10, "dexterity": 11, "intelligence": 16, "wisdom": 17, "charisma": 15, "constitution": 11 },
-    "training": { "social": 4, "hacking": 3, "stealth": 2 },
+    "attributes": {
+      "strength": 10,
+      "dexterity": 11,
+      "intelligence": 16,
+      "wisdom": 17,
+      "charisma": 15,
+      "constitution": 11
+    },
+    "training": {
+      "social": 4,
+      "hacking": 3,
+      "stealth": 2
+    },
     "special_ability": "Produces the correct paperwork before it is asked for.",
-    "personality_traits": ["Methodical", "Charming"],
+    "personality_traits": [
+      "Methodical",
+      "Charming"
+    ],
     "hire_cost": 8100
+  },
+  {
+    "id": "cyril_mott",
+    "name": "Cyril Mott",
+    "specialty": "Glazier",
+    "specialty_skill": "lockpicking",
+    "background": "Cut and fitted every shop window on Ward Street, twice.",
+    "rarity": "common",
+    "class": "infiltrator",
+    "attributes": {
+      "strength": 10,
+      "dexterity": 15,
+      "intelligence": 12,
+      "wisdom": 11,
+      "charisma": 9,
+      "constitution": 11
+    },
+    "training": {
+      "lockpicking": 4,
+      "stealth": 2
+    },
+    "special_ability": "Takes a pane out whole and puts it back afterwards.",
+    "personality_traits": [
+      "Meticulous",
+      "Quiet"
+    ],
+    "hire_cost": 2900
+  },
+  {
+    "id": "eda_stroud",
+    "name": "Eda Stroud",
+    "specialty": "Night Nurse",
+    "specialty_skill": "social",
+    "background": "Twelve years of night shifts and a face nobody questions.",
+    "rarity": "common",
+    "class": "face",
+    "attributes": {
+      "strength": 9,
+      "dexterity": 11,
+      "intelligence": 13,
+      "wisdom": 15,
+      "charisma": 14,
+      "constitution": 11
+    },
+    "training": {
+      "social": 4,
+      "stealth": 2
+    },
+    "special_ability": "Walks anywhere at three in the morning without being asked why.",
+    "personality_traits": [
+      "Steady",
+      "Sentimental"
+    ],
+    "hire_cost": 3100
+  },
+  {
+    "id": "bram_teague",
+    "name": "Bram Teague",
+    "specialty": "Scaffolder",
+    "specialty_skill": "athletics",
+    "background": "Put up half the city's frontages and fell off none of them.",
+    "rarity": "common",
+    "class": "acrobat",
+    "attributes": {
+      "strength": 14,
+      "dexterity": 15,
+      "intelligence": 9,
+      "wisdom": 11,
+      "charisma": 10,
+      "constitution": 14
+    },
+    "training": {
+      "athletics": 4,
+      "combat": 2
+    },
+    "special_ability": "Reads a facade for the route up before anyone finds the door.",
+    "personality_traits": [
+      "Blunt",
+      "Punctual"
+    ],
+    "hire_cost": 3300
+  },
+  {
+    "id": "ivy_calder",
+    "name": "Ivy Calder",
+    "specialty": "Switch Girl",
+    "specialty_skill": "hacking",
+    "background": "Ran a telephone exchange board for six years and heard everything.",
+    "rarity": "common",
+    "class": "tech",
+    "attributes": {
+      "strength": 9,
+      "dexterity": 13,
+      "intelligence": 15,
+      "wisdom": 13,
+      "charisma": 11,
+      "constitution": 10
+    },
+    "training": {
+      "hacking": 4,
+      "social": 2
+    },
+    "special_ability": "Knows which line to cut and which to leave ringing.",
+    "personality_traits": [
+      "Curious",
+      "Gregarious"
+    ],
+    "hire_cost": 3400
+  },
+  {
+    "id": "harlan_vise",
+    "name": "Harlan Vise",
+    "specialty": "Bouncer",
+    "specialty_skill": "combat",
+    "background": "Kept the door at three clubs that no longer exist.",
+    "rarity": "common",
+    "class": "muscle",
+    "attributes": {
+      "strength": 16,
+      "dexterity": 11,
+      "intelligence": 9,
+      "wisdom": 11,
+      "charisma": 11,
+      "constitution": 15
+    },
+    "training": {
+      "combat": 4,
+      "athletics": 2
+    },
+    "special_ability": "Ends an argument by standing closer to it.",
+    "personality_traits": [
+      "Blunt",
+      "Loyal"
+    ],
+    "hire_cost": 3000
+  },
+  {
+    "id": "nell_faraday",
+    "name": "Nell Faraday",
+    "specialty": "Cat Burglar",
+    "specialty_skill": "stealth",
+    "background": "Started on washing lines, worked up to top floors.",
+    "rarity": "uncommon",
+    "class": "acrobat",
+    "attributes": {
+      "strength": 11,
+      "dexterity": 17,
+      "intelligence": 12,
+      "wisdom": 14,
+      "charisma": 10,
+      "constitution": 12
+    },
+    "training": {
+      "stealth": 5,
+      "athletics": 3
+    },
+    "special_ability": "Goes in the way nobody thought was a way in.",
+    "personality_traits": [
+      "Reckless",
+      "Private"
+    ],
+    "hire_cost": 5200
+  },
+  {
+    "id": "desmond_okafor",
+    "name": "Desmond Okafor",
+    "specialty": "Ledgerman",
+    "specialty_skill": "social",
+    "background": "Audited three firms into the ground and one out of trouble.",
+    "rarity": "uncommon",
+    "class": "mastermind",
+    "attributes": {
+      "strength": 10,
+      "dexterity": 11,
+      "intelligence": 16,
+      "wisdom": 15,
+      "charisma": 13,
+      "constitution": 11
+    },
+    "training": {
+      "social": 3,
+      "hacking": 3,
+      "lockpicking": 2
+    },
+    "special_ability": "Finds the number that does not belong in under a minute.",
+    "personality_traits": [
+      "Meticulous",
+      "Suspicious"
+    ],
+    "hire_cost": 5600
+  },
+  {
+    "id": "greta_lindqvist",
+    "name": "Greta Lindqvist",
+    "specialty": "Ironworker",
+    "specialty_skill": "athletics",
+    "background": "Rivets and girders. Not frightened of anything at height.",
+    "rarity": "uncommon",
+    "class": "muscle",
+    "attributes": {
+      "strength": 16,
+      "dexterity": 13,
+      "intelligence": 10,
+      "wisdom": 12,
+      "charisma": 9,
+      "constitution": 16
+    },
+    "training": {
+      "athletics": 5,
+      "combat": 2
+    },
+    "special_ability": "Carries the rig up herself and does not mention it.",
+    "personality_traits": [
+      "Stubborn",
+      "Steady"
+    ],
+    "hire_cost": 4800
+  },
+  {
+    "id": "aurelio_bassi",
+    "name": "Aurelio Bassi",
+    "specialty": "Restorer",
+    "specialty_skill": "lockpicking",
+    "background": "Repairs antique cabinetry, including the parts that lock.",
+    "rarity": "uncommon",
+    "class": "infiltrator",
+    "attributes": {
+      "strength": 10,
+      "dexterity": 16,
+      "intelligence": 15,
+      "wisdom": 12,
+      "charisma": 11,
+      "constitution": 10
+    },
+    "training": {
+      "lockpicking": 5,
+      "stealth": 2
+    },
+    "special_ability": "Opens a two-hundred-year-old case without marking it.",
+    "personality_traits": [
+      "Patient",
+      "Proud"
+    ],
+    "hire_cost": 5400
+  },
+  {
+    "id": "kit_mahoney",
+    "name": "Kit Mahoney",
+    "specialty": "Runner",
+    "specialty_skill": "stealth",
+    "background": "Delivered messages nobody wanted written down.",
+    "rarity": "uncommon",
+    "class": "wildcard",
+    "attributes": {
+      "strength": 12,
+      "dexterity": 16,
+      "intelligence": 12,
+      "wisdom": 14,
+      "charisma": 13,
+      "constitution": 13
+    },
+    "training": {
+      "stealth": 3,
+      "athletics": 3,
+      "social": 2
+    },
+    "special_ability": "Always knows a second way out of the street.",
+    "personality_traits": [
+      "Impulsive",
+      "Charming"
+    ],
+    "hire_cost": 4900
+  },
+  {
+    "id": "solomon_pike",
+    "name": "Solomon Pike",
+    "specialty": "Fence",
+    "specialty_skill": "social",
+    "background": "Has bought and sold most of what this city has lost.",
+    "rarity": "uncommon",
+    "class": "face",
+    "attributes": {
+      "strength": 10,
+      "dexterity": 12,
+      "intelligence": 15,
+      "wisdom": 16,
+      "charisma": 15,
+      "constitution": 11
+    },
+    "training": {
+      "social": 5,
+      "hacking": 2
+    },
+    "special_ability": "Knows what a thing is worth before it is out of the case.",
+    "personality_traits": [
+      "Greedy",
+      "Cynical"
+    ],
+    "hire_cost": 5700
+  },
+  {
+    "id": "yusra_haddad",
+    "name": "Yusra Haddad",
+    "specialty": "Wire Girl",
+    "specialty_skill": "hacking",
+    "background": "Installed the alarms she now argues with.",
+    "rarity": "uncommon",
+    "class": "tech",
+    "attributes": {
+      "strength": 9,
+      "dexterity": 14,
+      "intelligence": 16,
+      "wisdom": 14,
+      "charisma": 10,
+      "constitution": 11
+    },
+    "training": {
+      "hacking": 5,
+      "lockpicking": 2
+    },
+    "special_ability": "Recognises a panel by the sound its relay makes.",
+    "personality_traits": [
+      "Meticulous",
+      "Nervous"
+    ],
+    "hire_cost": 5500
+  },
+  {
+    "id": "orson_bray",
+    "name": "Orson Bray",
+    "specialty": "Standover",
+    "specialty_skill": "combat",
+    "background": "Collected debts for people who did not ask how.",
+    "rarity": "uncommon",
+    "class": "muscle",
+    "attributes": {
+      "strength": 17,
+      "dexterity": 12,
+      "intelligence": 10,
+      "wisdom": 11,
+      "charisma": 12,
+      "constitution": 15
+    },
+    "training": {
+      "combat": 5,
+      "social": 2
+    },
+    "special_ability": "Persuades without the conversation ever becoming an incident.",
+    "personality_traits": [
+      "Ruthless",
+      "Hot-Headed"
+    ],
+    "hire_cost": 5100
+  },
+  {
+    "id": "clemency_dunne",
+    "name": "Clemency Dunne",
+    "specialty": "Second Storey",
+    "specialty_skill": "stealth",
+    "background": "Nobody has ever proven she was in the building.",
+    "rarity": "rare",
+    "class": "infiltrator",
+    "attributes": {
+      "strength": 11,
+      "dexterity": 18,
+      "intelligence": 13,
+      "wisdom": 16,
+      "charisma": 11,
+      "constitution": 12
+    },
+    "training": {
+      "stealth": 6,
+      "lockpicking": 3
+    },
+    "special_ability": "Leaves a room exactly as she found it, including the dust.",
+    "personality_traits": [
+      "Patient",
+      "Guarded"
+    ],
+    "hire_cost": 7600
+  },
+  {
+    "id": "matthias_orr",
+    "name": "Matthias Orr",
+    "specialty": "Vaultwright",
+    "specialty_skill": "lockpicking",
+    "background": "Designed strongrooms for twenty years, then read his own notes.",
+    "rarity": "rare",
+    "class": "tech",
+    "attributes": {
+      "strength": 11,
+      "dexterity": 16,
+      "intelligence": 17,
+      "wisdom": 13,
+      "charisma": 10,
+      "constitution": 11
+    },
+    "training": {
+      "lockpicking": 5,
+      "hacking": 4
+    },
+    "special_ability": "Knows where the relocker sits without opening the door.",
+    "personality_traits": [
+      "Meticulous",
+      "Proud"
+    ],
+    "hire_cost": 8200
+  },
+  {
+    "id": "rosalind_vane",
+    "name": "Rosalind Vane",
+    "specialty": "Hostess",
+    "specialty_skill": "social",
+    "background": "Ran a card room for the sort of people who own buildings.",
+    "rarity": "rare",
+    "class": "face",
+    "attributes": {
+      "strength": 9,
+      "dexterity": 13,
+      "intelligence": 15,
+      "wisdom": 16,
+      "charisma": 18,
+      "constitution": 10
+    },
+    "training": {
+      "social": 6,
+      "stealth": 2
+    },
+    "special_ability": "Is introduced to the room before anybody asks who invited her.",
+    "personality_traits": [
+      "Charming",
+      "Vain"
+    ],
+    "hire_cost": 8600
+  },
+  {
+    "id": "tobias_lench",
+    "name": "Tobias Lench",
+    "specialty": "Sapper",
+    "specialty_skill": "athletics",
+    "background": "Dug tunnels for a living, in a war he does not discuss.",
+    "rarity": "rare",
+    "class": "muscle",
+    "attributes": {
+      "strength": 16,
+      "dexterity": 14,
+      "intelligence": 12,
+      "wisdom": 14,
+      "charisma": 9,
+      "constitution": 17
+    },
+    "training": {
+      "athletics": 5,
+      "combat": 3,
+      "stealth": 2
+    },
+    "special_ability": "Gets in from underneath when there is no in from anywhere else.",
+    "personality_traits": [
+      "Fatalistic",
+      "Steady"
+    ],
+    "hire_cost": 7900
+  },
+  {
+    "id": "aiko_shimada",
+    "name": "Aiko Shimada",
+    "specialty": "Signal Cutter",
+    "specialty_skill": "hacking",
+    "background": "Municipal telemetry. Every sensor in the district reported to her.",
+    "rarity": "rare",
+    "class": "tech",
+    "attributes": {
+      "strength": 9,
+      "dexterity": 14,
+      "intelligence": 18,
+      "wisdom": 15,
+      "charisma": 11,
+      "constitution": 10
+    },
+    "training": {
+      "hacking": 6,
+      "stealth": 3
+    },
+    "special_ability": "Buys two clean minutes from any monitored system, once.",
+    "personality_traits": [
+      "Quiet",
+      "Curious"
+    ],
+    "hire_cost": 8800
+  },
+  {
+    "id": "gaspard_rue",
+    "name": "Gaspard Rue",
+    "specialty": "Duellist",
+    "specialty_skill": "combat",
+    "background": "Fenced competitively until the sport stopped being enough.",
+    "rarity": "rare",
+    "class": "acrobat",
+    "attributes": {
+      "strength": 14,
+      "dexterity": 17,
+      "intelligence": 12,
+      "wisdom": 13,
+      "charisma": 13,
+      "constitution": 13
+    },
+    "training": {
+      "combat": 5,
+      "athletics": 4
+    },
+    "special_ability": "Ends a confrontation in one movement, usually the first.",
+    "personality_traits": [
+      "Proud",
+      "Impulsive"
+    ],
+    "hire_cost": 8400
+  },
+  {
+    "id": "wilhelmina_dove",
+    "name": "Wilhelmina Dove",
+    "specialty": "Quartermaster",
+    "specialty_skill": "social",
+    "background": "Ran supply for a shipping line and never lost a crate.",
+    "rarity": "rare",
+    "class": "mastermind",
+    "attributes": {
+      "strength": 11,
+      "dexterity": 12,
+      "intelligence": 17,
+      "wisdom": 17,
+      "charisma": 14,
+      "constitution": 12
+    },
+    "training": {
+      "social": 4,
+      "hacking": 3,
+      "athletics": 2
+    },
+    "special_ability": "The right tool is already in the bag when it is asked for.",
+    "personality_traits": [
+      "Punctual",
+      "Generous"
+    ],
+    "hire_cost": 8900
+  },
+  {
+    "id": "emeric_shaw",
+    "name": "Emeric Shaw",
+    "specialty": "Ghostwriter",
+    "specialty_skill": "social",
+    "background": "Forged provenance documents for a decade before anyone checked one.",
+    "rarity": "epic",
+    "class": "face",
+    "attributes": {
+      "strength": 9,
+      "dexterity": 15,
+      "intelligence": 17,
+      "wisdom": 16,
+      "charisma": 17,
+      "constitution": 10
+    },
+    "training": {
+      "social": 6,
+      "lockpicking": 3,
+      "hacking": 3
+    },
+    "special_ability": "Produces paperwork that survives being checked properly.",
+    "personality_traits": [
+      "Meticulous",
+      "Superstitious"
+    ],
+    "hire_cost": 13400
+  },
+  {
+    "id": "petra_almeida",
+    "name": "Petra Almeida",
+    "specialty": "Freeclimber",
+    "specialty_skill": "athletics",
+    "background": "Soloed things with no ropes and no permission.",
+    "rarity": "epic",
+    "class": "acrobat",
+    "attributes": {
+      "strength": 15,
+      "dexterity": 18,
+      "intelligence": 12,
+      "wisdom": 15,
+      "charisma": 12,
+      "constitution": 16
+    },
+    "training": {
+      "athletics": 6,
+      "stealth": 4
+    },
+    "special_ability": "The outside of a building is a corridor with a better view.",
+    "personality_traits": [
+      "Fatalistic",
+      "Reckless"
+    ],
+    "hire_cost": 13900
+  },
+  {
+    "id": "leonid_varga",
+    "name": "Leonid Varga",
+    "specialty": "Systems Architect",
+    "specialty_skill": "hacking",
+    "background": "Built the access control three of these buildings still run.",
+    "rarity": "epic",
+    "class": "mastermind",
+    "attributes": {
+      "strength": 10,
+      "dexterity": 13,
+      "intelligence": 19,
+      "wisdom": 16,
+      "charisma": 12,
+      "constitution": 11
+    },
+    "training": {
+      "hacking": 6,
+      "lockpicking": 4,
+      "social": 2
+    },
+    "special_ability": "Has the maintenance credentials, because he wrote them.",
+    "personality_traits": [
+      "Proud",
+      "Guarded"
+    ],
+    "hire_cost": 14600
+  },
+  {
+    "id": "beatrix_hollow",
+    "name": "Beatrix Hollow",
+    "specialty": "The Quiet One",
+    "specialty_skill": "stealth",
+    "background": "Nobody agrees on where she worked before, or whether she did.",
+    "rarity": "epic",
+    "class": "infiltrator",
+    "attributes": {
+      "strength": 12,
+      "dexterity": 19,
+      "intelligence": 14,
+      "wisdom": 17,
+      "charisma": 11,
+      "constitution": 13
+    },
+    "training": {
+      "stealth": 7,
+      "lockpicking": 3,
+      "combat": 2
+    },
+    "special_ability": "Is in the room before the room knows the door opened.",
+    "personality_traits": [
+      "Quiet",
+      "Superstitious"
+    ],
+    "hire_cost": 15200
+  },
+  {
+    "id": "august_vane",
+    "name": "August Vane",
+    "specialty": "The Old Man",
+    "specialty_skill": "lockpicking",
+    "background": "Forty years in the trade and a reputation nobody will confirm.",
+    "rarity": "legendary",
+    "class": "mastermind",
+    "attributes": {
+      "strength": 12,
+      "dexterity": 17,
+      "intelligence": 18,
+      "wisdom": 18,
+      "charisma": 15,
+      "constitution": 12
+    },
+    "training": {
+      "lockpicking": 5,
+      "stealth": 4,
+      "hacking": 4,
+      "social": 4
+    },
+    "special_ability": "Has opened this kind of door before, whatever kind it is.",
+    "personality_traits": [
+      "Patient",
+      "Fatalistic"
+    ],
+    "hire_cost": 26000
   }
 ]

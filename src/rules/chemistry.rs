@@ -120,10 +120,14 @@ pub fn reaction_rate(traits: &[String]) -> f32 {
     let mut rate: f32 = 1.0;
     for name in traits {
         rate *= match name.to_ascii_lowercase().as_str() {
-            "steady" | "patient" | "methodical" => 0.7,
-            "reckless" | "impulsive" | "vain" => 1.4,
-            "cynical" | "guarded" | "private" => 0.85,
-            "optimistic" | "charming" => 1.15,
+            // Hands who work to a method do not re-read a bad night.
+            "steady" | "patient" | "methodical" | "meticulous" | "punctual" | "quiet" => 0.7,
+            // Hands who take everything personally take this personally too.
+            "reckless" | "impulsive" | "vain" | "hot-headed" | "greedy" | "proud" => 1.4,
+            // Expecting the worst blunts it when it arrives.
+            "cynical" | "guarded" | "private" | "suspicious" | "fatalistic" | "nervous" => 0.85,
+            // Warm people warm faster, and cool faster too.
+            "optimistic" | "charming" | "loyal" | "generous" | "gregarious" | "sentimental" => 1.15,
             _ => 1.0,
         };
     }
