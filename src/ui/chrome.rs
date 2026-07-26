@@ -92,11 +92,12 @@ fn heat_color(ctx: &UiContext<'_>) -> Color {
 }
 
 pub fn draw_tabs(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
-    let labels: Vec<&str> = Screen::ALL.iter().map(|screen| screen.label()).collect();
-    let active = Screen::ALL
+    let labels: Vec<&str> = Screen::TABS.iter().map(|screen| screen.label()).collect();
+    // Planning is not a tab; while it is open no tab reads as active.
+    let active = Screen::TABS
         .iter()
         .position(|screen| *screen == ctx.screen)
-        .unwrap_or(0);
+        .unwrap_or(usize::MAX);
 
     let clicked = tab_bar_styled_at(
         Rect::new(18.0, 90.0, 380.0, 38.0),
@@ -108,7 +109,7 @@ pub fn draw_tabs(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     );
 
     if let Some(index) = clicked {
-        actions.push(UiAction::ShowScreen(Screen::ALL[index]));
+        actions.push(UiAction::ShowScreen(Screen::TABS[index]));
     }
 }
 

@@ -4,7 +4,9 @@
 //! seed plus a plan replays exactly (GDD 5.7).
 
 pub mod job;
+pub mod plan;
 pub mod week;
 
-pub use job::{auto_assign, run_job, Assignment, DoorOutcome, JobPlan, JobReport};
+pub use job::{auto_assign, run_job, DoorOutcome, JobPlan, JobReport};
+pub use plan::{candidates, Candidate, PlanDraft};
 pub use week::advance_week;

@@ -5,8 +5,8 @@ use crate::model::crew::Injury;
 use crate::model::{Encounter, HeistTarget, RunEffect};
 use crate::rules::attributes::award_experience;
 use crate::rules::encounter::{build_check, resolve_with_effects, CheckInputs, EncounterResult};
-use crate::rules::environment::environment_entries;
-use crate::rules::outcome::{ModifierEntry, Outcome};
+use crate::rules::outcome::Outcome;
+use crate::sim::plan::situational_modifiers;
 use crate::state::GameSession;
 
 /// Who the fixer put on which door.
@@ -84,7 +84,7 @@ pub fn auto_assign(session: &GameSession, data: &GameData, target: &HeistTarget)
                 member,
                 loadout: &loadout,
                 encounter,
-                extra: &environment_extras(data, target, encounter, session),
+                extra: &situational_modifiers(data, target, encounter, session),
             });
             let mut score = check.bonus();
             if used.contains(&member.id) {
@@ -110,23 +110,6 @@ pub fn auto_assign(session: &GameSession, data: &GameData, target: &HeistTarget)
         assignments,
         delegated: true,
     }
-}
-
-fn environment_extras(
-    data: &GameData,
-    target: &HeistTarget,
-    encounter: &Encounter,
-    session: &GameSession,
-) -> Vec<ModifierEntry> {
-    let mut extras = environment_entries(&target.environment, encounter.primary_skill, |id| {
-        data.environment.get(id)
-    });
-
-    let heat = session.heat_dc_penalty(&data.config);
-    if heat > 0 {
-        extras.push(ModifierEntry::new("City heat", -heat));
-    }
-    extras
 }
 
 /// Commit. Resolves each door in order, applies everything the job costs, and
@@ -221,7 +204,7 @@ fn resolve_door(
             return missed_door(encounter);
         };
         let _ = member;
-        environment_extras(data, target, encounter, session)
+        situational_modifiers(data, target, encounter, session)
     };
 
     let check = {

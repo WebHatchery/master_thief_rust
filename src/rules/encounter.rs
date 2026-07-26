@@ -35,9 +35,15 @@ impl CheckBreakdown {
         self.entries.iter().map(|entry| entry.value).sum()
     }
 
-    /// Entries worth drawing.
+    /// Entries worth drawing. The skill total always shows, even at zero — a
+    /// hand with no training in the trade is exactly what a player needs to see
+    /// before they put them on the door.
     pub fn significant(&self) -> impl Iterator<Item = &ModifierEntry> {
-        self.entries.iter().filter(|entry| entry.is_significant())
+        self.entries
+            .iter()
+            .enumerate()
+            .filter(|(index, entry)| *index == 0 || entry.is_significant())
+            .map(|(_, entry)| entry)
     }
 
     /// The lowest natural roll that still gets through the door. Natural 1
@@ -506,6 +512,24 @@ mod tests {
 
         assert_eq!(check.roll_needed(), 21);
         assert!((check.success_chance() - 0.05).abs() < 1e-6);
+    }
+
+    #[test]
+    fn an_untrained_hand_still_shows_their_zero() {
+        let mut member = test_member();
+        member.training = Skills::default();
+        member.attributes = Attributes::default();
+        let encounter = test_encounter();
+
+        let check = check_for(&member, &encounter, &Loadout::empty());
+        let shown: Vec<&str> = check
+            .significant()
+            .map(|entry| entry.label.as_str())
+            .collect();
+
+        assert_eq!(check.entries[0].value, 0);
+        assert_eq!(shown.first(), Some(&"Lockpicking skill"));
+        assert!(!shown.contains(&"Equipment"), "empty kit stays hidden");
     }
 
     #[test]

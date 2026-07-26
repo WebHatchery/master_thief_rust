@@ -10,7 +10,7 @@
     "Between jobs the crew is the campaign. Thieves gain levels, mastery, injuries, fatigue, and grudges; equipment breaks; reputation opens better targets while notoriety brings heat down on the ones you already own."
   ],
   "controls": [
-    { "key": "Mouse", "desc": "Select crew and marks, case a target, commit a job" },
+    { "key": "Mouse", "desc": "Select crew and marks, case a target, assign each door, commit" },
     { "key": "Tab", "desc": "Cycle crew / the board / last job" },
     { "key": "S / L", "desc": "Save / load the campaign" }
   ],

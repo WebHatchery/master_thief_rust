@@ -163,12 +163,26 @@ fn draw_detail(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
             166.0,
             38.0,
         ),
-        "Delegate the job",
+        "Delegate",
+        crew_ready,
+        ButtonTone::Secondary,
+        ctx.mouse(),
+    ) {
+        actions.push(UiAction::DelegateJob(entry.target_id.clone()));
+    }
+    if button_rect_tone_at(
+        Rect::new(
+            content.right() - 570.0,
+            content.bottom() - 40.0,
+            164.0,
+            38.0,
+        ),
+        "Plan the job",
         crew_ready,
         ButtonTone::Positive,
         ctx.mouse(),
     ) {
-        actions.push(UiAction::DelegateJob(entry.target_id.clone()));
+        actions.push(UiAction::PlanJob(entry.target_id.clone()));
     }
 }
 
@@ -273,7 +287,7 @@ fn draw_doors(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &Boa
         );
 
         let dc_label = if entry.cased {
-            format!("DC {}", encounter.difficulty + heat)
+            format!("DC {}", encounter.difficulty)
         } else {
             "DC ??".to_owned()
         };

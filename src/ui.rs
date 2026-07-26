@@ -4,10 +4,11 @@
 pub mod board;
 pub mod chrome;
 pub mod crew;
+pub mod planning;
 pub mod results;
 
 use crate::data::GameData;
-use crate::sim::JobReport;
+use crate::sim::{JobReport, PlanDraft};
 use crate::state::GameSession;
 use macroquad::prelude::*;
 use macroquad_toolkit::ui::VirtualUi;
@@ -21,16 +22,20 @@ pub enum Screen {
     #[default]
     Crew,
     Board,
+    /// Reached from a mark, not from the tab bar — it needs a job to plan.
+    Planning,
     Results,
 }
 
 impl Screen {
-    pub const ALL: [Screen; 3] = [Screen::Crew, Screen::Board, Screen::Results];
+    /// The screens the tab bar offers. Planning is deliberately not among them.
+    pub const TABS: [Screen; 3] = [Screen::Crew, Screen::Board, Screen::Results];
 
     pub fn label(self) -> &'static str {
         match self {
             Screen::Crew => "Crew",
             Screen::Board => "The Board",
+            Screen::Planning => "Planning",
             Screen::Results => "Last Job",
         }
     }
@@ -47,6 +52,20 @@ pub enum UiAction {
     SelectMember(String),
     SelectTarget(String),
     CaseTarget(String),
+    /// Open the planning screen on a mark.
+    PlanJob(String),
+    /// Open one door's candidate list.
+    FocusDoor(usize),
+    AssignDoor {
+        door: usize,
+        member_id: String,
+    },
+    ClearDoor(usize),
+    /// Fill the draft with the crew's own best guess.
+    AutoFillPlan,
+    /// Commit the plan and run the job.
+    CommitPlan,
+    AbandonPlan,
     /// Hand the job to the crew's own judgement and run it (GDD 5.3).
     DelegateJob(String),
     AdvanceWeek,
@@ -58,6 +77,7 @@ pub struct UiContext<'a> {
     pub screen: Screen,
     pub selected_member: Option<&'a str>,
     pub selected_target: Option<&'a str>,
+    pub draft: Option<&'a PlanDraft>,
     pub last_report: Option<&'a JobReport>,
     pub save_exists: bool,
     pub ui: &'a VirtualUi,
@@ -100,6 +120,7 @@ pub fn draw_game_ui(ctx: UiContext<'_>) -> Vec<UiAction> {
     match ctx.screen {
         Screen::Crew => crew::draw(&ctx, &mut actions),
         Screen::Board => board::draw(&ctx, &mut actions),
+        Screen::Planning => planning::draw(&ctx, &mut actions),
         Screen::Results => results::draw(&ctx),
     }
 

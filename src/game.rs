@@ -68,12 +68,36 @@ impl Game {
                     .map(|entry| entry.target_id.clone());
                 Screen::Board
             }
+            "planning" | "plan" => {
+                self.open_capture_plan();
+                Screen::Planning
+            }
             "results" => {
                 self.run_capture_job();
                 Screen::Results
             }
             _ => Screen::Crew,
         };
+    }
+
+    /// A cased mark with the crew's own picks already in, so the capture shows
+    /// difficulties, assignments, and odds rather than an empty draft.
+    fn open_capture_plan(&mut self) {
+        let Some(entry) = self.session.board.first_mut() else {
+            return;
+        };
+        entry.cased = true;
+        let target_id = entry.target_id.clone();
+
+        let Some(target) = self.data.targets.get(&target_id).cloned() else {
+            return;
+        };
+        let mut draft = sim::PlanDraft::from_auto(&self.session, &self.data, &target);
+        draft.clear(draft.doors.len().saturating_sub(1));
+        draft.focus_on(draft.doors.len().saturating_sub(1));
+
+        self.selection.target = Some(target_id);
+        self.selection.draft = Some(draft);
     }
 
     fn run_capture_job(&mut self) {
@@ -94,6 +118,8 @@ impl Game {
             let next = match self.selection.screen {
                 Screen::Crew => Screen::Board,
                 Screen::Board => Screen::Results,
+                // Tab never walks into or out of a plan under construction.
+                Screen::Planning => Screen::Planning,
                 Screen::Results => Screen::Crew,
             };
             self.events.push(UiAction::ShowScreen(next));
@@ -121,6 +147,7 @@ impl Game {
             screen: self.selection.screen,
             selected_member: self.selection.member.as_deref(),
             selected_target: self.selection.target.as_deref(),
+            draft: self.selection.draft.as_ref(),
             last_report: self.selection.last_report.as_ref(),
             save_exists: self.save_exists,
             ui: &virtual_ui,
