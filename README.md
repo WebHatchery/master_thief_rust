@@ -5,10 +5,10 @@ through which door — then watch the plan survive contact with the building, or
 not. Jobs resolve as runs of d20 checks against encounter difficulty classes;
 the crew is the campaign.
 
-**Status:** M0–M6 landed; M7 part-way. Achievements, the records screen and its
-reputation/notoriety curves are in, and every content axis in GDD §8 has now
-reached its full target. The tutorial, audio, and settings are what remain.
-Read [`gdd.md`](gdd.md) first; it is the source of truth for what to build.
+**Status:** M0–M7 landed — the milestone list in `gdd.md` §13 is complete.
+Rules engine, planning, run, campaign, delegation reporting, content at the full
+GDD §8 targets, achievements, records, tutorial hints, settings and procedurally
+generated audio. `publish.ps1` is clean and the capture set covers every screen.
 
 ### Content against GDD §8
 
@@ -40,6 +40,8 @@ tests and the distribution soak in `sim::job` rely on.
 | `src/sim/` | Planning drafts, job resolution, loot, the week, and whole-campaign playthroughs |
 | `src/state.rs` | `GameSession`, the save shape, and migration |
 | `src/ui/` | View layer only — returns `UiAction`, mutates nothing |
+| `src/audio.rs` | Every sound effect, rendered from `synth` voices at boot |
+| `src/prefs.rs` | Run pacing, sound, and hints — this game's own settings |
 | `src/ui/floorplan.rs` | The building, drawn through `paint` so a test can measure it |
 | `src/game/playback.rs` | Replaying a resolved job at a pace a person can read |
 | `src/heist_actions.rs` | The one place an intent becomes a change |
@@ -68,7 +70,7 @@ cargo build --release --target wasm32-unknown-unknown   # WebGL
 ## Screenshots
 
 ```powershell
-.\scripts\capture_ui.ps1 -Scenes crew,hiring,board,shop,planning,run,results,records
+.\scripts\capture_ui.ps1 -Scenes crew,hiring,board,shop,planning,run,results,records,settings
 ```
 
 Drives the headless capture harness through the `MASTER_THIEF_CAPTURE_*` env

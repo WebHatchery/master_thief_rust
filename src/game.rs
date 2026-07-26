@@ -3,9 +3,11 @@
 
 pub mod playback;
 
+use crate::audio::{Sfx, SoundBank};
 use crate::data::{GameConfig, GameData};
 use crate::game::playback::RunPlayback;
 use crate::heist_actions::{self, Dispatch, GameCommand, Selection};
+use crate::prefs::Preferences;
 use crate::rules::Outcome;
 use crate::sim;
 use crate::state::{migrate_save_value, GameSession, SaveData};
@@ -30,6 +32,8 @@ pub struct Game {
     playback: Option<RunPlayback>,
     /// Crit punctuation, hung over the room it happened in.
     floats: FloatingTextLayer,
+    prefs: Preferences,
+    sound: SoundBank,
     notifications: NotificationManager,
     events: EventBus<UiAction>,
     save_exists: bool,
@@ -48,6 +52,9 @@ impl Game {
             data.crew_pool.len()
         ));
 
+        let prefs = Preferences::load(&data.config.game_name);
+        let sound = SoundBank::load(prefs.effective_volume()).await;
+
         let session = GameSession::new(&data.config, &data, new_seed());
         let mut game = Self {
             data,
@@ -55,6 +62,8 @@ impl Game {
             selection: Selection::default(),
             playback: None,
             floats: FloatingTextLayer::new(),
+            prefs,
+            sound,
             notifications,
             events: EventBus::new(),
             save_exists: false,
@@ -69,6 +78,8 @@ impl Game {
     pub fn set_capture_scene(&mut self, scene: &str) {
         self.session = GameSession::new(&self.data.config, &self.data, CAPTURE_SEED);
         self.selection = Selection::default();
+        // A screenshot has nothing to listen with.
+        self.sound = SoundBank::muted();
 
         self.selection.screen = match scene {
             "board" | "targets" => {
@@ -78,6 +89,10 @@ impl Game {
                     .first()
                     .map(|entry| entry.target_id.clone());
                 Screen::Board
+            }
+            "settings" => {
+                self.selection.settings_open = true;
+                Screen::Crew
             }
             "shop" | "outfitter" => Screen::Shop,
             "records" => {
@@ -163,6 +178,13 @@ impl Game {
             };
             self.events.push(UiAction::ShowScreen(next));
         }
+        if is_key_pressed(KeyCode::Escape) {
+            self.events.push(if self.selection.settings_open {
+                UiAction::CloseSettings
+            } else {
+                UiAction::OpenSettings
+            });
+        }
         if is_key_pressed(KeyCode::S) {
             self.events.push(UiAction::Save);
         }
@@ -190,6 +212,8 @@ impl Game {
             draft: self.selection.draft.as_ref(),
             playback: self.playback.as_ref(),
             last_report: self.selection.last_report.as_ref(),
+            prefs: &self.prefs,
+            settings_open: self.selection.settings_open,
             save_exists: self.save_exists,
             ui: &virtual_ui,
         });
@@ -214,6 +238,7 @@ impl Game {
                 data: &self.data,
                 session: &mut self.session,
                 selection: &mut self.selection,
+                prefs: &mut self.prefs,
                 notifications: &mut self.notifications,
             },
         );
@@ -230,14 +255,34 @@ impl Game {
                 }
             }
             Some(GameCommand::FinishRun) => self.finish_run(),
+            Some(GameCommand::SavePreferences) => self.save_preferences(),
             None => {}
         }
     }
 
+    fn save_preferences(&mut self) {
+        self.prefs.sanitize();
+        self.sound.set_volume(self.prefs.effective_volume());
+        let _ = self.prefs.save(&self.data.config.game_name);
+        self.sound.play(Sfx::Click);
+    }
+
     fn start_run(&mut self, report: crate::sim::JobReport) {
         self.floats.clear();
-        self.playback = Some(RunPlayback::new(report));
+        let playback = RunPlayback::new(report);
+
+        // A player who has asked not to watch is taken at their word: the dice
+        // were cast at commit either way (GDD 9, and accessibility).
+        if self.prefs.pacing.skips_the_run() {
+            self.selection.last_report = Some(playback.into_report());
+            self.selection.screen = Screen::Results;
+            self.sound.play(Sfx::Payout);
+            return;
+        }
+
+        self.playback = Some(playback);
         self.selection.screen = Screen::Run;
+        self.sound.play(Sfx::DiceThrow);
     }
 
     /// Walk the run forward and punctuate each critical as its verdict lands.
@@ -248,8 +293,13 @@ impl Game {
 
         let was_phase = playback.phase();
         let was_door = playback.door_index();
+        let was_landed = playback.roll_landed();
         let fast_forward = is_key_down(KeyCode::Space);
-        playback.update(dt, fast_forward);
+        playback.update(dt * self.prefs.pacing.speed(), fast_forward);
+
+        if !was_landed && playback.roll_landed() {
+            self.sound.play(Sfx::DiceLand);
+        }
 
         if !playback.verdict_just_landed(was_phase, was_door) {
             return;
@@ -261,12 +311,25 @@ impl Game {
         let Some(door) = playback.current_door() else {
             return;
         };
-        let (text, color) = match door.result.outcome {
+        let outcome = door.result.outcome;
+        let (text, color) = match outcome {
             Outcome::CriticalSuccess => ("CRITICAL", Color::new(0.46, 0.88, 0.56, 1.0)),
             Outcome::CriticalFailure => ("DISASTER", Color::new(0.92, 0.36, 0.34, 1.0)),
-            _ => return,
+            _ => {
+                self.sound.play(if outcome.passed() {
+                    Sfx::DoorPassed
+                } else {
+                    Sfx::DoorFailed
+                });
+                return;
+            }
         };
 
+        self.sound.play(if outcome == Outcome::CriticalSuccess {
+            Sfx::Critical
+        } else {
+            Sfx::Disaster
+        });
         if let Some(center) = ui::run::room_center(index, doors) {
             self.floats.spawn(text, center, color);
         }
@@ -277,7 +340,13 @@ impl Game {
             return;
         };
         self.floats.clear();
-        self.selection.last_report = Some(playback.into_report());
+        let report = playback.into_report();
+        self.sound.play(if report.success {
+            Sfx::Payout
+        } else {
+            Sfx::DoorFailed
+        });
+        self.selection.last_report = Some(report);
         self.selection.screen = Screen::Results;
     }
 

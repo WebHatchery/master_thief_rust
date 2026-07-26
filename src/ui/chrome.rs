@@ -123,9 +123,9 @@ pub fn draw_footer(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
 
     let mouse = ctx.mouse();
     let mut x = rect.x + 14.0;
-    let buttons: [(&str, bool, ButtonTone, UiAction); 5] = [
+    let buttons: [(&str, bool, ButtonTone, UiAction); 6] = [
         (
-            "Advance the Week",
+            "Advance Week",
             true,
             ButtonTone::Primary,
             UiAction::AdvanceWeek,
@@ -144,10 +144,16 @@ pub fn draw_footer(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
             ButtonTone::Danger,
             UiAction::DeleteSave,
         ),
+        (
+            "Settings",
+            true,
+            ButtonTone::Secondary,
+            UiAction::OpenSettings,
+        ),
     ];
 
     for (label, enabled, tone, action) in buttons {
-        let width = 150.0;
+        let width = 132.0;
         if button_rect_tone_at(
             Rect::new(x, rect.y + 9.0, width, 36.0),
             label,
@@ -160,12 +166,7 @@ pub fn draw_footer(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         x += width + 10.0;
     }
 
-    draw_ui_text_ex(
-        &format!("Seed {}", ctx.session.seed),
-        x + 6.0,
-        rect.y + 33.0,
-        TextStyle::new(14.0, dark::TEXT_DIM).params(),
-    );
+    let _ = x;
 }
 
 /// A left-aligned label with a right-aligned value on one line.

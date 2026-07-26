@@ -2,6 +2,7 @@
 //! nowhere else.
 
 use crate::data::GameData;
+use crate::prefs::Preferences;
 use crate::sim::{self, JobReport, PlanDraft};
 use crate::state::GameSession;
 use crate::ui::{Screen, UiAction};
@@ -16,6 +17,7 @@ pub struct Selection {
     pub target: Option<String>,
     /// True while the crew screen is showing applicants rather than payroll.
     pub hiring: bool,
+    pub settings_open: bool,
     /// The plan under construction, if the fixer is at the planning table.
     pub draft: Option<PlanDraft>,
     pub last_report: Option<JobReport>,
@@ -35,12 +37,15 @@ pub enum GameCommand {
     SkipRun,
     /// The run is over; move to the results.
     FinishRun,
+    /// A preference changed; write it out and follow it.
+    SavePreferences,
 }
 
 pub struct Dispatch<'a> {
     pub data: &'a GameData,
     pub session: &'a mut GameSession,
     pub selection: &'a mut Selection,
+    pub prefs: &'a mut Preferences,
     pub notifications: &'a mut NotificationManager,
 }
 
@@ -49,6 +54,7 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
         data,
         session,
         selection,
+        prefs,
         notifications,
     } = dispatch;
 
@@ -67,6 +73,28 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
         UiAction::CaseTarget(id) => case_target(data, session, notifications, &id),
 
         UiAction::ShowHiring(hiring) => selection.hiring = hiring,
+
+        UiAction::OpenSettings => selection.settings_open = true,
+        UiAction::CloseSettings => {
+            selection.settings_open = false;
+            return Some(GameCommand::SavePreferences);
+        }
+        UiAction::SetPacing(pacing) => {
+            prefs.pacing = pacing;
+            return Some(GameCommand::SavePreferences);
+        }
+        UiAction::SetSound(on) => {
+            prefs.sound = on;
+            return Some(GameCommand::SavePreferences);
+        }
+        UiAction::SetVolume(volume) => {
+            prefs.volume = volume.clamp(0.0, 1.0);
+            return Some(GameCommand::SavePreferences);
+        }
+        UiAction::ShowHints(shown) => {
+            prefs.hints = shown;
+            return Some(GameCommand::SavePreferences);
+        }
         UiAction::HireRecruit(id) => {
             let hired = session.hire(data, &id);
             if hired.is_ok() {
@@ -359,10 +387,12 @@ mod tests {
         selection: &'a mut Selection,
         notifications: &'a mut NotificationManager,
     ) -> Dispatch<'a> {
+        // The tests never assert on preferences, so they share one throwaway.
         Dispatch {
             data,
             session,
             selection,
+            prefs: Box::leak(Box::new(Preferences::default())),
             notifications,
         }
     }

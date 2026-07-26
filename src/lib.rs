@@ -4,10 +4,12 @@
 //! exercised headlessly: `rules` and `sim` never touch a window, and the ported
 //! tests plus the distribution soak run without one (GDD 11).
 
+pub mod audio;
 pub mod data;
 pub mod game;
 pub mod heist_actions;
 pub mod model;
+pub mod prefs;
 pub mod rules;
 pub mod sim;
 pub mod state;

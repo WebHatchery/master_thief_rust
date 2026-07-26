@@ -5,15 +5,18 @@ pub mod board;
 pub mod chrome;
 pub mod crew;
 pub mod floorplan;
+pub mod hints;
 pub mod hiring;
 pub mod planning;
 pub mod records;
 pub mod results;
 pub mod run;
+pub mod settings;
 pub mod shop;
 
 use crate::data::GameData;
 use crate::game::playback::RunPlayback;
+use crate::prefs::{Preferences, RunPacing};
 use crate::sim::{JobReport, PlanDraft};
 use crate::state::GameSession;
 use macroquad::prelude::*;
@@ -62,7 +65,9 @@ impl Screen {
 }
 
 /// Everything the player can ask for. The UI produces these; it never acts.
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// Not `Eq`: a volume is a float, and pretending otherwise would be a lie about
+/// what comparing two of these means.
+#[derive(Debug, Clone, PartialEq)]
 pub enum UiAction {
     NewGame,
     Save,
@@ -73,6 +78,12 @@ pub enum UiAction {
     SelectTarget(String),
     /// Switch the crew screen's left panel between payroll and applicants.
     ShowHiring(bool),
+    OpenSettings,
+    CloseSettings,
+    SetPacing(RunPacing),
+    SetSound(bool),
+    SetVolume(f32),
+    ShowHints(bool),
     HireRecruit(String),
     BuyItem(String),
     EquipItem {
@@ -126,6 +137,9 @@ pub struct UiContext<'a> {
     pub draft: Option<&'a PlanDraft>,
     pub playback: Option<&'a RunPlayback>,
     pub last_report: Option<&'a JobReport>,
+    pub prefs: &'a Preferences,
+    /// True while the settings panel is covering everything.
+    pub settings_open: bool,
     pub save_exists: bool,
     pub ui: &'a VirtualUi,
 }
@@ -136,8 +150,10 @@ impl UiContext<'_> {
     }
 }
 
+/// Where a screen's panels live. Fixed, so every screen agrees — the hint bar
+/// sits in the gap above it rather than pushing anything around.
 pub fn content_rect() -> Rect {
-    Rect::new(18.0, 142.0, LOGICAL_WIDTH - 36.0, 496.0)
+    Rect::new(18.0, 166.0, LOGICAL_WIDTH - 36.0, 472.0)
 }
 
 /// The panel a list of things lives in, on the left of every screen.
@@ -163,6 +179,7 @@ pub fn draw_game_ui(ctx: UiContext<'_>) -> Vec<UiAction> {
 
     chrome::draw_header(&ctx);
     chrome::draw_tabs(&ctx, &mut actions);
+    hints::draw(&ctx, &mut actions);
 
     match ctx.screen {
         Screen::Crew => crew::draw(&ctx, &mut actions),
@@ -175,6 +192,12 @@ pub fn draw_game_ui(ctx: UiContext<'_>) -> Vec<UiAction> {
     }
 
     chrome::draw_footer(&ctx, &mut actions);
+
+    // The settings panel covers everything, and eats the clicks meant for it.
+    if ctx.settings_open {
+        actions.clear();
+        settings::draw(&ctx, &mut actions);
+    }
 
     actions
 }
