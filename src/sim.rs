@@ -3,6 +3,7 @@
 //! Everything here draws from the session's seeded RNG in a fixed order, so a
 //! seed plus a plan replays exactly (GDD 5.7).
 
+pub mod awards;
 pub mod campaign;
 pub mod delegation;
 pub mod job;
@@ -10,6 +11,7 @@ pub mod loot;
 pub mod plan;
 pub mod week;
 
+pub use awards::{award, AwardDef, CampaignTally};
 pub use campaign::{play, CampaignLog};
 pub use delegation::DelegationMiss;
 pub use job::{auto_assign, run_job, DoorOutcome, JobPlan, JobReport};

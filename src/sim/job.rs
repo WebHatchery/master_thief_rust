@@ -397,11 +397,20 @@ fn settle(
     let loot = super::loot::roll_loot(&mut session.rng, data, target, &outcomes, success);
     session.inventory.extend(loot.iter().cloned());
 
+    let was_cased = session
+        .board_entry(&target.id)
+        .map(|entry| entry.cased)
+        .unwrap_or(false);
+
     session.budget += net;
     session.notoriety += notoriety;
     session.heat += notoriety;
     session.reputation += reputation;
     session.board.retain(|entry| entry.target_id != target.id);
+
+    record_job(
+        session, target, plan, &doors, success, net, &loot, was_cased,
+    );
 
     JobReport {
         target_id: target.id.clone(),
@@ -416,6 +425,68 @@ fn settle(
         heat_gained: notoriety,
         delegated: plan.delegated,
     }
+}
+
+/// Everything the records screen and the achievements read afterwards.
+#[allow(clippy::too_many_arguments)]
+fn record_job(
+    session: &mut GameSession,
+    target: &HeistTarget,
+    plan: &JobPlan,
+    doors: &[DoorOutcome],
+    success: bool,
+    payout: i64,
+    loot: &[String],
+    was_cased: bool,
+) {
+    let passed = doors.iter().filter(|door| door.result.passed()).count();
+    let tally = &mut session.tally;
+
+    tally.jobs_run += 1;
+    if success {
+        tally.jobs_won += 1;
+    } else {
+        tally.jobs_lost += 1;
+    }
+    if passed == doors.len() && !doors.is_empty() {
+        tally.clean_sweeps += 1;
+    }
+    tally.doors_cleared += passed as i64;
+    tally.critical_successes += doors
+        .iter()
+        .filter(|d| d.result.outcome == Outcome::CriticalSuccess)
+        .count() as i64;
+    tally.critical_failures += doors
+        .iter()
+        .filter(|d| d.result.outcome == Outcome::CriticalFailure)
+        .count() as i64;
+    tally.complications_faced += doors.iter().filter(|d| d.was_complication).count() as i64;
+    tally.injuries_taken += doors.iter().filter(|d| d.injury.is_some()).count() as i64;
+    tally.payout_total += payout.max(0);
+    tally.payout_best = tally.payout_best.max(payout);
+    tally.loot_found += loot.len() as i64;
+    if plan.delegated {
+        tally.delegated_jobs += 1;
+    } else {
+        tally.planned_jobs += 1;
+    }
+    if !was_cased {
+        tally.blind_jobs += 1;
+    }
+    tally.heat_peak = tally.heat_peak.max(session.heat as i64);
+
+    session.history.push(crate::state::JobRecord {
+        week: session.week,
+        target_name: target.name.clone(),
+        difficulty: target.difficulty,
+        success,
+        doors_passed: passed,
+        doors_total: doors.len(),
+        payout,
+        delegated: plan.delegated,
+        reputation: session.reputation,
+        notoriety: session.notoriety,
+    });
 }
 
 fn difficulty_weight(target: &HeistTarget) -> i32 {

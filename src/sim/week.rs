@@ -61,6 +61,15 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
     let crew = session.crew_ids();
     session.chemistry.retain_crew(&crew);
 
+    // A week that ran nothing is a week spent lying low, which is a real
+    // strategy and worth counting (GDD 5.6).
+    let ran_a_job = session
+        .history
+        .last()
+        .is_some_and(|record| record.week == session.week);
+    if !ran_a_job {
+        session.tally.quiet_weeks += 1;
+    }
     session.week += 1;
 
     WeekSummary {

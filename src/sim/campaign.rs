@@ -54,6 +54,7 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
             if let Some(recruit) = session.recruits.first().cloned() {
                 if session.hire(data, &recruit).is_ok() {
                     log.hires += 1;
+                    session.tally.hires += 1;
                 }
             }
         }
@@ -89,6 +90,7 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
         }
 
         super::advance_week(session, data);
+        super::award(session, &data.awards);
     }
 
     let levels: i32 = session

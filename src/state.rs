@@ -3,6 +3,8 @@
 use crate::data::{GameConfig, GameData};
 use crate::model::{CrewMember, EquipmentDef, EquipmentSlot, HeistTarget, Loadout};
 use crate::rules::chemistry::Chemistry;
+use crate::sim::CampaignTally;
+use macroquad_toolkit::achievements::Achievements;
 use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -49,6 +51,30 @@ pub struct GameSession {
     /// Crew-pool ids on offer this week.
     #[serde(default)]
     pub recruits: Vec<String>,
+    /// Everything the campaign counts about itself.
+    #[serde(default)]
+    pub tally: CampaignTally,
+    #[serde(default)]
+    pub achievements: Achievements,
+    /// One line per job, oldest first — the records screen reads this.
+    #[serde(default)]
+    pub history: Vec<JobRecord>,
+}
+
+/// A finished job, kept for the records screen and its charts.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct JobRecord {
+    pub week: u32,
+    pub target_name: String,
+    pub difficulty: crate::model::DifficultyBand,
+    pub success: bool,
+    pub doors_passed: usize,
+    pub doors_total: usize,
+    pub payout: i64,
+    pub delegated: bool,
+    /// Reputation and notoriety as they stood after the job.
+    pub reputation: i32,
+    pub notoriety: i32,
 }
 
 impl GameSession {
@@ -72,7 +98,13 @@ impl GameSession {
             board: Vec::new(),
             chemistry: Chemistry::default(),
             recruits: Vec::new(),
+            tally: CampaignTally::default(),
+            achievements: Achievements::default(),
+            history: Vec::new(),
         };
+        session
+            .achievements
+            .sync_definitions(data.awards.iter().map(|a| a.definition()).collect());
         session.issue_starting_kit(data);
         session.refresh_board(config, data);
         session.refresh_recruits(config, data);
@@ -338,6 +370,14 @@ pub struct SaveData {
 
 /// Unwrap the toolkit's save envelope and read the campaign out of it. There is
 /// no legacy format yet; when one appears this is where it gets translated.
+/// Bring a loaded campaign up to the current content: achievement text may have
+/// changed and new ones may exist, while unlock state is preserved.
+pub fn adopt_current_definitions(session: &mut GameSession, data: &GameData) {
+    session
+        .achievements
+        .sync_definitions(data.awards.iter().map(|a| a.definition()).collect());
+}
+
 pub fn migrate_save_value(
     detected_version: Option<String>,
     value: Value,

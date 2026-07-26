@@ -7,6 +7,7 @@ pub mod crew;
 pub mod floorplan;
 pub mod hiring;
 pub mod planning;
+pub mod records;
 pub mod results;
 pub mod run;
 pub mod shop;
@@ -28,6 +29,7 @@ pub enum Screen {
     Crew,
     Board,
     Shop,
+    Records,
     /// Reached from a mark, not from the tab bar — it needs a job to plan.
     Planning,
     /// The committed job, resolving door by door.
@@ -38,13 +40,20 @@ pub enum Screen {
 impl Screen {
     /// The screens the tab bar offers. Planning and the run are deliberately
     /// not among them — each needs a job to exist first.
-    pub const TABS: [Screen; 4] = [Screen::Crew, Screen::Board, Screen::Shop, Screen::Results];
+    pub const TABS: [Screen; 5] = [
+        Screen::Crew,
+        Screen::Board,
+        Screen::Shop,
+        Screen::Results,
+        Screen::Records,
+    ];
 
     pub fn label(self) -> &'static str {
         match self {
             Screen::Crew => "Crew",
             Screen::Board => "The Board",
             Screen::Shop => "Outfitter",
+            Screen::Records => "Records",
             Screen::Planning => "Planning",
             Screen::Run => "The Run",
             Screen::Results => "Last Job",
@@ -159,6 +168,7 @@ pub fn draw_game_ui(ctx: UiContext<'_>) -> Vec<UiAction> {
         Screen::Crew => crew::draw(&ctx, &mut actions),
         Screen::Board => board::draw(&ctx, &mut actions),
         Screen::Shop => shop::draw(&ctx, &mut actions),
+        Screen::Records => records::draw(&ctx, &mut actions),
         Screen::Planning => planning::draw(&ctx, &mut actions),
         Screen::Run => run::draw(&ctx, &mut actions),
         Screen::Results => results::draw(&ctx),

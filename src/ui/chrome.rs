@@ -100,7 +100,7 @@ pub fn draw_tabs(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         .unwrap_or(usize::MAX);
 
     let clicked = tab_bar_styled_at(
-        Rect::new(18.0, 90.0, 380.0, 38.0),
+        Rect::new(18.0, 90.0, 500.0, 38.0),
         &labels,
         active,
         TabOrientation::Horizontal,

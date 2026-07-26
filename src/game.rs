@@ -80,6 +80,11 @@ impl Game {
                 Screen::Board
             }
             "shop" | "outfitter" => Screen::Shop,
+            "records" => {
+                crate::sim::play(&mut self.session, &self.data, 12);
+                crate::sim::award(&mut self.session, &self.data.awards);
+                Screen::Records
+            }
             "hiring" => {
                 self.selection.hiring = true;
                 Screen::Crew
@@ -149,11 +154,12 @@ impl Game {
                 Screen::Crew => Screen::Board,
                 Screen::Board => Screen::Shop,
                 Screen::Shop => Screen::Results,
+                Screen::Records => Screen::Crew,
                 // Tab never walks out of a plan under construction, and never
                 // out of a run in progress.
                 Screen::Planning => Screen::Planning,
                 Screen::Run => Screen::Run,
-                Screen::Results => Screen::Crew,
+                Screen::Results => Screen::Records,
             };
             self.events.push(UiAction::ShowScreen(next));
         }
@@ -314,6 +320,7 @@ impl Game {
         match loaded {
             Ok(save) => {
                 self.session = GameSession::from_save(save);
+                crate::state::adopt_current_definitions(&mut self.session, &self.data);
                 self.selection = Selection::default();
                 self.playback = None;
                 self.floats.clear();

@@ -5,10 +5,9 @@ through which door — then watch the plan survive contact with the building, or
 not. Jobs resolve as runs of d20 checks against encounter difficulty classes;
 the crew is the campaign.
 
-**Status:** M0–M6 landed. Everything through delegation and its differential
-reporting is in, a headless twenty-week campaign is a test rather than a claim
-(`sim::campaign`), and every content axis in GDD §8 has reached its **full**
-target except achievements, which need the toolkit wiring M7 brings.
+**Status:** M0–M6 landed; M7 part-way. Achievements, the records screen and its
+reputation/notoriety curves are in, and every content axis in GDD §8 has now
+reached its full target. The tutorial, audio, and settings are what remain.
 Read [`gdd.md`](gdd.md) first; it is the source of truth for what to build.
 
 ### Content against GDD §8
@@ -18,12 +17,12 @@ Read [`gdd.md`](gdd.md) first; it is the source of truth for what to build.
 | Outcome narrative lines | 400 | 400 |
 | Encounter templates | 71 | 70 |
 | Equipment templates | 67 | 60 |
+| Achievements | 48 | 40 |
 | Heist targets | 45 | 45 |
 | Recruit archetypes | 40 | 40 |
 | Personality traits | 30 | 30 |
 | Critical success/failure effects | 56 | 50 |
 | Environmental factors | 16 | 15 |
-| Achievements | 0 | 40 |
 
 `GameData::inventory()` reports these and `data.rs` holds the full targets as
 floors, so content can only grow.
@@ -69,7 +68,7 @@ cargo build --release --target wasm32-unknown-unknown   # WebGL
 ## Screenshots
 
 ```powershell
-.\scripts\capture_ui.ps1 -Scenes crew,hiring,board,shop,planning,run,results
+.\scripts\capture_ui.ps1 -Scenes crew,hiring,board,shop,planning,run,results,records
 ```
 
 Drives the headless capture harness through the `MASTER_THIEF_CAPTURE_*` env

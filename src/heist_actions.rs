@@ -67,12 +67,17 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
         UiAction::CaseTarget(id) => case_target(data, session, notifications, &id),
 
         UiAction::ShowHiring(hiring) => selection.hiring = hiring,
-        UiAction::HireRecruit(id) => report(
-            notifications,
-            session
-                .hire(data, &id)
-                .map(|name| format!("{} is on the payroll", name)),
-        ),
+        UiAction::HireRecruit(id) => {
+            let hired = session.hire(data, &id);
+            if hired.is_ok() {
+                session.tally.hires += 1;
+            }
+            report(
+                notifications,
+                hired.map(|name| format!("{} is on the payroll", name)),
+            );
+            check_awards(data, session, notifications);
+        }
         UiAction::BuyItem(id) => report(
             notifications,
             session
@@ -251,10 +256,23 @@ fn commit_plan(
     // follows on the run screen is a replay, not a second roll.
     let report = sim::run_job(session, data, &plan);
     announce(notifications, &report);
+    check_awards(data, session, notifications);
 
     selection.draft = None;
     selection.target = None;
     Some(GameCommand::StartRun(Box::new(report)))
+}
+
+/// Check the achievement list after anything that could have earned something,
+/// and say so when it has.
+fn check_awards(
+    data: &GameData,
+    session: &mut GameSession,
+    notifications: &mut NotificationManager,
+) {
+    for name in sim::award(session, &data.awards) {
+        notifications.success(format!("Achievement: {}", name));
+    }
 }
 
 fn announce(notifications: &mut NotificationManager, report: &JobReport) {
@@ -301,6 +319,7 @@ fn delegate_job(
     let plan = sim::auto_assign(session, data, &target);
     let report = sim::run_job(session, data, &plan);
     announce(notifications, &report);
+    check_awards(data, session, notifications);
 
     selection.draft = None;
     selection.target = None;
@@ -313,6 +332,7 @@ fn advance_week(
     notifications: &mut NotificationManager,
 ) {
     let summary = sim::advance_week(session, data);
+    check_awards(data, session, notifications);
     notifications.info(format!(
         "Week {} — {} fatigue shed, {} healed, heat down {}, {} new marks",
         summary.week,

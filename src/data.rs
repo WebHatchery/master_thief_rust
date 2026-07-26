@@ -17,6 +17,7 @@ const ENCOUNTERS_JSON: &str = include_str!("../assets/data/encounters.json");
 const TARGETS_JSON: &str = include_str!("../assets/data/targets.json");
 const ENVIRONMENT_JSON: &str = include_str!("../assets/data/environment.json");
 const OUTCOMES_JSON: &str = include_str!("../assets/data/outcomes.json");
+const ACHIEVEMENTS_JSON: &str = include_str!("../assets/data/achievements.json");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameConfig {
@@ -71,6 +72,8 @@ pub struct GameData {
     pub targets: DataRegistry<HeistTarget>,
     pub environment: DataRegistry<EnvironmentModifier>,
     pub outcomes: OutcomeTables,
+    /// Achievement definitions, in the order they are shown.
+    pub awards: Vec<crate::sim::AwardDef>,
 }
 
 impl GameData {
@@ -82,6 +85,7 @@ impl GameData {
         let targets = registry("targets", TARGETS_JSON)?;
         let environment = registry("environment", ENVIRONMENT_JSON)?;
         let outcomes = load_embedded_json_labeled("outcomes", OUTCOMES_JSON)?;
+        let awards = load_embedded_json_labeled("achievements", ACHIEVEMENTS_JSON)?;
 
         Ok(Self {
             config,
@@ -91,6 +95,7 @@ impl GameData {
             targets,
             environment,
             outcomes,
+            awards,
         })
     }
 
@@ -165,6 +170,7 @@ pub struct ContentInventory {
     pub environment_factors: usize,
     pub critical_effects: usize,
     pub outcome_lines: usize,
+    pub achievements: usize,
 }
 
 impl GameData {
@@ -196,6 +202,7 @@ impl GameData {
             environment_factors: self.environment.len(),
             critical_effects,
             outcome_lines: self.outcomes.total_lines(),
+            achievements: self.awards.len(),
         }
     }
 }
@@ -290,6 +297,24 @@ mod tests {
         assert!(inventory.personality_traits >= 30, "{:?}", inventory);
         assert!(inventory.critical_effects >= 50, "{:?}", inventory);
         assert!(inventory.environment_factors >= 15, "{:?}", inventory);
+        assert!(inventory.achievements >= 40, "{:?}", inventory);
+    }
+
+    #[test]
+    fn every_achievement_is_uniquely_named_and_reachable() {
+        let data = GameData::load().unwrap();
+
+        let mut ids: Vec<&str> = data.awards.iter().map(|a| a.id.as_str()).collect();
+        let before = ids.len();
+        ids.sort_unstable();
+        ids.dedup();
+        assert_eq!(ids.len(), before, "duplicate achievement ids");
+
+        for award in &data.awards {
+            assert!(!award.name.is_empty(), "{} has no name", award.id);
+            assert!(!award.description.is_empty(), "{} says nothing", award.id);
+            assert!(award.at_least > 0, "{} unlocks for free", award.id);
+        }
     }
 
     #[test]
