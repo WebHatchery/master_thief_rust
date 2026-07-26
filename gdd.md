@@ -1,0 +1,425 @@
+# Master Thief — Game Design Document
+
+*Draft v0.1 — living document.*
+
+> You do not pick the lock. You pick the person who picks the lock, buy the tools they'll
+> use, read the building until you know which door is the real one, and then commit —
+> and every plan is only as good as a d20 you don't get to roll again.
+
+Sources: `game_apps/master_thief/` (React 19 + Zustand original),
+`rust_management/migration_candidates.md`, `rust_management/standing.md`,
+`rust_management/docs/GAME_DEVELOPMENT_GUIDE.md`, `rust_management/docs/CODE_STANDARDS.md`,
+`rust_management/docs/MACROQUAD_TOOLKIT.md`.
+
+---
+
+## 0. Migration Snapshot
+
+- **Old game:** `game_apps/master_thief/` — a React 19 + Zustand SPA (~10.5k LOC TS/TSX,
+  no backend). Notable for a real, tested rules engine: `utils/heistExecution.ts` (526
+  lines) and `utils/characterCalculations.ts` (318 lines) carry **1,433 lines of tests**
+  between them — the most thoroughly tested source app in `game_apps/`.
+
+- **Why it was picked:** `migration_candidates.md` — *"Heist crew-dispatch sim —
+  automated-mission structure like `carriage_run`'s expedition meta-game, so art stays to
+  icons/UI. Distinct from anything shipped."* The crew-of-specialists-versus-a-fixed-
+  obstacle-sequence loop has no analogue in `standing.md`.
+
+- **Art-liability audit.** A full scan of the project for
+  `.png/.jpg/.jpeg/.svg/.gif/.webp` returns **zero image files**. No `public/` art
+  directory, no icon library, no canvas. Presentation is Tailwind plus five emoji-bearing
+  files.
+
+  | Old asset (web) | Art cost | Rust replacement |
+  | --- | --- | --- |
+  | Crew "portraits" (`EnhancedCharacterCard.tsx`, `TeamMemberCard.tsx`) | None — never existed | Class badge + attribute block + condition meters. A crew member is a personnel dossier |
+  | Target/building art | None — a card with a name and payout | A **floorplan drawn from data**: encounters as connected nodes. Procedural line art via `ui` primitives, no assets. See §5.4 |
+  | Equipment icons | None — text + rarity colour | Rarity-coloured badges via `colors`, slot glyphs as text |
+  | Dice UI (`DiceModal.tsx`) | None — a CSS animation | The most valuable presentation in the game. Drawn with `ui` primitives + `fx`; see §9 |
+  | UI chrome | None (Tailwind) | `SurfaceStyle`/`TextStyle`/`GridLayout` |
+
+  **Nothing here requires an artist.** The one genuine visual design problem — making a
+  floorplan legible without tile art — is a procedural drawing problem, and the toolkit's
+  `paint` module exists precisely so that kind of art can be golden-image tested.
+
+- **Mechanic carry-over table.**
+
+  | Old mechanic | Disposition | Notes |
+  | --- | --- | --- |
+  | d20 encounter resolution vs. a DC, with attribute modifiers, skill, equipment, condition, environment | **Keep verbatim** | The best asset in the codebase. `resolveEncounter` is a real, tested rules engine — port it as-is, tests and all. See §5.2 |
+  | Six attributes (STR/DEX/INT/WIS/CHA/CON) → six derived skills | Keep as-is | Skill = attribute pair + training. Clean, tested |
+  | Derived stats (health, stamina, initiative, carry, crit chance/multiplier) | Keep, prune | Several are computed and never read. Keep only what a rule consumes |
+  | Seven character classes, five rarity tiers | Keep | |
+  | Equipment: 5 slots, 5 rarity tiers, attribute + skill bonuses, special effects, level/class requirements | Keep as-is | |
+  | **Manual heists** (`HeistTarget` → `Encounter[]`, resolved one at a time) | **Keep — this is the game** | The tense, legible version of the loop |
+  | **Automated heists** (`AutomatedHeist`, team power vs. required power, a timer) | **Redesign, subordinate** | Two parallel resolution systems for the same fiction is the design's central flaw: one is a rich d20 sim, the other a single power comparison against a wall-clock timer. Unified in §5.3 — automation becomes *delegation of the same engine*, never a second engine |
+  | Real-time `timeRemaining` on active heists | Cut | Wall-clock timers fight determinism (`CODE_STANDARDS.md` §5) and are a mobile-idle-game idiom this game doesn't want. Jobs resolve when the player advances the week |
+  | Character progression: level, XP, attribute/skill points, mastery 0–10 | Keep as-is | |
+  | Loyalty, fatigue, injuries, personality traits, backstory events | Keep, **wire** | Loyalty and personality are tracked and barely consumed. Fatigue and injuries are real and good |
+  | Relationship system (`characterRelationships`) | **Cut or build properly** | Three `// TODO: Implement full relationship system in Phase 3` sites; the field exists and nothing writes it. Either a real crew-chemistry system (§5.5) or delete the field — no scaffolding |
+  | Equipment drops from heists | **Build** | `// TODO: Add equipment finding logic` — `possibleLoot` is declared on every heist and never rolled |
+  | Reputation vs. notoriety | Keep, sharpen | Two-axis progression: reputation opens targets, notoriety brings heat. The best under-used idea in the original — see §5.6 |
+  | Daily challenges (`expiresAt: Date`) | Cut | Real-world-calendar engagement mechanics don't belong in an offline single-player game |
+  | Achievements (5 categories) | Keep | Via toolkit `achievements` |
+  | Tutorial (`tutorialSteps.ts`, tested) | Keep | |
+  | Outcome description tables (crit fail / fail / neutral / success / crit success) | Keep, expand | The narrative layer over the dice. See §8 |
+
+- **Explicitly out of scope:** multiplayer; real-money or energy mechanics; wall-clock
+  timers; character portrait art; a real-time stealth action layer (this is a planner,
+  and the plan is the game).
+
+---
+
+## 1. High Concept
+
+- **Pitch:** Assemble a crew of specialists, case a target until you understand which of
+  its obstacles will actually stop you, assign the right person to each door — then
+  commit, and watch twenty seconds of dice decide whether you were right. The crew
+  survives the job; the campaign is what the job does to them.
+- **Genre:** Heist crew management / tactical roguelite with a d20 core. Distinct from
+  `carriage_run` (escort roguelite — you travel a route) and `frontier` (mission-select
+  strategy — abstract resolution). Here resolution is *the content*.
+- **Perspective & presentation:** UI-only with one **procedurally drawn floorplan view**
+  during a job — encounter nodes connected in sequence, the assigned specialist shown at
+  each, lighting up as the run resolves. No camera, no sprites, no tilemap.
+- **Tone:** Professional and clipped. Heist-movie competence, not crime-drama grit. The
+  crew are tradespeople. Failure is embarrassing before it is tragic.
+- **Comparables:** *Monaco* (crew of complementary specialists), *XCOM* (a roster you
+  invest in and can permanently lose, percentages you learn to distrust), *Blades in the
+  Dark* (the plan is abstract; the roll is concrete).
+- **Audience:** Tactics and management players who enjoy visible probability — the
+  `carriage_run` audience.
+- **Scope:** Full game. See §13.
+- **Platforms:** WebGL + native Windows.
+
+---
+
+## 2. Design Pillars
+
+1. **The plan is the play.** All player skill is expressed before the dice roll:
+   recruiting, equipping, casing, and assigning. Once committed, the player watches. The
+   game must therefore make the *pre-commit* screen the richest one in it.
+2. **Every roll is legible.** The player sees the DC, the assigned member's total, and
+   every modifier by name — before committing and again in the results. No hidden
+   difficulty, ever.
+3. **The crew is the campaign.** Levels, mastery, injuries, fatigue, and chemistry
+   persist. A perfect job that hospitalises your only hacker is a bad job.
+4. **Reputation and notoriety pull in opposite directions.** Every success buys access
+   and costs anonymity. There is no strategy that maximises both.
+5. **Delegation is a discount, not a shortcut.** Auto-resolving a job runs the same
+   engine with worse assignments — never a different, kinder rule.
+
+---
+
+## 3. Core Loop
+
+**The week** is the unit of play.
+
+1. **Case** — review available targets. Casing spends the week's attention to reveal
+   encounter DCs, required skills, and environmental factors. Uncased targets can be run
+   blind, at a real disadvantage.
+2. **Crew** — recruit, rest, treat injuries, spend level-up points, manage chemistry.
+3. **Outfit** — buy, assign, and repair equipment.
+4. **Plan** — pick a target and assign a specialist to each encounter node. **This is the
+   game's central screen**; it shows every modifier for every candidate at every node.
+5. **Commit** — the run resolves encounter by encounter, visibly.
+6. **Fallout** — payout, XP, loot, injuries, fatigue, notoriety, heat. Read the results.
+7. **Advance the week** — heat decays or escalates, new targets appear, rivals and law
+   enforcement react.
+
+Job length: ~1 minute to resolve; a week is 3–5 minutes. A campaign runs 4–8 hours.
+
+---
+
+## 4. Player Role & Verbs
+
+The player is the fixer. Verbs: **recruit**, **case**, **equip**, **assign**, **commit**,
+**rest**, **treat**, **train** (spend progression points), **delegate** (auto-assign a
+job), **advance the week**.
+
+Non-verbs: the player never controls a character in the building, never re-rolls, never
+aborts mid-run. Committing is committing.
+
+---
+
+## 5. Systems & Mechanics
+
+### 5.1 Attributes, Skills, Derived Stats
+
+Six attributes on the 3–20 scale with the standard `(score - 10) / 2` modifier. Six
+skills, each derived from an attribute pair plus training:
+
+| Skill | Attributes |
+| --- | --- |
+| Stealth | DEX + WIS |
+| Athletics | STR + CON |
+| Combat | STR + DEX |
+| Lockpicking | DEX + INT |
+| Hacking | INT + WIS |
+| Social | CHA + WIS |
+
+Ports directly from `characterCalculations.ts`, including its tests.
+
+### 5.2 Encounter Resolution — the d20 core
+
+Ported verbatim from `resolveEncounter`. For an encounter with difficulty class `DC`:
+
+```
+total = d20
+      + primary skill
+      + attribute modifier(s)     (explicit primary_attribute, or the §5.1 pair)
+      + equipment bonuses         (skill bonuses + per-encounter slot bonuses)
+      + condition modifiers       (fatigue > 50 penalty, injuries, loyalty)
+      + crew chemistry            (§5.5)
+      + environmental modifiers   (day/night, alarms, weather)
+```
+
+Outcome bands: natural 1 → critical failure; `total < DC` → failure; `total >= DC` →
+success; natural 20 → critical success. Criticals fire the encounter's
+`critical_failure_effect` / `critical_success_reward`, which can restructure the rest of
+the run — a critical success on a lock can skip the next encounter entirely; a critical
+failure can add one.
+
+**Environmental modifiers must be deterministic.** The original picks day or night with
+`Math.random() > 0.5` *inside* the resolution loop (`heistExecution.ts:459`). In the port,
+time-of-day is a property of the job chosen at planning time, visible before commit.
+
+### 5.3 Delegation (replacing "automated heists")
+
+The original's second resolution path — team power vs. required power against a wall-clock
+timer — is deleted. Delegation instead means: **the game auto-assigns specialists to
+nodes using the same greedy best-fit the original used for automation, then runs the
+identical §5.2 engine.** The player trades a better assignment for the time they didn't
+spend. The results screen states plainly where the auto-assignment differed from the
+player's best available option, which teaches the planning screen.
+
+### 5.4 Targets and Floorplans
+
+A target is a name, a difficulty band, a payout, and an ordered list of encounters.
+Rendered as a **procedural floorplan**: nodes laid out along a path, connected by
+corridors, each labelled with its primary skill, DC (if cased), and assigned specialist.
+Drawn entirely with `ui`/`paint` primitives — no tiles, no assets. During a run, nodes
+resolve in order and light up green/amber/red with the roll shown.
+
+This is the game's one piece of real visual design, and being data-driven it stays
+correct as targets are authored.
+
+### 5.5 Crew Chemistry (replacing the stubbed relationship system)
+
+Either build this properly or delete the field. Proposed: each pair of crew members holds
+a chemistry value that moves on shared outcomes — succeeding together raises it, watching
+a partner critically fail lowers it, and personality traits set the rate. Chemistry
+contributes a small modifier when both members are on the same job, and an extreme
+negative pair refuses to work together. This makes the roster a *composition* problem
+rather than a sum of individual power ratings, and it gives personality traits — currently
+decorative — a mechanical job.
+
+### 5.6 Reputation, Notoriety, and Heat
+
+- **Reputation** rises with clean, high-value jobs; gates access to better targets, better
+  recruits, and better equipment.
+- **Notoriety** rises with every job and spikes on failures, alarms, and violence.
+- **Heat** is notoriety's short-term component: it decays weekly, and above a threshold
+  it raises DCs across the board, adds law-enforcement encounters, and can retire a crew
+  member into custody.
+
+Lying low — advancing a week with no job — is a legitimate, sometimes optimal move.
+
+### 5.7 Randomness & Determinism
+
+A single seeded `macroquad_toolkit::rng` owned by the run; the seed is saved and displayed
+so runs are reproducible and shareable. All d20 rolls, loot rolls, recruit generation, and
+target generation draw from it in a fixed order. No `Math.random()` equivalent anywhere in
+the sim — this is the specific bug the original has at `heistExecution.ts:459`.
+
+---
+
+## 6. Data Model (`assets/*.json`)
+
+| File | Defines | Loaded via |
+| --- | --- | --- |
+| `assets/data/game_config.json` | Starting budget, XP curve, fatigue/injury thresholds, heat decay, DC bands | `load_embedded_json_labeled` |
+| `assets/characters.json` | Recruit archetypes: classes (7), rarities (5), attribute ranges, special abilities, personality traits, backgrounds | `DataRegistry` |
+| `assets/equipment.json` | Templates (19+), slots (5), rarities (5), bonuses, special effects, requirements | `DataRegistry` |
+| `assets/targets.json` | Heist targets: difficulty, payout, encounter sequence, environmental factors | `DataRegistry` |
+| `assets/encounters.json` | Reusable encounter templates: primary/secondary skill, DC, complexity, consequences, crit effects, equipment interactions | `DataRegistry` |
+| `assets/outcomes.json` | Narrative tables for all five outcome bands, keyed by skill and complexity | `DataRegistry` |
+| `assets/achievements.json` | Achievement definitions | `achievements` |
+| `assets/strings.json` | UI copy, tutorial steps, crew barks | `DataRegistry` |
+
+Embed-only via `include_str!`, matching `template/`.
+
+---
+
+## 7. World & Progression Structure
+
+- **World layout:** No spatial world. A city as a list of targets that unlock by
+  reputation, plus a procedurally drawn floorplan per job (§5.4).
+- **Session length:** a week is 3–5 minutes; a campaign 4–8 hours.
+- **Progression:** two curves — crew (levels 1–20, mastery 0–10, equipment tiers) and
+  operation (reputation tiers unlocking target classes, offset by notoriety/heat).
+- **Save model:** `save_to_slot_with_version` / `load_from_slot_with_migration`. Saved:
+  run seed, week number, crew roster with full condition state, equipment inventory,
+  target availability and casing state, reputation/notoriety/heat, chemistry matrix,
+  achievements, job history.
+
+---
+
+## 8. Content Inventory
+
+| Content type | In old game | Prototype target | Full target |
+| --- | ---: | ---: | ---: |
+| Character classes | 7 | 7 | 7 |
+| Recruit archetypes | ~10 | 15 | 40 |
+| Personality traits | ~8 | 12 | 30 |
+| Equipment templates | 19 | 25 | 60 |
+| Encounter templates | ~12 | 25 | 70 |
+| Heist targets | 19 | 20 | 45 |
+| Environmental factors | ~4 | 8 | 15 |
+| Critical success/failure effects | ~6 | 20 | 50 |
+| **Outcome narrative lines** | ~25 | 150 | 400 |
+| Achievements | ~10 | 15 | 40 |
+
+Outcome lines are the deliberate outlier. Five bands × six skills × complexity tiers is
+the game's entire texture, and it is the cheapest content in it to author.
+
+---
+
+## 9. UI/UX & Screen Flow
+
+UI is a pure view layer returning `UiAction`; a `heist_actions.rs` dispatcher applies them.
+
+| Screen | Purpose | Toolkit pieces |
+| --- | --- | --- |
+| Crew | Roster: attributes, skills, condition, chemistry matrix | `GridLayout`, meters, badges, tooltips |
+| Targets | Available jobs, payout, difficulty, casing state | Scroll list, badges |
+| **Planning** | Floorplan + per-node assignment with full modifier breakdown for every candidate | `paint`/`ui` primitives, `GridLayout`, `TextStyle` |
+| Run | Encounters resolving in order, dice and modifiers shown | `fx`, `timing`, `NotificationManager` |
+| Results | Payout, XP, loot, injuries, notoriety delta, narrative lines | Modal surface |
+| Shop | Equipment purchase, repair, assignment | Scroll list, badges |
+| Records | Job history, crew memorial, seed, statistics | `series` for the reputation/notoriety curves |
+| Pause / Settings | | `settings` |
+
+**The dice presentation is load-bearing.** The `DiceModal` is the moment the game's
+tension resolves; it needs real timing and weight — a roll that lands, a beat, then the
+modifiers totalling up against the DC. Built from `ui` primitives, `fx`, and `timing`, and
+skippable (hold to fast-forward) for players on their fortieth job.
+
+Flow: crew/shop/targets freely → planning → commit → run → results → advance week.
+
+---
+
+## 10. Toolkit Mapping
+
+| Need | Toolkit module | Using it? | Notes |
+| --- | --- | --- | --- |
+| Input handling | `input` | Yes | |
+| Widgets/layout/text | `ui` | **Yes — the bulk** | `VirtualUi`, `GridLayout`, `SurfaceStyle`, `TextStyle`, meters, badges, tabs, scroll |
+| Textures/manifest | `assets` | No | No textures |
+| Camera/pan/zoom | `camera` | No | Floorplans fit one screen by design |
+| Cross-system messaging | `events` | Yes | `EventBus<UiAction>` |
+| Palette | `colors` | Yes | Rarity and outcome-band colours |
+| Vector/grid math | `math` | Yes | Floorplan node layout |
+| Frame timing | `timing` | **Yes — critical** | Dice and run pacing |
+| Particles/juice | `fx` | **Yes** | Crit success/failure punctuation |
+| User settings | `settings` | Yes | Incl. dice-animation speed |
+| Unlocks/achievements | `achievements` | Yes | |
+| Dev overlay | `debug` | Yes | |
+| Deterministic randomness | `rng` | **Yes — critical** | §5.7 |
+| Sprite animation | `sprite` | No | |
+| Procedural images | `raster` / `paint` | **Yes** | Floorplan drawing; `paint` makes it golden-image testable |
+| Headless capture | `capture` | Yes (required) | `MASTER_THIEF_CAPTURE_*`, already wired |
+| Save/load | `persistence` | Yes | |
+| Tile grid / fog / pathing | `FlatGrid`, `FogState` | No | **Strip the template's grid/fog scaffolding** |
+| Charts | `series` | Yes | Reputation/notoriety over the campaign on the records screen |
+
+No toolkit gap identified. If floorplan layout wants a general node-graph layout helper,
+raise it as a toolkit upgrade — `mytherra` and `dungeon_core` would both use one.
+
+---
+
+## 11. Architecture Skeleton
+
+```
+src/
+├── main.rs
+├── game.rs                  # Game struct, state machine, transition()
+├── game/
+│   ├── states.rs            # Menu, Week, Planning, Run, Results, Records
+│   └── capture_scenes.rs
+├── data.rs                  # embedded JSON + registries
+├── data/                    # characters, equipment, targets, encounters, outcomes, strings
+├── model.rs                 # Crew, Equipment, Target, Encounter, Job
+├── model/
+├── rules.rs                 # the ported d20 engine — pure, no engine/UI knowledge
+├── rules/
+│   ├── attributes.rs        # modifiers, derived stats, skills, level-up
+│   ├── encounter.rs         # resolve_encounter + the modifier list
+│   ├── chemistry.rs
+│   └── loot.rs
+├── sim.rs                   # week resolution, heat decay, target refresh, recruit pool
+├── sim/
+├── state.rs                 # GameSession, SaveData, migration
+├── state/
+├── ui.rs
+├── ui/                      # crew, targets, planning, floorplan, run, results, shop, records
+└── heist_actions.rs         # UiAction dispatcher
+```
+
+`rules/` must have **no dependency on macroquad**. It is a pure library so the ported
+tests run headlessly and a soak test can play thousands of jobs to validate the DC curve.
+
+---
+
+## 12. Non-Goals / Open Questions
+
+**Non-goals:** multiplayer; real-money or energy mechanics; wall-clock timers or daily
+challenges; a real-time action layer; character portraits; permadeath-free "safe" mode
+(injury and loss are the point).
+
+**Open questions:**
+
+1. Is crew death on the table, or is capture/retirement the terminal state? Capture keeps
+   the memorial screen meaningful without the roguelike sting — and a captured member who
+   can be *broken out* is a target generator.
+2. Should casing cost the week's action, or a resource? Costing the week makes casing a
+   real trade-off but may make blind runs strictly bad early.
+3. How much should critical results restructure a run? Skipping an encounter is a strong,
+   readable payoff; adding one may feel unfair unless well telegraphed.
+4. Does chemistry (§5.5) earn its complexity, or is it feature creep on a system the
+   original never built? Prototype it in M4 and cut it if the planning screen gets
+   illegible.
+5. Should notoriety ever be reducible (bribes, a fall guy, lying low for a month), or is
+   it strictly monotonic and the campaign therefore finite by design? The finite version
+   is a stronger game.
+
+---
+
+## 13. Milestones
+
+| Milestone | Contents | Done when |
+| --- | --- | --- |
+| **M0 — Skeleton** | Data model, JSON loaders, `GameSession`, save round-trip, state machine, capture scenes | Load + save/load round-trip tested |
+| **M1 — The rules engine** | `rules/` ported from `heistExecution.ts` + `characterCalculations.ts`, **with the original's 1,433 lines of tests translated** | A headless soak test runs 10,000 encounters and the outcome distribution matches expectation |
+| **M2 — One job** | Targets, encounters, planning screen with modifier breakdown, run resolution, results | A job can be planned, committed, and resolved end to end |
+| **M3 — The floorplan** | Procedural floorplan drawing, node layout, run visualisation, dice presentation | Golden-image tests cover the floorplan renderer |
+| **M4 — The campaign** | Weeks, crew progression, injuries/fatigue/rest, equipment shop and loot drops, reputation/notoriety/heat, chemistry | A 20-week campaign is playable and the crew visibly changes |
+| **M5 — Delegation** | Auto-assignment via the same engine, differential reporting | Delegated results are never better than a good manual plan |
+| **M6 — Content** | Content to the §8 full targets, especially outcome lines | A full campaign rarely repeats a narrative line |
+| **M7 — Polish** | Tutorial, achievements, records + `series` charts, accessibility, audio via `synth`, balance | `publish.ps1` clean; CI green; capture set covers every screen |
+
+---
+
+## 14. Verification
+
+- **Port the tests first.** The original's `characterCalculations.test.ts` (802 lines) and
+  `heistExecution.test.ts` (631 lines) are the specification. Translating them in M1
+  before writing new rules code is the single highest-value step in this port.
+- **Determinism test** — same seed + same plan → identical job history.
+- **Distribution soak** — a headless run of thousands of jobs asserting success rates by
+  difficulty band stay inside designed windows; guards against DC drift as content lands.
+- **No-dead-content test** — every encounter template reachable from some target, every
+  equipment item purchasable or droppable, every outcome band having lines for every
+  skill.
+- **Golden-image test** on the floorplan renderer via `paint`.
+- **Screenshot capture** per screen via `scripts/capture_ui.ps1`.

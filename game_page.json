@@ -1,0 +1,25 @@
+{
+  "title": "Master Thief",
+  "wasm": "master_thief",
+  "roost_slug": "rust_master_thief",
+  "status": { "text": "In Development", "class": "wip" },
+  "canvas_rendering": "pixelated",
+  "about": [
+    "A heist planner. You never pick a lock yourself — you recruit the crew, buy the gear, read the target, and decide who goes through which door. Then you watch the plan survive contact with the building, or not.",
+    "Every job is a run of encounters resolved against a d20: a difficulty class, the specialist you assigned, their attributes and equipment, and the crew's chemistry. A natural 20 opens a route nobody planned for. A natural 1 puts a name on a police file.",
+    "Between jobs the crew is the campaign. Thieves gain levels, mastery, injuries, fatigue, and grudges; equipment breaks; reputation opens better targets while notoriety brings heat down on the ones you already own."
+  ],
+  "controls": [
+    { "key": "Mouse", "desc": "Select crew, gear, and targets" },
+    { "key": "1-4", "desc": "Jump to crew / targets / shop / records" },
+    { "key": "Space", "desc": "Commit the plan and run the job" },
+    { "key": "Esc", "desc": "Pause menu" },
+    { "key": "S / L", "desc": "Save / load" }
+  ],
+  "details": [
+    { "label": "Genre", "value": "Heist crew management / tactical roguelite" },
+    { "label": "Engine", "value": "Macroquad + Toolkit" },
+    { "label": "Platform", "value": "Browser, Windows" },
+    { "label": "Ported from", "value": "game_apps/master_thief (React)" }
+  ]
+}
