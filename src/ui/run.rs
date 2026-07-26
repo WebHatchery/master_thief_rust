@@ -46,9 +46,9 @@ fn dice_rect() -> Rect {
 
 /// Where the plan puts a given room, in logical UI space. `Game` uses this to
 /// hang the critical-hit punctuation over the right door.
-pub fn room_center(index: usize, count: usize) -> Option<Vec2> {
+pub fn room_center(target_id: &str, index: usize, count: usize) -> Option<Vec2> {
     let content = draw_area(building_rect());
-    let plan = floorplan::layout(content, count);
+    let plan = floorplan::layout(content, count, floorplan::seed_for(target_id));
     plan.room(index)
         .map(|room| vec2(room.x + room.w * 0.5, room.y + room.h * 0.5))
 }
@@ -66,7 +66,11 @@ fn draw_building(playback: &RunPlayback) {
     let report = playback.report();
     let content = draw_panel(building_rect(), &report.target_name);
     let area = draw_area(building_rect());
-    let plan = floorplan::layout(area, report.doors.len());
+    let plan = floorplan::layout(
+        area,
+        report.doors.len(),
+        floorplan::seed_for(&report.target_id),
+    );
 
     let outcomes = playback.outcomes_so_far();
     let states: Vec<RoomState> = outcomes

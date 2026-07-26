@@ -308,6 +308,7 @@ impl Game {
 
         let index = playback.door_index();
         let doors = playback.report().doors.len();
+        let target_id = playback.report().target_id.clone();
         let Some(door) = playback.current_door() else {
             return;
         };
@@ -330,7 +331,7 @@ impl Game {
         } else {
             Sfx::Disaster
         });
-        if let Some(center) = ui::run::room_center(index, doors) {
+        if let Some(center) = ui::run::room_center(&target_id, index, doors) {
             self.floats.spawn(text, center, color);
         }
     }

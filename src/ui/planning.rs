@@ -1,20 +1,23 @@
 //! The planning screen — the richest screen in the game, by design.
 //!
-//! Left: the job as a run of connected doors. Right: every hand on the payroll
-//! ranked for the focused door, with the full arithmetic behind each of them.
-//! All the player's skill is spent here; after commit they only watch (GDD 2).
+//! Left: the mark's own floorplan, the same building the run will draw, with
+//! each room labelled and clickable. Right: every hand on the payroll ranked
+//! for the focused door, with the full arithmetic behind each of them. All the
+//! player's skill is spent here; after commit they only watch (GDD 2, 5.4).
 
 use super::chrome::{draw_panel, empty_notice, panel_style, title_style};
+use super::floorplan::{self, FloorplanPalette, RoomState};
 use super::{content_rect, UiAction, UiContext};
 use crate::model::{Encounter, HeistTarget};
 use crate::sim::plan::{candidates, Candidate, PlanDraft};
 use macroquad::prelude::*;
+use macroquad_toolkit::paint::ScreenPainter;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, RectExt};
 
-const DOORS_WIDTH: f32 = 470.0;
-const NODE_HEIGHT: f32 = 74.0;
-const NODE_GAP: f32 = 22.0;
+/// The building gets the room; the candidate list is dense enough to live in a
+/// narrower column.
+const DOORS_WIDTH: f32 = 700.0;
 
 pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     let Some(draft) = ctx.draft else {
@@ -53,54 +56,45 @@ fn is_cased(ctx: &UiContext<'_>, target_id: &str) -> bool {
         .unwrap_or(false)
 }
 
-/// The route: doors in order, joined by a corridor. A first sketch of the
-/// procedural floorplan M3 will draw properly.
+/// The mark's building, drawn from its own id so it is recognisably the same
+/// place on this screen and on the run. Each room is a door; clicking one opens
+/// its candidate list.
 fn draw_route(
     ctx: &UiContext<'_>,
     draft: &PlanDraft,
     target: &HeistTarget,
     actions: &mut Vec<UiAction>,
 ) {
-    let content = draw_panel(doors_rect(), &format!("{} — the route", target.name));
+    let content = draw_panel(doors_rect(), &format!("{} — the floor", target.name));
     let cased = is_cased(ctx, &target.id);
     let mouse = ctx.mouse();
 
-    for (index, door_id) in draft.doors.iter().enumerate() {
-        let Some(encounter) = ctx.data.encounters.get(door_id) else {
+    let area = Rect::new(content.x, content.y, content.w, content.h - 50.0);
+    let plan = floorplan::layout(area, draft.doors.len(), floorplan::seed_for(&target.id));
+
+    let states: Vec<RoomState> = (0..draft.doors.len())
+        .map(|index| RoomState {
+            assigned: draft.assigned(index).is_some(),
+            active: draft.focus == index,
+            outcome: None,
+        })
+        .collect();
+    floorplan::paint(
+        &mut ScreenPainter,
+        &plan,
+        &states,
+        &FloorplanPalette::default(),
+    );
+
+    for (index, room) in plan.rooms.iter().enumerate() {
+        let Some(encounter) = ctx.data.encounters.get(&draft.doors[index]) else {
             continue;
         };
-        let y = content.y + index as f32 * (NODE_HEIGHT + NODE_GAP);
-        let rect = Rect::new(content.x + 26.0, y, content.w - 26.0, NODE_HEIGHT);
-        if rect.bottom() > content.bottom() {
-            break;
-        }
+        draw_room_label(ctx, *room, draft, index, encounter, cased);
+    }
 
-        if index > 0 {
-            draw_line(
-                content.x + 13.0,
-                y - NODE_GAP,
-                content.x + 13.0,
-                y + NODE_HEIGHT * 0.5,
-                2.0,
-                Color::new(0.34, 0.42, 0.55, 0.8),
-            );
-        }
-        draw_line(
-            content.x + 13.0,
-            y + NODE_HEIGHT * 0.5,
-            rect.x,
-            y + NODE_HEIGHT * 0.5,
-            2.0,
-            Color::new(0.34, 0.42, 0.55, 0.8),
-        );
-        draw_circle(
-            content.x + 13.0,
-            y + NODE_HEIGHT * 0.5,
-            5.0,
-            node_color(ctx, draft, index),
-        );
-
-        if draw_node(ctx, rect, draft, index, encounter, cased, mouse) {
+    if is_mouse_button_released(MouseButton::Left) {
+        if let Some(index) = plan.room_at(mouse) {
             actions.push(UiAction::FocusDoor(index));
         }
     }
@@ -108,61 +102,27 @@ fn draw_route(
     draw_route_footer(ctx, content, draft, actions);
 }
 
-fn node_color(ctx: &UiContext<'_>, draft: &PlanDraft, index: usize) -> Color {
-    let _ = ctx;
-    if draft.assigned(index).is_some() {
-        Color::new(0.46, 0.76, 0.52, 1.0)
-    } else {
-        Color::new(0.60, 0.62, 0.68, 1.0)
-    }
-}
-
-fn draw_node(
+/// What a room says. The order is deliberate: which door it is, what it wants,
+/// how hard it is, and who is standing in it.
+fn draw_room_label(
     ctx: &UiContext<'_>,
-    rect: Rect,
+    room: Rect,
     draft: &PlanDraft,
     index: usize,
     encounter: &Encounter,
     cased: bool,
-    mouse: Vec2,
-) -> bool {
-    let focused = draft.focus == index;
-    let hovered = rect.contains_point(mouse);
-    let fill = if focused {
-        Color::new(0.15, 0.19, 0.26, 1.0)
-    } else if hovered {
-        Color::new(0.12, 0.14, 0.18, 1.0)
-    } else {
-        Color::new(0.09, 0.10, 0.13, 1.0)
-    };
-    draw_surface(
-        rect,
-        &SurfaceStyle::new(fill)
-            .with_left_accent(4.0, node_color(ctx, draft, index))
-            .with_border(
-                1.0,
-                if focused {
-                    dark::ACCENT
-                } else {
-                    Color::new(0.45, 0.50, 0.60, 0.28)
-                },
-            ),
-    );
-
+) {
+    let text = room.x + 12.0;
     draw_ui_text_ex(
         &format!("{}. {}", index + 1, encounter.name),
-        rect.x + 12.0,
-        rect.y + 22.0,
-        TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
+        text,
+        room.y + 24.0,
+        TextStyle::new(15.0, dark::TEXT_BRIGHT).params(),
     );
     draw_ui_text_ex(
-        &format!(
-            "{} · {}",
-            encounter.primary_skill.label(),
-            encounter.complexity.label()
-        ),
-        rect.x + 12.0,
-        rect.y + 42.0,
+        encounter.primary_skill.label(),
+        text,
+        room.y + 43.0,
         TextStyle::new(13.0, dark::TEXT_DIM).params(),
     );
     draw_text_right(
@@ -171,10 +131,10 @@ fn draw_node(
         } else {
             "DC ??".to_owned()
         },
-        rect.right() - 12.0,
-        rect.y + 22.0,
+        room.right() - 12.0,
+        room.y + 24.0,
         TextStyle::new(
-            15.0,
+            14.0,
             if cased {
                 dark::TEXT_BRIGHT
             } else {
@@ -192,17 +152,17 @@ fn draw_node(
                 .unwrap_or_else(|| member_id.to_owned());
             draw_ui_text_ex(
                 &name,
-                rect.x + 12.0,
-                rect.y + 63.0,
+                text,
+                room.bottom() - 30.0,
                 TextStyle::new(14.0, Color::new(0.56, 0.80, 0.60, 1.0)).params(),
             );
             if cased {
                 if let Some(chance) = assigned_chance(ctx, draft, encounter, member_id) {
-                    draw_text_right(
+                    draw_ui_text_ex(
                         &format!("{:.0}%", chance * 100.0),
-                        rect.right() - 12.0,
-                        rect.y + 63.0,
-                        TextStyle::new(14.0, chance_color(chance)),
+                        text,
+                        room.bottom() - 12.0,
+                        TextStyle::new(13.0, chance_color(chance)).params(),
                     );
                 }
             }
@@ -210,14 +170,12 @@ fn draw_node(
         None => {
             draw_ui_text_ex(
                 "— nobody assigned —",
-                rect.x + 12.0,
-                rect.y + 63.0,
-                TextStyle::new(14.0, Color::new(0.86, 0.62, 0.40, 1.0)).params(),
+                text,
+                room.bottom() - 14.0,
+                TextStyle::new(13.0, Color::new(0.86, 0.62, 0.40, 1.0)).params(),
             );
         }
     }
-
-    hovered && is_mouse_button_released(MouseButton::Left)
 }
 
 fn assigned_chance(
