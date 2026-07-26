@@ -1,14 +1,9 @@
-//! Macroquad game template wired to macroquad-toolkit.
+//! Master Thief — window, frame loop, and the headless capture entry point.
 
 use macroquad::prelude::*;
 use macroquad_toolkit::capture;
-
-mod data;
-mod game;
-mod state;
-mod ui;
-
-use game::Game;
+use master_thief::game::Game;
+use master_thief::ui;
 
 fn window_conf() -> Conf {
     capture::capture_window_conf(
@@ -23,11 +18,10 @@ fn window_conf() -> Conf {
 async fn main() {
     let mut game = Game::new().await;
 
-    // Screenshot harness: when MASTER_THIEF_CAPTURE_PATH is set, render
-    // deterministic frames, write a PNG, and exit. This is a minimal starter
-    // template with a single boot state, so the capture just photographs
-    // whatever the boot flow lands on.
+    // Screenshot harness: with MASTER_THIEF_CAPTURE_PATH set, boot into the
+    // named scene, render a fixed number of frames, write a PNG, and exit.
     if let Some(config) = capture::CaptureConfig::from_env("MASTER_THIEF") {
+        game.set_capture_scene(&config.scene);
         capture::run_capture(&config, |dt| {
             game.update(dt);
             game.draw();

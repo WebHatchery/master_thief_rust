@@ -1,0 +1,260 @@
+[
+  {
+    "id": "basic_picks",
+    "name": "Shop-Bought Picks",
+    "slot": "tool",
+    "rarity": "basic",
+    "description": "Adequate steel. Bends before a good lock does.",
+    "skill_bonuses": { "lockpicking": 2 },
+    "cost": 600
+  },
+  {
+    "id": "tension_set",
+    "name": "Graded Tension Set",
+    "slot": "tool",
+    "rarity": "improved",
+    "description": "Nine wrenches, correctly weighted, in a roll that does not rattle.",
+    "skill_bonuses": { "lockpicking": 3 },
+    "cost": 1800
+  },
+  {
+    "id": "diamond_picks",
+    "name": "Diamond-Tipped Picks",
+    "slot": "tool",
+    "rarity": "advanced",
+    "description": "Cuts where lesser steel slips.",
+    "skill_bonuses": { "lockpicking": 5 },
+    "attribute_bonuses": { "dexterity": 1 },
+    "cost": 5200,
+    "required_level": 3
+  },
+  {
+    "id": "auto_rake",
+    "name": "Electric Rake",
+    "slot": "tool",
+    "rarity": "advanced",
+    "description": "Fast, loud, and forgiving of a shaking hand.",
+    "skill_bonuses": { "lockpicking": 4, "stealth": -1 },
+    "cost": 4400
+  },
+  {
+    "id": "glass_cutter",
+    "name": "Vacuum Glass Cutter",
+    "slot": "tool",
+    "rarity": "improved",
+    "description": "Takes a pane out whole, and quietly.",
+    "skill_bonuses": { "stealth": 2, "lockpicking": 1 },
+    "cost": 2100
+  },
+  {
+    "id": "master_kit",
+    "name": "Locksmith's Master Kit",
+    "slot": "tool",
+    "rarity": "masterwork",
+    "description": "Everything, indexed, and a decade of knowing which piece.",
+    "skill_bonuses": { "lockpicking": 7 },
+    "attribute_bonuses": { "dexterity": 1, "intelligence": 1 },
+    "special_effects": ["Halves the penalty from an unfamiliar lock"],
+    "cost": 14000,
+    "required_level": 6
+  },
+  {
+    "id": "dark_coat",
+    "name": "Unremarkable Dark Coat",
+    "slot": "armor",
+    "rarity": "basic",
+    "description": "The most effective garment in the trade.",
+    "skill_bonuses": { "stealth": 2 },
+    "cost": 400
+  },
+  {
+    "id": "padded_vest",
+    "name": "Padded Vest",
+    "slot": "armor",
+    "rarity": "improved",
+    "description": "Turns a bad night into a sore one.",
+    "skill_bonuses": { "combat": 2 },
+    "attribute_bonuses": { "constitution": 1 },
+    "cost": 2600
+  },
+  {
+    "id": "service_uniform",
+    "name": "Building Services Uniform",
+    "slot": "armor",
+    "rarity": "improved",
+    "description": "Nobody stops a person carrying a clipboard and a mop.",
+    "skill_bonuses": { "social": 3, "stealth": 1 },
+    "cost": 2200
+  },
+  {
+    "id": "climbing_rig",
+    "name": "Low-Profile Climbing Rig",
+    "slot": "armor",
+    "rarity": "advanced",
+    "description": "Worn under a jacket; holds a person and their nerve.",
+    "skill_bonuses": { "athletics": 4 },
+    "cost": 4800
+  },
+  {
+    "id": "tailored_suit",
+    "name": "Tailored Suit",
+    "slot": "armor",
+    "rarity": "advanced",
+    "description": "Expensive enough that nobody asks what you do.",
+    "skill_bonuses": { "social": 4 },
+    "attribute_bonuses": { "charisma": 1 },
+    "cost": 5600,
+    "required_class": ["face", "mastermind"]
+  },
+  {
+    "id": "ballistic_liner",
+    "name": "Ballistic Liner",
+    "slot": "armor",
+    "rarity": "masterwork",
+    "description": "The one purchase that argues you should not have needed it.",
+    "skill_bonuses": { "combat": 5 },
+    "attribute_bonuses": { "constitution": 2 },
+    "special_effects": ["Downgrades one major injury per job to minor"],
+    "cost": 13500,
+    "required_level": 5
+  },
+  {
+    "id": "burner_deck",
+    "name": "Burner Deck",
+    "slot": "gadget",
+    "rarity": "basic",
+    "description": "Cheap, disposable, and slow.",
+    "skill_bonuses": { "hacking": 2 },
+    "cost": 700
+  },
+  {
+    "id": "signal_jammer",
+    "name": "Signal Jammer",
+    "slot": "gadget",
+    "rarity": "improved",
+    "description": "Buys silence from anything with an antenna.",
+    "skill_bonuses": { "hacking": 3, "stealth": 1 },
+    "cost": 2900
+  },
+  {
+    "id": "loop_box",
+    "name": "Camera Loop Box",
+    "slot": "gadget",
+    "rarity": "advanced",
+    "description": "Ninety seconds of a corridor that was already empty.",
+    "skill_bonuses": { "hacking": 4, "stealth": 2 },
+    "special_effects": ["Ignores the first alarm complication of a job"],
+    "cost": 6400,
+    "required_level": 3
+  },
+  {
+    "id": "thermal_lance",
+    "name": "Thermal Lance",
+    "slot": "gadget",
+    "rarity": "advanced",
+    "description": "Opens anything. Announces that it did.",
+    "skill_bonuses": { "lockpicking": 5, "stealth": -3 },
+    "cost": 5800
+  },
+  {
+    "id": "field_terminal",
+    "name": "Field Terminal",
+    "slot": "gadget",
+    "rarity": "masterwork",
+    "description": "A workstation folded into a satchel, and cooled well.",
+    "skill_bonuses": { "hacking": 7 },
+    "attribute_bonuses": { "intelligence": 2 },
+    "cost": 15200,
+    "required_level": 6,
+    "required_class": ["tech", "mastermind"]
+  },
+  {
+    "id": "grapple_line",
+    "name": "Compact Grapple Line",
+    "slot": "accessory",
+    "rarity": "improved",
+    "description": "Forty metres of very expensive rope.",
+    "skill_bonuses": { "athletics": 3 },
+    "cost": 2400
+  },
+  {
+    "id": "forged_credentials",
+    "name": "Forged Credentials",
+    "slot": "accessory",
+    "rarity": "improved",
+    "description": "Good enough for a bored guard on a long shift.",
+    "skill_bonuses": { "social": 3 },
+    "cost": 2000
+  },
+  {
+    "id": "soft_soles",
+    "name": "Soft-Soled Shoes",
+    "slot": "accessory",
+    "rarity": "basic",
+    "description": "The cheapest three points of stealth in the city.",
+    "skill_bonuses": { "stealth": 2 },
+    "cost": 500
+  },
+  {
+    "id": "optics_rig",
+    "name": "Low-Light Optics",
+    "slot": "accessory",
+    "rarity": "advanced",
+    "description": "The dark stops being an argument.",
+    "skill_bonuses": { "stealth": 3, "lockpicking": 2 },
+    "attribute_bonuses": { "wisdom": 1 },
+    "cost": 5000
+  },
+  {
+    "id": "the_ledger",
+    "name": "The Ledger",
+    "slot": "accessory",
+    "rarity": "legendary",
+    "description": "Names, debts, and favours. Somebody in every building owes it.",
+    "skill_bonuses": { "social": 6, "hacking": 2 },
+    "attribute_bonuses": { "charisma": 2, "wisdom": 1 },
+    "special_effects": ["One encounter per job may be reattempted at +0"],
+    "cost": 32000,
+    "required_level": 8
+  },
+  {
+    "id": "weighted_sap",
+    "name": "Weighted Sap",
+    "slot": "weapon",
+    "rarity": "basic",
+    "description": "Quiet, brief, and rarely fatal.",
+    "skill_bonuses": { "combat": 2, "stealth": 1 },
+    "cost": 450
+  },
+  {
+    "id": "collapsible_baton",
+    "name": "Collapsible Baton",
+    "slot": "weapon",
+    "rarity": "improved",
+    "description": "Fits a coat pocket; ends most disagreements.",
+    "skill_bonuses": { "combat": 3 },
+    "cost": 1600
+  },
+  {
+    "id": "tranq_pistol",
+    "name": "Tranquiliser Pistol",
+    "slot": "weapon",
+    "rarity": "advanced",
+    "description": "Nobody wakes up angry, and nobody files a shooting report.",
+    "skill_bonuses": { "combat": 4, "stealth": 2 },
+    "special_effects": ["A failed combat check does not raise the alarm"],
+    "cost": 6800,
+    "required_level": 4
+  },
+  {
+    "id": "duelling_cane",
+    "name": "Duelling Cane",
+    "slot": "weapon",
+    "rarity": "masterwork",
+    "description": "Legal everywhere, and only a weapon in the right hands.",
+    "skill_bonuses": { "combat": 5, "social": 2 },
+    "attribute_bonuses": { "dexterity": 1 },
+    "cost": 12400,
+    "required_level": 5
+  }
+]

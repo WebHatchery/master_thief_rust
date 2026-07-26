@@ -1,0 +1,98 @@
+[
+  {
+    "id": "day",
+    "name": "Daylight",
+    "description": "Everyone is where they are supposed to be, and so is the light.",
+    "skill_modifiers": { "social": 1, "stealth": -1 }
+  },
+  {
+    "id": "dusk",
+    "name": "Dusk",
+    "description": "The shift change, and the hour nobody looks closely.",
+    "skill_modifiers": { "stealth": 1, "social": 1 }
+  },
+  {
+    "id": "night",
+    "name": "Night",
+    "description": "Skeleton staff, hard shadows, and nowhere to explain yourself.",
+    "skill_modifiers": { "stealth": 2, "social": -1 }
+  },
+  {
+    "id": "dawn",
+    "name": "Dawn",
+    "description": "The tired end of the graveyard shift.",
+    "skill_modifiers": { "stealth": 1, "hacking": 1, "combat": -1 }
+  },
+  {
+    "id": "clear",
+    "name": "Clear",
+    "description": "Nothing in the weather helps or hinders.",
+    "skill_modifiers": {}
+  },
+  {
+    "id": "rain",
+    "name": "Rain",
+    "description": "Steady rain masks a footstep and ruins a foothold.",
+    "skill_modifiers": { "stealth": 1, "athletics": -2 }
+  },
+  {
+    "id": "fog",
+    "name": "Fog",
+    "description": "Excellent cover, and you cannot see the camera either.",
+    "skill_modifiers": { "stealth": 3, "hacking": -1, "combat": -1 }
+  },
+  {
+    "id": "storm",
+    "name": "Storm",
+    "description": "Thunder covers noise; the roof is trying to kill you.",
+    "skill_modifiers": { "stealth": 2, "athletics": -3, "social": -2 }
+  },
+  {
+    "id": "crowded",
+    "name": "Crowded",
+    "description": "A room full of people is the best door in the building.",
+    "skill_modifiers": { "stealth": 2, "social": 1, "combat": -2 }
+  },
+  {
+    "id": "well_lit",
+    "name": "Well Lit",
+    "description": "Every corner accounted for, and every lock easy to read.",
+    "skill_modifiers": { "stealth": -2, "lockpicking": 1 }
+  },
+  {
+    "id": "noisy",
+    "name": "Noisy",
+    "description": "Machinery, music, or traffic — nobody hears anything.",
+    "skill_modifiers": { "stealth": 1, "social": -1 }
+  },
+  {
+    "id": "high_security",
+    "name": "High Security",
+    "description": "Layered, funded, and drilled. Everything is harder here.",
+    "all_skills": -3
+  },
+  {
+    "id": "wired",
+    "name": "Wired",
+    "description": "Everything runs through a panel, and panels have opinions.",
+    "skill_modifiers": { "hacking": 2, "lockpicking": -1 }
+  },
+  {
+    "id": "old_money",
+    "name": "Old Money",
+    "description": "Brass locks, thick doors, and staff who know every face.",
+    "skill_modifiers": { "lockpicking": -1, "social": -2, "hacking": 2 }
+  },
+  {
+    "id": "understaffed",
+    "name": "Understaffed",
+    "description": "Two guards covering six floors, and both of them know it.",
+    "skill_modifiers": { "stealth": 2, "combat": 1, "social": -1 }
+  },
+  {
+    "id": "private_security",
+    "name": "Private Security",
+    "description": "Paid well, drilled often, and unimpressed by paperwork.",
+    "skill_modifiers": { "combat": -2, "social": -2, "stealth": -1 }
+  }
+]

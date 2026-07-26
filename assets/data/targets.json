@@ -1,0 +1,323 @@
+[
+  {
+    "id": "velvet_room",
+    "name": "The Velvet Room",
+    "description": "A members' casino with loose security and looser bookkeeping.",
+    "difficulty": "easy",
+    "potential_payout": 180000,
+    "encounters": [
+      "bouncer_line",
+      "cloakroom_lock",
+      "alley_exit"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "crowded",
+        "noisy"
+      ]
+    },
+    "required_reputation": 0,
+    "notoriety": 4,
+    "possible_loot": [
+      "soft_soles",
+      "weighted_sap",
+      "forged_credentials"
+    ]
+  },
+  {
+    "id": "riverside_warehouse",
+    "name": "Riverside Warehouse 12",
+    "description": "Bonded goods, one night watchman, and a very old roller door.",
+    "difficulty": "easy",
+    "potential_payout": 140000,
+    "encounters": [
+      "loading_dock",
+      "reception_desk",
+      "alley_exit"
+    ],
+    "environment": {
+      "time_of_day": "dawn",
+      "weather": "rain",
+      "factors": [
+        "understaffed"
+      ]
+    },
+    "required_reputation": 0,
+    "notoriety": 3,
+    "possible_loot": [
+      "basic_picks",
+      "dark_coat",
+      "grapple_line"
+    ]
+  },
+  {
+    "id": "civic_archive",
+    "name": "The Civic Archive",
+    "description": "Public building, private annexe, and a records room worth more than the art.",
+    "difficulty": "medium",
+    "potential_payout": 300000,
+    "encounters": [
+      "reception_desk",
+      "cloakroom_lock",
+      "server_cage"
+    ],
+    "environment": {
+      "time_of_day": "day",
+      "weather": "clear",
+      "factors": [
+        "well_lit",
+        "wired"
+      ]
+    },
+    "required_reputation": 4,
+    "notoriety": 5,
+    "possible_loot": [
+      "burner_deck",
+      "signal_jammer",
+      "tension_set"
+    ]
+  },
+  {
+    "id": "counting_house",
+    "name": "The Counting House",
+    "description": "Cash business, cash security, and dogs that were not in the file.",
+    "difficulty": "medium",
+    "potential_payout": 380000,
+    "encounters": [
+      "counting_room",
+      "guard_dog_run",
+      "night_patrol"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "fog",
+      "factors": [
+        "noisy"
+      ]
+    },
+    "required_reputation": 8,
+    "notoriety": 7,
+    "possible_loot": [
+      "tension_set",
+      "collapsible_baton",
+      "padded_vest"
+    ]
+  },
+  {
+    "id": "first_national",
+    "name": "First National Vault",
+    "description": "The classic job: marble, guards, and a door built to be admired.",
+    "difficulty": "medium",
+    "potential_payout": 450000,
+    "encounters": [
+      "camera_bank",
+      "vault_door",
+      "night_patrol"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "high_security"
+      ]
+    },
+    "required_reputation": 12,
+    "notoriety": 10,
+    "possible_loot": [
+      "diamond_picks",
+      "loop_box",
+      "service_uniform"
+    ]
+  },
+  {
+    "id": "datacore_annexe",
+    "name": "Datacore Annexe",
+    "description": "Nothing here is worth carrying, and all of it sells.",
+    "difficulty": "medium",
+    "potential_payout": 520000,
+    "encounters": [
+      "roof_approach",
+      "camera_bank",
+      "server_cage"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "storm",
+      "factors": [
+        "wired",
+        "understaffed"
+      ]
+    },
+    "required_reputation": 16,
+    "notoriety": 8,
+    "possible_loot": [
+      "field_terminal",
+      "signal_jammer",
+      "optics_rig"
+    ]
+  },
+  {
+    "id": "metropolitan_museum",
+    "name": "Metropolitan Museum",
+    "description": "Priceless things on marble floors, watched by people who love them.",
+    "difficulty": "hard",
+    "potential_payout": 750000,
+    "encounters": [
+      "laser_grid",
+      "night_curator",
+      "pressure_case"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "well_lit",
+        "private_security"
+      ]
+    },
+    "required_reputation": 22,
+    "notoriety": 14,
+    "possible_loot": [
+      "glass_cutter",
+      "optics_rig",
+      "tailored_suit"
+    ]
+  },
+  {
+    "id": "corporate_tower",
+    "name": "Meridian Tower",
+    "description": "Forty floors of glass, and one office that matters.",
+    "difficulty": "hard",
+    "potential_payout": 650000,
+    "encounters": [
+      "exec_elevator",
+      "board_room",
+      "penthouse_safe"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "factors": [
+        "wired",
+        "private_security"
+      ]
+    },
+    "required_reputation": 26,
+    "notoriety": 13,
+    "possible_loot": [
+      "loop_box",
+      "tailored_suit",
+      "master_kit"
+    ]
+  },
+  {
+    "id": "hillcrest_estate",
+    "name": "Hillcrest Estate",
+    "description": "Old money behind a long drive and a shorter temper.",
+    "difficulty": "hard",
+    "potential_payout": 820000,
+    "encounters": [
+      "roof_approach",
+      "penthouse_safe",
+      "armed_response"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "rain",
+      "factors": [
+        "old_money",
+        "private_security"
+      ]
+    },
+    "required_reputation": 32,
+    "notoriety": 16,
+    "possible_loot": [
+      "ballistic_liner",
+      "duelling_cane",
+      "climbing_rig"
+    ]
+  },
+  {
+    "id": "auction_house",
+    "name": "Ashcombe Auction House",
+    "description": "The lot is on the floor for one night, and so is everyone who wants it.",
+    "difficulty": "hard",
+    "potential_payout": 900000,
+    "encounters": [
+      "auction_floor",
+      "night_curator",
+      "pressure_case"
+    ],
+    "environment": {
+      "time_of_day": "dusk",
+      "weather": "clear",
+      "factors": [
+        "crowded",
+        "old_money"
+      ]
+    },
+    "required_reputation": 38,
+    "notoriety": 15,
+    "possible_loot": [
+      "the_ledger",
+      "tailored_suit",
+      "master_kit"
+    ]
+  },
+  {
+    "id": "the_spire",
+    "name": "The Spire",
+    "description": "The most secure private floor in the city, and the best view from it.",
+    "difficulty": "extreme",
+    "potential_payout": 1400000,
+    "encounters": [
+      "skylight_drop",
+      "biometric_door",
+      "board_room"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "storm",
+      "factors": [
+        "high_security",
+        "wired"
+      ]
+    },
+    "required_reputation": 48,
+    "notoriety": 22,
+    "possible_loot": [
+      "field_terminal",
+      "master_kit",
+      "the_ledger"
+    ]
+  },
+  {
+    "id": "harbour_vault",
+    "name": "The Harbour Vault",
+    "description": "A bonded vault on the water that has never been opened by a stranger.",
+    "difficulty": "extreme",
+    "potential_payout": 1750000,
+    "encounters": [
+      "harbour_fence",
+      "deposit_boxes",
+      "armed_response"
+    ],
+    "environment": {
+      "time_of_day": "night",
+      "weather": "fog",
+      "factors": [
+        "high_security",
+        "private_security"
+      ]
+    },
+    "required_reputation": 58,
+    "notoriety": 25,
+    "possible_loot": [
+      "the_ledger",
+      "ballistic_liner",
+      "field_terminal"
+    ]
+  }
+]

@@ -1,12 +1,26 @@
 {
   "game_name": "master_thief",
   "display_name": "Master Thief",
-  "save_slot": "autosave",
-  "version": "1.0.0",
-  "starting_points": 25,
-  "starting_energy": 60.0,
-  "max_energy": 100.0,
-  "energy_per_second": 4.0,
-  "world_width": 14,
-  "world_height": 9
+  "save_slot": "campaign",
+  "version": "0.1.0",
+
+  "starting_budget": 25000,
+  "starting_crew": ["vera_sloan", "otis_kemp", "birdie_lang"],
+  "starting_inventory": ["basic_picks", "dark_coat", "burner_deck"],
+
+  "targets_on_board": 5,
+  "recruit_pool_size": 4,
+  "casing_cost": 2500,
+
+  "rest_recovery": 25,
+  "fatigue_work_threshold": 80,
+  "idle_loyalty_drift": 3,
+
+  "heat_decay_per_week": 5,
+  "heat_safe_threshold": 20,
+  "heat_dc_step": 20,
+  "failure_notoriety": 6,
+
+  "reputation_per_job": 4,
+  "crew_cut": 0.25
 }

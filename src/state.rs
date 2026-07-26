@@ -1,132 +1,215 @@
-//! Runtime state, save data, and save migration helpers.
+//! The safehouse ledger: everything a campaign remembers between weeks.
 
-use crate::data::{ActionDef, GameConfig};
-use macroquad_toolkit::grid::{
-    calculate_visible_tiles, update_flat_fog_states, FlatGrid, FogState, TilePos,
-};
+use crate::data::{GameConfig, GameData};
+use crate::model::{CrewMember, EquipmentDef, HeistTarget, Loadout};
+use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashSet;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PlayerState {
-    pub points: i64,
-    pub energy: f32,
-    pub selected_tile: TilePos,
-    pub turn: u32,
+/// One mark on the board, and how much the crew has bothered to learn about it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BoardEntry {
+    pub target_id: String,
+    /// Cased targets show their DCs and environment on the planning screen.
+    pub cased: bool,
+    /// Weeks this mark stays on the board before the window closes.
+    pub weeks_remaining: u32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct WorldState {
-    pub fog: FlatGrid<FogState>,
-    pub reachable: HashSet<TilePos>,
+impl BoardEntry {
+    pub fn new(target_id: impl Into<String>) -> Self {
+        Self {
+            target_id: target_id.into(),
+            cased: false,
+            weeks_remaining: 4,
+        }
+    }
 }
 
+/// The whole campaign, in one serialisable place.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SaveData {
-    pub version: String,
-    pub player: PlayerState,
-    pub world: WorldState,
-}
-
-#[derive(Debug, Clone)]
 pub struct GameSession {
-    pub player: PlayerState,
-    pub world: WorldState,
+    /// The run seed, shown on the records screen so a campaign is shareable.
+    pub seed: u64,
+    /// Every draw in the sim comes from here, in a fixed order (GDD 5.7).
+    pub rng: SeededRng,
+    pub week: u32,
+    pub budget: i64,
+    pub reputation: i32,
+    pub notoriety: i32,
+    pub heat: i32,
+    pub crew: Vec<CrewMember>,
+    /// Equipment ids in the lockup, including items currently assigned.
+    pub inventory: Vec<String>,
+    pub board: Vec<BoardEntry>,
 }
 
 impl GameSession {
-    pub fn new(config: &GameConfig) -> Self {
-        let start = TilePos::new(
-            (config.world_width / 2) as i32,
-            (config.world_height / 2) as i32,
-        );
+    pub fn new(config: &GameConfig, data: &GameData, seed: u64) -> Self {
+        let crew = config
+            .starting_crew
+            .iter()
+            .filter_map(|id| data.crew_pool.get(id).cloned())
+            .collect();
+
         let mut session = Self {
-            player: PlayerState {
-                points: config.starting_points,
-                energy: config.starting_energy,
-                selected_tile: start,
-                turn: 1,
-            },
-            world: WorldState {
-                fog: FlatGrid::new(config.world_width, config.world_height, FogState::Hidden),
-                reachable: HashSet::new(),
-            },
+            seed,
+            rng: SeededRng::new(seed),
+            week: 1,
+            budget: config.starting_budget,
+            reputation: 0,
+            notoriety: 0,
+            heat: 0,
+            crew,
+            inventory: config.starting_inventory.clone(),
+            board: Vec::new(),
         };
-        session.refresh_visibility();
+        session.issue_starting_kit(data);
+        session.refresh_board(config, data);
         session
     }
 
-    pub fn from_save(save: SaveData) -> Self {
-        Self {
-            player: save.player,
-            world: save.world,
+    /// Put the opening lockup on the people who can use it: each item goes to
+    /// the free slot of the hand whose skills it flatters most.
+    fn issue_starting_kit(&mut self, data: &GameData) {
+        let items: Vec<String> = self.inventory.clone();
+
+        for item_id in items {
+            let Some(item) = data.equipment.get(&item_id) else {
+                continue;
+            };
+
+            let best = self
+                .crew
+                .iter()
+                .enumerate()
+                .filter(|(_, member)| member.equipment.get(item.slot).is_none())
+                .max_by_key(|(_, member)| item.skill_bonus(member.specialty_skill))
+                .map(|(index, _)| index);
+
+            if let Some(index) = best {
+                self.crew[index]
+                    .equipment
+                    .set(item.slot, Some(item_id.clone()));
+            }
         }
     }
 
     pub fn to_save(&self, version: &str) -> SaveData {
         SaveData {
             version: version.to_owned(),
-            player: self.player.clone(),
-            world: self.world.clone(),
+            session: self.clone(),
         }
     }
 
-    pub fn update_energy(&mut self, config: &GameConfig, dt: f32) {
-        self.player.energy =
-            (self.player.energy + config.energy_per_second * dt).min(config.max_energy);
+    pub fn from_save(save: SaveData) -> Self {
+        save.session
     }
 
-    pub fn can_run_action(&self, action: &ActionDef) -> bool {
-        self.player.energy >= action.energy_cost
+    pub fn member(&self, id: &str) -> Option<&CrewMember> {
+        self.crew.iter().find(|member| member.id == id)
     }
 
-    pub fn apply_action(&mut self, action: &ActionDef) -> bool {
-        if !self.can_run_action(action) {
-            return false;
+    pub fn member_mut(&mut self, id: &str) -> Option<&mut CrewMember> {
+        self.crew.iter_mut().find(|member| member.id == id)
+    }
+
+    /// Crew fit to be assigned to a door this week.
+    pub fn available_crew(&self) -> impl Iterator<Item = &CrewMember> {
+        self.crew
+            .iter()
+            .filter(|member| member.condition.is_fit_for_work())
+    }
+
+    /// Resolve a member's kit against the catalogue.
+    pub fn loadout<'a>(&self, member: &CrewMember, data: &'a GameData) -> Loadout<'a> {
+        Loadout::resolve(&member.equipment, |id| data.equipment.get(id))
+    }
+
+    /// Items in the lockup that nobody is carrying.
+    pub fn unassigned_inventory<'a>(&'a self, data: &'a GameData) -> Vec<&'a EquipmentDef> {
+        let assigned: Vec<&str> = self
+            .crew
+            .iter()
+            .flat_map(|member| member.equipment.item_ids())
+            .collect();
+
+        let mut remaining = assigned.clone();
+        self.inventory
+            .iter()
+            .filter(|id| {
+                // One copy is consumed per assignment, so duplicates in the
+                // lockup stay visible.
+                match remaining.iter().position(|held| held == id) {
+                    Some(index) => {
+                        remaining.remove(index);
+                        false
+                    }
+                    None => true,
+                }
+            })
+            .filter_map(|id| data.equipment.get(id))
+            .collect()
+    }
+
+    /// How much the city's attention adds to every difficulty class.
+    pub fn heat_dc_penalty(&self, config: &GameConfig) -> i32 {
+        if config.heat_dc_step <= 0 {
+            return 0;
         }
-
-        self.player.energy -= action.energy_cost;
-        self.player.points += action.points_reward;
-        self.player.turn += 1;
-        self.refresh_visibility();
-        true
+        ((self.heat - config.heat_safe_threshold).max(0)) / config.heat_dc_step
     }
 
-    pub fn move_selection(&mut self, dx: i32, dy: i32) {
-        let next = TilePos::new(
-            self.player.selected_tile.x + dx,
-            self.player.selected_tile.y + dy,
-        );
-        self.select_tile(next);
+    /// Marks the crew's reputation has opened up.
+    pub fn eligible_targets<'a>(&self, data: &'a GameData) -> Vec<&'a HeistTarget> {
+        let mut targets: Vec<&HeistTarget> = data
+            .targets
+            .iter()
+            .map(|(_, target)| target)
+            .filter(|target| target.required_reputation <= self.reputation)
+            .collect();
+        targets.sort_by_key(|target| (target.required_reputation, target.id.clone()));
+        targets
     }
 
-    pub fn select_tile(&mut self, next: TilePos) {
-        if self.world.fog.is_valid(next) {
-            self.player.selected_tile = next;
-            self.refresh_visibility();
+    /// Fill the board up to the configured size with marks the crew can take,
+    /// drawing in a fixed order from the run's RNG.
+    pub fn refresh_board(&mut self, config: &GameConfig, data: &GameData) {
+        let eligible: Vec<String> = self
+            .eligible_targets(data)
+            .into_iter()
+            .map(|target| target.id.clone())
+            .filter(|id| !self.board.iter().any(|entry| &entry.target_id == id))
+            .collect();
+
+        let mut pool = eligible;
+        while self.board.len() < config.targets_on_board && !pool.is_empty() {
+            let index = self.rng.below(pool.len());
+            self.board.push(BoardEntry::new(pool.remove(index)));
         }
     }
 
-    fn refresh_visibility(&mut self) {
-        let visible = calculate_visible_tiles(self.player.selected_tile, 4, |_| false);
-        update_flat_fog_states(&mut self.world.fog, &visible);
-        self.world.reachable =
-            self.world
-                .fog
-                .flood_fill(self.player.selected_tile, false, |_, fog| {
-                    *fog != FogState::Hidden
-                });
+    /// Age the board by a week, dropping marks whose window has closed.
+    pub fn age_board(&mut self) {
+        for entry in &mut self.board {
+            entry.weeks_remaining = entry.weeks_remaining.saturating_sub(1);
+        }
+        self.board.retain(|entry| entry.weeks_remaining > 0);
+    }
+
+    pub fn board_entry(&self, target_id: &str) -> Option<&BoardEntry> {
+        self.board.iter().find(|entry| entry.target_id == target_id)
     }
 }
 
-#[derive(Debug, Deserialize)]
-struct LegacySave {
-    points: Option<i64>,
-    energy: Option<f32>,
-    turn: Option<u32>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SaveData {
+    pub version: String,
+    pub session: GameSession,
 }
 
+/// Unwrap the toolkit's save envelope and read the campaign out of it. There is
+/// no legacy format yet; when one appears this is where it gets translated.
 pub fn migrate_save_value(
     detected_version: Option<String>,
     value: Value,
@@ -134,79 +217,177 @@ pub fn migrate_save_value(
 ) -> Result<SaveData, String> {
     let payload = value.get("data").cloned().unwrap_or(value);
 
-    if let Ok(mut current) = serde_json::from_value::<SaveData>(payload.clone()) {
-        current.version = config.version.clone();
-        return Ok(current);
-    }
-
-    let legacy: LegacySave = serde_json::from_value(payload)
-        .map_err(|err| format!("Unsupported save format {:?}: {}", detected_version, err))?;
-
-    let mut session = GameSession::new(config);
-    if let Some(points) = legacy.points {
-        session.player.points = points;
-    }
-    if let Some(energy) = legacy.energy {
-        session.player.energy = energy.clamp(0.0, config.max_energy);
-    }
-    if let Some(turn) = legacy.turn {
-        session.player.turn = turn.max(1);
-    }
-
-    Ok(session.to_save(&config.version))
+    let mut save: SaveData = serde_json::from_value(payload).map_err(|err| {
+        format!(
+            "Unsupported save format {:?}: {}",
+            detected_version.as_deref().unwrap_or("unknown"),
+            err
+        )
+    })?;
+    save.version = config.version.clone();
+    Ok(save)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn test_config() -> GameConfig {
-        GameConfig {
-            game_name: "master_thief".to_owned(),
-            display_name: "Master Thief".to_owned(),
-            save_slot: "autosave".to_owned(),
-            version: "1.0.0".to_owned(),
-            starting_points: 10,
-            starting_energy: 5.0,
-            max_energy: 10.0,
-            energy_per_second: 1.0,
-            world_width: 8,
-            world_height: 8,
+    fn data() -> GameData {
+        GameData::load().unwrap()
+    }
+
+    #[test]
+    fn a_new_campaign_hires_the_starting_crew_and_stocks_the_board() {
+        let data = data();
+        let session = GameSession::new(&data.config, &data, 42);
+
+        assert_eq!(session.crew.len(), data.config.starting_crew.len());
+        assert_eq!(session.budget, data.config.starting_budget);
+        assert!(!session.board.is_empty());
+        assert!(session.board.len() <= data.config.targets_on_board);
+    }
+
+    #[test]
+    fn the_board_only_offers_marks_the_crews_name_can_open() {
+        let data = data();
+        let session = GameSession::new(&data.config, &data, 7);
+
+        for entry in &session.board {
+            let target = data.targets.get(&entry.target_id).unwrap();
+            assert!(target.required_reputation <= session.reputation);
         }
     }
 
     #[test]
-    fn action_spends_energy_and_rewards_points() {
-        let config = test_config();
-        let action = ActionDef {
-            id: "test".to_owned(),
-            name: "Test".to_owned(),
-            description: "Test action".to_owned(),
-            energy_cost: 3.0,
-            points_reward: 7,
-        };
-        let mut session = GameSession::new(&config);
+    fn reputation_opens_new_marks() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 7);
+        let early = session.eligible_targets(&data).len();
 
-        assert!(session.apply_action(&action));
-        assert_eq!(session.player.points, 17);
-        assert_eq!(session.player.turn, 2);
-        assert!((session.player.energy - 2.0).abs() < f32::EPSILON);
+        session.reputation = 100;
+        assert!(session.eligible_targets(&data).len() > early);
     }
 
     #[test]
-    fn legacy_save_migrates_to_current_shape() {
-        let config = test_config();
-        let value = serde_json::json!({
-            "points": 42,
-            "energy": 99.0,
-            "turn": 3
-        });
+    fn the_same_seed_lays_out_the_same_board() {
+        let data = data();
+        let a = GameSession::new(&data.config, &data, 20260726);
+        let b = GameSession::new(&data.config, &data, 20260726);
 
-        let migrated = migrate_save_value(Some("0.1.0".to_owned()), value, &config).unwrap();
+        let ids_a: Vec<&str> = a.board.iter().map(|e| e.target_id.as_str()).collect();
+        let ids_b: Vec<&str> = b.board.iter().map(|e| e.target_id.as_str()).collect();
+        assert_eq!(ids_a, ids_b);
+    }
 
-        assert_eq!(migrated.version, "1.0.0");
-        assert_eq!(migrated.player.points, 42);
-        assert_eq!(migrated.player.energy, 10.0);
-        assert_eq!(migrated.player.turn, 3);
+    #[test]
+    fn a_save_round_trips_through_json() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 99);
+        session.budget -= 4200;
+        session.heat = 31;
+        session.crew[0].condition.fatigue = 45;
+
+        let save = session.to_save(&data.config.version);
+        let encoded = serde_json::to_value(&save).unwrap();
+        let restored = migrate_save_value(
+            Some(data.config.version.clone()),
+            serde_json::json!({ "data": encoded }),
+            &data.config,
+        )
+        .unwrap();
+
+        assert_eq!(
+            serde_json::to_value(GameSession::from_save(restored)).unwrap(),
+            serde_json::to_value(&session).unwrap()
+        );
+    }
+
+    #[test]
+    fn a_save_the_game_cannot_read_is_reported_not_swallowed() {
+        let data = data();
+        let result = migrate_save_value(
+            Some("0.0.1".to_owned()),
+            serde_json::json!({ "data": { "nonsense": true } }),
+            &data.config,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn heat_only_bites_above_the_safe_threshold() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 3);
+
+        session.heat = data.config.heat_safe_threshold;
+        assert_eq!(session.heat_dc_penalty(&data.config), 0);
+
+        session.heat = data.config.heat_safe_threshold + data.config.heat_dc_step * 2;
+        assert_eq!(session.heat_dc_penalty(&data.config), 2);
+    }
+
+    #[test]
+    fn the_board_ages_out_marks_whose_window_closed() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 11);
+        let starting = session.board.len();
+        assert!(starting > 0);
+
+        for _ in 0..4 {
+            session.age_board();
+        }
+        assert!(session.board.is_empty());
+    }
+
+    #[test]
+    fn the_opening_lockup_is_issued_to_the_people_who_can_use_it() {
+        let data = data();
+        let session = GameSession::new(&data.config, &data, 5);
+
+        let carried: usize = session
+            .crew
+            .iter()
+            .map(|member| member.equipment.item_ids().count())
+            .sum();
+        assert_eq!(carried, data.config.starting_inventory.len());
+        assert!(session.unassigned_inventory(&data).is_empty());
+    }
+
+    #[test]
+    fn kit_taken_off_a_hand_reappears_in_the_lockup() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 5);
+        let (slot, item) = session
+            .crew
+            .iter()
+            .find_map(|member| {
+                crate::model::EquipmentSlot::ALL
+                    .into_iter()
+                    .find_map(|slot| member.equipment.get(slot).map(|id| (slot, id.to_owned())))
+            })
+            .expect("somebody is carrying the starting kit");
+
+        let holder = session
+            .crew
+            .iter()
+            .position(|member| member.equipment.get(slot) == Some(item.as_str()))
+            .unwrap();
+        session.crew[holder].equipment.set(slot, None);
+
+        let lockup: Vec<&str> = session
+            .unassigned_inventory(&data)
+            .iter()
+            .map(|def| def.id.as_str())
+            .collect();
+        assert_eq!(lockup, vec![item.as_str()]);
+    }
+
+    #[test]
+    fn an_injured_or_exhausted_hand_is_not_offered_for_work() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 5);
+        assert_eq!(session.available_crew().count(), session.crew.len());
+
+        session.crew[0].condition.fatigue = 95;
+        assert_eq!(session.available_crew().count(), session.crew.len() - 1);
     }
 }

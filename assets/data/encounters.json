@@ -1,0 +1,387 @@
+[
+  {
+    "id": "bouncer_line",
+    "name": "The Bouncer",
+    "description": "Sweet-talk or slip past the muscle on the door.",
+    "primary_skill": "social",
+    "difficulty": 16,
+    "complexity": "simple",
+    "failure_consequence": "The door staff start remembering faces.",
+    "success_bonus": "The crew walks in as guests.",
+    "critical_success_reward": "He waves the whole crew through without a look.",
+    "critical_failure_effect": "He calls it in, and the room gets watchful.",
+    "critical_success_run_effect": "skip_next",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "armor": 2,
+      "accessory": 1
+    }
+  },
+  {
+    "id": "cloakroom_lock",
+    "name": "Cloakroom Cabinet",
+    "description": "A cheap cabinet holding better things than it should.",
+    "primary_skill": "lockpicking",
+    "difficulty": 17,
+    "complexity": "moderate",
+    "failure_consequence": "The lock jams, and the attendant returns early.",
+    "equipment_bonuses": {
+      "tool": 2
+    }
+  },
+  {
+    "id": "alley_exit",
+    "name": "Back Alley Exit",
+    "description": "Out through the service door and into the delivery lane.",
+    "primary_skill": "stealth",
+    "difficulty": 16,
+    "complexity": "simple",
+    "failure_consequence": "A kitchen hand watches the crew leave.",
+    "equipment_bonuses": {
+      "accessory": 1
+    }
+  },
+  {
+    "id": "counting_room",
+    "name": "Counting Room",
+    "description": "The night's take, still in the trays.",
+    "primary_skill": "lockpicking",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "The tray alarm trips and the floor manager is paged.",
+    "critical_success_reward": "The float is untouched and unrecorded.",
+    "equipment_bonuses": {
+      "tool": 3
+    }
+  },
+  {
+    "id": "camera_bank",
+    "name": "Camera Bank",
+    "description": "Blind the watchful electronic eyes, briefly.",
+    "primary_skill": "hacking",
+    "difficulty": 18,
+    "complexity": "moderate",
+    "failure_consequence": "Security notices a gap in the feed and starts a sweep.",
+    "critical_success_reward": "The whole floor's coverage loops for the run.",
+    "critical_success_run_effect": "skip_next",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "gadget": 3
+    }
+  },
+  {
+    "id": "night_patrol",
+    "name": "Night Patrol",
+    "description": "Two guards, one route, and eleven predictable minutes.",
+    "primary_skill": "stealth",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "A guard turns early and the crew has to move loudly.",
+    "critical_failure_effect": "The patrol calls in an unscheduled check.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "armor": 1,
+      "accessory": 2
+    }
+  },
+  {
+    "id": "vault_door",
+    "name": "Main Vault Door",
+    "description": "Open the steel with finesse, before the time lock notices.",
+    "primary_skill": "lockpicking",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "The time-lock alarm trips and the response clock starts.",
+    "critical_success_reward": "The door opens clean, and quietly, and early.",
+    "equipment_bonuses": {
+      "tool": 4,
+      "gadget": 2
+    }
+  },
+  {
+    "id": "laser_grid",
+    "name": "Laser Grid",
+    "description": "Dance through the web of beams across the gallery floor.",
+    "primary_skill": "athletics",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "A beam breaks, and a silent alarm starts a clock.",
+    "critical_failure_effect": "The gallery shutters begin to close.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "armor": 2,
+      "accessory": 2
+    }
+  },
+  {
+    "id": "night_curator",
+    "name": "The Night Curator",
+    "description": "Convince a cultured insomniac that you belong here.",
+    "primary_skill": "social",
+    "primary_attribute": "charisma",
+    "difficulty": 20,
+    "complexity": "moderate",
+    "failure_consequence": "He is polite, and then he calls the desk.",
+    "equipment_bonuses": {
+      "armor": 2,
+      "accessory": 2
+    }
+  },
+  {
+    "id": "pressure_case",
+    "name": "Pressure-Sensitive Case",
+    "description": "Lift the piece without letting the plate know it left.",
+    "primary_skill": "lockpicking",
+    "difficulty": 22,
+    "complexity": "complex",
+    "failure_consequence": "The case alarm carries through the whole wing.",
+    "critical_success_reward": "The swap is perfect; nobody looks for days.",
+    "equipment_bonuses": {
+      "tool": 3,
+      "gadget": 2
+    }
+  },
+  {
+    "id": "exec_elevator",
+    "name": "Executive Elevator",
+    "description": "Talk the lift controller into the floors it protects.",
+    "primary_skill": "hacking",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "The car locks out and the stairwell is the only way up.",
+    "equipment_bonuses": {
+      "gadget": 3
+    }
+  },
+  {
+    "id": "penthouse_safe",
+    "name": "Penthouse Safe",
+    "description": "A private safe, bought for looks and installed for it too.",
+    "primary_skill": "lockpicking",
+    "difficulty": 23,
+    "complexity": "complex",
+    "failure_consequence": "The secondary system arms and cannot be disarmed twice.",
+    "critical_success_reward": "There is more in it than the file said.",
+    "equipment_bonuses": {
+      "tool": 4
+    }
+  },
+  {
+    "id": "board_room",
+    "name": "Board Room Crossing",
+    "description": "Cross a glass room that was designed to be looked into.",
+    "primary_skill": "stealth",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "A late executive sees movement and is not sure enough to shout.",
+    "equipment_bonuses": {
+      "armor": 2,
+      "accessory": 2
+    }
+  },
+  {
+    "id": "loading_dock",
+    "name": "Loading Dock",
+    "description": "Over the roller door before the shift bell.",
+    "primary_skill": "athletics",
+    "difficulty": 16,
+    "complexity": "simple",
+    "failure_consequence": "A dropped crate brings the dock foreman out.",
+    "equipment_bonuses": {
+      "accessory": 2
+    }
+  },
+  {
+    "id": "server_cage",
+    "name": "Server Cage",
+    "description": "A locked rack, a hot aisle, and a very short window.",
+    "primary_skill": "hacking",
+    "difficulty": 22,
+    "complexity": "complex",
+    "failure_consequence": "The intrusion is logged, and logs are read on Mondays.",
+    "critical_success_reward": "The logs are rewritten as a maintenance window.",
+    "equipment_bonuses": {
+      "gadget": 4
+    }
+  },
+  {
+    "id": "reception_desk",
+    "name": "Reception Desk",
+    "description": "Sign in as somebody the building expects.",
+    "primary_skill": "social",
+    "difficulty": 15,
+    "complexity": "simple",
+    "failure_consequence": "The visitor log now has a face and a bad name on it.",
+    "equipment_bonuses": {
+      "accessory": 3,
+      "armor": 1
+    }
+  },
+  {
+    "id": "roof_approach",
+    "name": "Roof Approach",
+    "description": "Four storeys of service ladder and one bad parapet.",
+    "primary_skill": "athletics",
+    "difficulty": 18,
+    "complexity": "moderate",
+    "failure_consequence": "A fall, a noise, and a very long minute of standing still.",
+    "equipment_bonuses": {
+      "armor": 3,
+      "accessory": 2
+    }
+  },
+  {
+    "id": "guard_dog_run",
+    "name": "The Dog Run",
+    "description": "Two shepherds who take their work more seriously than the guards.",
+    "primary_skill": "stealth",
+    "primary_attribute": "wisdom",
+    "difficulty": 18,
+    "complexity": "moderate",
+    "failure_consequence": "Barking, and lights coming on in the yard office.",
+    "equipment_bonuses": {
+      "accessory": 2,
+      "weapon": 1
+    }
+  },
+  {
+    "id": "armed_response",
+    "name": "Armed Response",
+    "description": "Two contractors, alerted, and between the crew and the street.",
+    "primary_skill": "combat",
+    "difficulty": 22,
+    "complexity": "complex",
+    "failure_consequence": "Somebody gets hurt, and somebody makes a statement.",
+    "critical_failure_effect": "The response calls for backup on an open channel.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "weapon": 4,
+      "armor": 3
+    }
+  },
+  {
+    "id": "skylight_drop",
+    "name": "Skylight Drop",
+    "description": "Eleven metres of controlled descent onto a marble floor.",
+    "primary_skill": "athletics",
+    "difficulty": 23,
+    "complexity": "complex",
+    "failure_consequence": "A hard landing, a loud one, and a turned ankle.",
+    "critical_success_reward": "The line is set for the way out as well.",
+    "critical_success_run_effect": "skip_next",
+    "equipment_bonuses": {
+      "armor": 3,
+      "accessory": 3
+    }
+  },
+  {
+    "id": "auction_floor",
+    "name": "The Auction Floor",
+    "description": "Bid, be seen, and be the reason nobody watches the back.",
+    "primary_skill": "social",
+    "primary_attribute": "charisma",
+    "difficulty": 24,
+    "complexity": "complex",
+    "failure_consequence": "A dealer recognises the face and mentions it to the house.",
+    "critical_success_reward": "The house treats the crew as a client for the night.",
+    "critical_success_run_effect": "skip_next",
+    "equipment_bonuses": {
+      "armor": 4,
+      "accessory": 3
+    }
+  },
+  {
+    "id": "biometric_door",
+    "name": "Biometric Door",
+    "description": "Two factors, one of which is a person who went home at six.",
+    "primary_skill": "hacking",
+    "difficulty": 25,
+    "complexity": "legendary",
+    "failure_consequence": "A failed read locks the door for an hour and files a ticket.",
+    "critical_failure_effect": "The floor goes into lockdown.",
+    "critical_failure_run_effect": "add_complication",
+    "equipment_bonuses": {
+      "gadget": 5
+    }
+  },
+  {
+    "id": "deposit_boxes",
+    "name": "The Deposit Boxes",
+    "description": "Four hundred small locks, and only nine that matter.",
+    "primary_skill": "lockpicking",
+    "difficulty": 25,
+    "complexity": "legendary",
+    "failure_consequence": "A drilled box is obvious by morning and traceable by noon.",
+    "critical_success_reward": "Nine boxes open, and a tenth that looked interesting.",
+    "equipment_bonuses": {
+      "tool": 5,
+      "gadget": 2
+    }
+  },
+  {
+    "id": "harbour_fence",
+    "name": "The Harbour Fence",
+    "description": "A lit yard, a patrolled line, and water on three sides.",
+    "primary_skill": "stealth",
+    "difficulty": 25,
+    "complexity": "legendary",
+    "failure_consequence": "A spotlight finds the line, and the yard wakes up.",
+    "equipment_bonuses": {
+      "accessory": 4,
+      "armor": 2
+    }
+  },
+  {
+    "id": "silent_alarm_sweep",
+    "name": "Sweep Team",
+    "description": "The alarm brought people, and the people brought torches.",
+    "primary_skill": "stealth",
+    "difficulty": 19,
+    "complexity": "moderate",
+    "failure_consequence": "The sweep finds the crew's route and follows it.",
+    "complication_only": true,
+    "equipment_bonuses": {
+      "accessory": 2
+    }
+  },
+  {
+    "id": "responding_unit",
+    "name": "Responding Unit",
+    "description": "Somebody called it in, and somebody came.",
+    "primary_skill": "combat",
+    "difficulty": 20,
+    "complexity": "complex",
+    "failure_consequence": "An arrest is attempted, and it goes badly for everyone.",
+    "complication_only": true,
+    "equipment_bonuses": {
+      "weapon": 3,
+      "armor": 3
+    }
+  },
+  {
+    "id": "lockdown_shutter",
+    "name": "Lockdown Shutter",
+    "description": "The building decided to close around the crew.",
+    "primary_skill": "hacking",
+    "difficulty": 21,
+    "complexity": "complex",
+    "failure_consequence": "The shutter stays down and the way out gets longer.",
+    "complication_only": true,
+    "equipment_bonuses": {
+      "gadget": 4
+    }
+  },
+  {
+    "id": "panicked_witness",
+    "name": "Panicked Witness",
+    "description": "A cleaner who was not supposed to be on this floor.",
+    "primary_skill": "social",
+    "difficulty": 17,
+    "complexity": "moderate",
+    "failure_consequence": "They run, and they talk, and they are believed.",
+    "complication_only": true,
+    "equipment_bonuses": {
+      "armor": 2
+    }
+  }
+]

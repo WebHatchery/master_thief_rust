@@ -1,0 +1,227 @@
+{
+  "critical_success": {
+    "generic": [
+      "It goes better than the plan allowed for, and nobody says so out loud.",
+      "Textbook, and then some. The crew is out before the window opened.",
+      "Whatever was supposed to be hard about this was not.",
+      "Clean enough that it will be told wrong for years.",
+      "The job gives up more than it was asked for."
+    ],
+    "stealth": [
+      "Not one camera, not one floorboard, not one witness.",
+      "The route is walked twice and remembered as empty both times.",
+      "They pass a guard close enough to smell his coffee.",
+      "The building never notices it had company."
+    ],
+    "athletics": [
+      "The line is set, the drop is silent, and the way out is already rigged.",
+      "Four storeys in under a minute, and the parapet holds.",
+      "The gap gets crossed like it was a step.",
+      "They land soft, on the balls of the feet, and keep moving."
+    ],
+    "combat": [
+      "Two down, neither hurt badly, and neither able to describe anyone.",
+      "It ends before it is a fight, which is the only way it should end.",
+      "One sap, one shoulder, one very quiet corridor.",
+      "Nobody files a report on being surprised by nothing."
+    ],
+    "lockpicking": [
+      "The last pin sets before the tension wrench has finished turning.",
+      "The door opens like it was expecting them.",
+      "The case comes open, the plate never knows, and the swap is perfect.",
+      "Whoever fitted this lock would want to watch that."
+    ],
+    "hacking": [
+      "The log rewrites itself into a scheduled maintenance window.",
+      "Every camera on the floor agrees the corridor was empty.",
+      "The system lets them in, and then forgets both of them.",
+      "The door reads a thumbprint that went home at six."
+    ],
+    "social": [
+      "They are walked in, introduced, and offered a drink.",
+      "The story is better than the truth and holds up longer.",
+      "By the end of it he is asking when they will visit again.",
+      "The crew leaves with a name badge and an invitation."
+    ]
+  },
+  "success": {
+    "generic": [
+      "Clean work. The kind nobody will ever hear about.",
+      "It goes the way it was drawn on the board.",
+      "Professional, unremarkable, and finished on time.",
+      "No noise, no marks, no reason to look twice.",
+      "The plan holds, which is the whole point of a plan."
+    ],
+    "stealth": [
+      "Three rooms, no shadow out of place.",
+      "The patrol passes four metres away and keeps walking.",
+      "They move in the noise of the building and are part of it.",
+      "The floor takes the weight without comment."
+    ],
+    "athletics": [
+      "Up, over, and down with breath to spare.",
+      "The rig holds and the descent is controlled all the way.",
+      "The roller door is cleared before the shift bell.",
+      "Hard work, done properly, and quietly."
+    ],
+    "combat": [
+      "Short, decisive, and over before anyone reaches a radio.",
+      "One down, out of sight, and breathing.",
+      "The confrontation resolves without a shot or a shout.",
+      "They put him somewhere comfortable and take the keys."
+    ],
+    "lockpicking": [
+      "Sixty seconds, and the tumbler gives up its argument.",
+      "The cabinet opens without a scratch on the escutcheon.",
+      "Steady tension, patient rake, open door.",
+      "The safe yields on the second attempt and stays quiet."
+    ],
+    "hacking": [
+      "The feed loops for ninety seconds, which is eighty more than needed.",
+      "The controller accepts the credentials without asking twice.",
+      "In, copied, and out, with the session closed behind them.",
+      "The lockout timer resets and nobody is paged."
+    ],
+    "social": [
+      "The badge is glanced at, not read.",
+      "They are believed, which is all that was required.",
+      "A polite conversation, and a door held open at the end of it.",
+      "The right name, dropped at the right moment."
+    ]
+  },
+  "neutral": {
+    "generic": [
+      "They get through. It is not pretty and it is not clean.",
+      "The door opens. Something about it will be noticed tomorrow.",
+      "Through, but slower than planned and with less margin.",
+      "It works, and everyone knows how close it was.",
+      "A win by the width of a wrench."
+    ],
+    "stealth": [
+      "A footfall lands wrong, and the corridor stays empty anyway.",
+      "They freeze for eleven seconds that cost more than the job pays.",
+      "Something is knocked, caught, and set down carefully.",
+      "The guard turns at the wrong moment and sees an empty hall."
+    ],
+    "athletics": [
+      "The grip slips, and holds on the second try.",
+      "A hard landing, absorbed badly, and walked off.",
+      "They make it up, but the parapet loses some render.",
+      "The gap gets crossed with nothing to spare."
+    ],
+    "combat": [
+      "It becomes a fight, briefly, and ends in a draw nobody wanted.",
+      "He goes down, but not before the radio hits the floor.",
+      "They get past. Somebody will have a story and a bruise.",
+      "Messy, loud, and survivable."
+    ],
+    "lockpicking": [
+      "The lock opens on the fourth attempt, and a pick stays inside it.",
+      "It gives, eventually, and leaves a scratch that will be seen.",
+      "Two minutes over, and the sweat is a problem for the grip.",
+      "Open, but the housing is bent and will not close again."
+    ],
+    "hacking": [
+      "In, but the session is logged and the log is not clean.",
+      "The loop holds for forty seconds, which is barely enough.",
+      "Access granted, alert raised, alert dismissed, for now.",
+      "The system lets them through and files a question about it."
+    ],
+    "social": [
+      "He believes about half of it, and lets them past anyway.",
+      "The story wobbles and is propped up in time.",
+      "She waves them through with a look that will be remembered.",
+      "Nobody is convinced; nobody quite objects either."
+    ]
+  },
+  "failure": {
+    "generic": [
+      "It does not work, and now the room knows somebody tried.",
+      "A setback. Recoverable, expensive, and embarrassing.",
+      "The plan meets the building and the building wins this one.",
+      "They fall back and rethink with less time than before.",
+      "No injury, no arrest, no progress."
+    ],
+    "stealth": [
+      "A door closes louder than it should and the corridor answers.",
+      "They are seen — not identified, but seen.",
+      "The floor gives them away and there is nowhere to be.",
+      "The patrol turns early and there is no shadow deep enough."
+    ],
+    "athletics": [
+      "The grip fails and the drop is short but badly taken.",
+      "The rig slips a metre and everything above it hears about it.",
+      "Halfway up, out of strength, and back down again.",
+      "A bad landing, a turned ankle, and a slow walk to the next door."
+    ],
+    "combat": [
+      "It goes to ground, badly, and the radio gets used.",
+      "Two of them and both still standing when it matters.",
+      "He takes the hit and shouts anyway.",
+      "The fight is lost quietly, which is the only mercy in it."
+    ],
+    "lockpicking": [
+      "The pick snaps in the keyway and the lock is now a wall.",
+      "The tumbler will not set, and the clock does not care.",
+      "The plate registers the lift and starts a very short countdown.",
+      "Five minutes of nothing, and the shift change coming."
+    ],
+    "hacking": [
+      "The credentials are rejected and the rejection is interesting to somebody.",
+      "The session drops and the reconnect is flagged.",
+      "The camera comes back up early, pointed the wrong way for them.",
+      "Access denied, ticket filed, name attached."
+    ],
+    "social": [
+      "He does not buy it, and he is polite about calling the desk.",
+      "The name is wrong, and she knows exactly how wrong.",
+      "A perfectly good story told to a person who checks things.",
+      "The conversation ends with a phone being picked up."
+    ]
+  },
+  "critical_failure": {
+    "generic": [
+      "Everything that could go wrong does, in order, quickly.",
+      "It falls apart in the worst way and takes the schedule with it.",
+      "This is the one they will not talk about afterwards.",
+      "The job stops being a job and becomes an escape.",
+      "Catastrophe, and it is nobody's fault but the dice."
+    ],
+    "stealth": [
+      "They walk into a guard, at a distance where explaining is not an option.",
+      "The alarm goes, and the building's lights come on floor by floor.",
+      "A cleaner opens the door they are standing behind.",
+      "Every camera in the wing gets a clear, well-lit face."
+    ],
+    "athletics": [
+      "The line parts at eleven metres.",
+      "The parapet gives, and so does a wrist.",
+      "The fall is long enough to be heard on the street.",
+      "They land badly, and the ankle will not take weight."
+    ],
+    "combat": [
+      "It becomes exactly the kind of incident this crew does not do.",
+      "Somebody is badly hurt, and it is not the guard.",
+      "A weapon is drawn, and after that nothing is quiet.",
+      "Backup is called on an open channel with a description attached."
+    ],
+    "lockpicking": [
+      "The drill slips, the housing screams, and the floor wakes up.",
+      "The case seals and locks with the piece still inside it.",
+      "The plate goes off, and it is the loud kind.",
+      "Broken pick, broken lock, and a door that is now evidence."
+    ],
+    "hacking": [
+      "The intrusion is caught live and the floor goes to lockdown.",
+      "The shutters come down with the crew on the wrong side of them.",
+      "Every door in the building relocks at once.",
+      "The system logs the attempt, the source, and the time, in that order."
+    ],
+    "social": [
+      "He recognises the face, and he has seen it on a notice.",
+      "The lie collapses in front of three people who all repeat it.",
+      "She smiles, agrees, and has already pressed the button.",
+      "A witness panics, runs, and is believed."
+    ]
+  }
+}
