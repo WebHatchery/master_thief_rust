@@ -4,10 +4,13 @@
 pub mod board;
 pub mod chrome;
 pub mod crew;
+pub mod floorplan;
 pub mod planning;
 pub mod results;
+pub mod run;
 
 use crate::data::GameData;
+use crate::game::playback::RunPlayback;
 use crate::sim::{JobReport, PlanDraft};
 use crate::state::GameSession;
 use macroquad::prelude::*;
@@ -24,6 +27,8 @@ pub enum Screen {
     Board,
     /// Reached from a mark, not from the tab bar — it needs a job to plan.
     Planning,
+    /// The committed job, resolving door by door.
+    Run,
     Results,
 }
 
@@ -36,6 +41,7 @@ impl Screen {
             Screen::Crew => "Crew",
             Screen::Board => "The Board",
             Screen::Planning => "Planning",
+            Screen::Run => "The Run",
             Screen::Results => "Last Job",
         }
     }
@@ -66,6 +72,10 @@ pub enum UiAction {
     /// Commit the plan and run the job.
     CommitPlan,
     AbandonPlan,
+    /// Stop watching and jump to the end of the run.
+    SkipRun,
+    /// Leave the run screen for the results.
+    FinishRun,
     /// Hand the job to the crew's own judgement and run it (GDD 5.3).
     DelegateJob(String),
     AdvanceWeek,
@@ -78,6 +88,7 @@ pub struct UiContext<'a> {
     pub selected_member: Option<&'a str>,
     pub selected_target: Option<&'a str>,
     pub draft: Option<&'a PlanDraft>,
+    pub playback: Option<&'a RunPlayback>,
     pub last_report: Option<&'a JobReport>,
     pub save_exists: bool,
     pub ui: &'a VirtualUi,
@@ -121,6 +132,7 @@ pub fn draw_game_ui(ctx: UiContext<'_>) -> Vec<UiAction> {
         Screen::Crew => crew::draw(&ctx, &mut actions),
         Screen::Board => board::draw(&ctx, &mut actions),
         Screen::Planning => planning::draw(&ctx, &mut actions),
+        Screen::Run => run::draw(&ctx, &mut actions),
         Screen::Results => results::draw(&ctx),
     }
 

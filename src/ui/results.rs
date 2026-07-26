@@ -1,9 +1,9 @@
 //! The results screen: the dice, laid out with every modifier that made them.
 
 use super::chrome::{draw_panel, empty_notice, panel_style, stat_row, title_style};
+use super::run::outcome_color;
 use super::{content_rect, UiContext};
 use crate::rules::encounter::EncounterResult;
-use crate::rules::Outcome;
 use crate::sim::{DoorOutcome, JobReport};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
@@ -227,15 +227,5 @@ fn signed(value: i32) -> String {
         format!("+{}", value)
     } else {
         value.to_string()
-    }
-}
-
-fn outcome_color(outcome: Outcome) -> Color {
-    match outcome {
-        Outcome::CriticalSuccess => Color::new(0.42, 0.84, 0.52, 1.0),
-        Outcome::Success => Color::new(0.46, 0.72, 0.50, 1.0),
-        Outcome::Neutral => Color::new(0.82, 0.76, 0.42, 1.0),
-        Outcome::Failure => Color::new(0.90, 0.56, 0.34, 1.0),
-        Outcome::CriticalFailure => Color::new(0.88, 0.34, 0.34, 1.0),
     }
 }

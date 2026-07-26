@@ -19,13 +19,20 @@ pub struct Selection {
     pub last_report: Option<JobReport>,
 }
 
-/// Persistence work the dispatcher cannot do itself, handed back to `Game`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SaveCommand {
+/// Work the dispatcher cannot do itself — persistence, and anything that needs
+/// the frame loop — handed back to `Game`.
+#[derive(Debug, Clone)]
+pub enum GameCommand {
     NewCampaign,
     Save,
     Load,
     Delete,
+    /// A job has been committed; start watching it happen.
+    StartRun(Box<JobReport>),
+    /// Stop watching and jump to the end.
+    SkipRun,
+    /// The run is over; move to the results.
+    FinishRun,
 }
 
 pub struct Dispatch<'a> {
@@ -35,7 +42,7 @@ pub struct Dispatch<'a> {
     pub notifications: &'a mut NotificationManager,
 }
 
-pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<SaveCommand> {
+pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
     let Dispatch {
         data,
         session,
@@ -44,10 +51,12 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<SaveCommand> {
     } = dispatch;
 
     match action {
-        UiAction::NewGame => return Some(SaveCommand::NewCampaign),
-        UiAction::Save => return Some(SaveCommand::Save),
-        UiAction::Load => return Some(SaveCommand::Load),
-        UiAction::DeleteSave => return Some(SaveCommand::Delete),
+        UiAction::NewGame => return Some(GameCommand::NewCampaign),
+        UiAction::Save => return Some(GameCommand::Save),
+        UiAction::Load => return Some(GameCommand::Load),
+        UiAction::DeleteSave => return Some(GameCommand::Delete),
+        UiAction::SkipRun => return Some(GameCommand::SkipRun),
+        UiAction::FinishRun => return Some(GameCommand::FinishRun),
 
         UiAction::ShowScreen(screen) => selection.screen = screen,
         UiAction::SelectMember(id) => selection.member = Some(id),
@@ -72,13 +81,15 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<SaveCommand> {
             }
         }
         UiAction::AutoFillPlan => auto_fill_plan(data, session, selection, notifications),
-        UiAction::CommitPlan => commit_plan(data, session, selection, notifications),
+        UiAction::CommitPlan => return commit_plan(data, session, selection, notifications),
         UiAction::AbandonPlan => {
             selection.draft = None;
             selection.screen = Screen::Board;
         }
 
-        UiAction::DelegateJob(id) => delegate_job(data, session, selection, notifications, &id),
+        UiAction::DelegateJob(id) => {
+            return delegate_job(data, session, selection, notifications, &id)
+        }
         UiAction::AdvanceWeek => advance_week(data, session, notifications),
     }
 
@@ -183,23 +194,24 @@ fn commit_plan(
     session: &mut GameSession,
     selection: &mut Selection,
     notifications: &mut NotificationManager,
-) {
+) -> Option<GameCommand> {
     let Some(plan) = selection
         .draft
         .as_ref()
         .and_then(|draft| draft.to_job_plan())
     else {
         notifications.warning("Every door needs somebody on it before you commit");
-        return;
+        return None;
     };
 
+    // The dice are cast here, all of them, from the run's seeded RNG. What
+    // follows on the run screen is a replay, not a second roll.
     let report = sim::run_job(session, data, &plan);
     announce(notifications, &report);
 
     selection.draft = None;
-    selection.last_report = Some(report);
-    selection.screen = Screen::Results;
     selection.target = None;
+    Some(GameCommand::StartRun(Box::new(report)))
 }
 
 fn announce(notifications: &mut NotificationManager, report: &JobReport) {
@@ -229,15 +241,15 @@ fn delegate_job(
     selection: &mut Selection,
     notifications: &mut NotificationManager,
     target_id: &str,
-) {
+) -> Option<GameCommand> {
     let Some(target) = data.targets.get(target_id).cloned() else {
         notifications.warning("That mark is no longer on the board");
-        return;
+        return None;
     };
 
     if session.available_crew().count() == 0 {
         notifications.warning("Nobody on the payroll is fit to work");
-        return;
+        return None;
     }
 
     let plan = sim::auto_assign(session, data, &target);
@@ -245,9 +257,8 @@ fn delegate_job(
     announce(notifications, &report);
 
     selection.draft = None;
-    selection.last_report = Some(report);
-    selection.screen = Screen::Results;
     selection.target = None;
+    Some(GameCommand::StartRun(Box::new(report)))
 }
 
 fn advance_week(
@@ -380,7 +391,10 @@ mod tests {
         );
 
         assert_eq!(selection.screen, Screen::Planning);
-        assert!(selection.last_report.is_none());
+        assert!(
+            selection.draft.is_some(),
+            "the draft survives a refused commit"
+        );
         assert_eq!(session.budget, budget);
     }
 
@@ -410,15 +424,19 @@ mod tests {
                 dispatch(&data, &mut session, &mut selection, &mut notifications),
             );
         }
-        apply(
+        let command = apply(
             UiAction::CommitPlan,
             dispatch(&data, &mut session, &mut selection, &mut notifications),
         );
 
-        let report = selection.last_report.as_ref().expect("the job ran");
-        assert_eq!(selection.screen, Screen::Results);
-        assert!(selection.draft.is_none());
+        // Committing resolves the job and hands the report to `Game`, which
+        // owns the watching. The dispatcher never opens the run screen itself.
+        let Some(GameCommand::StartRun(report)) = command else {
+            panic!("committing a full plan must start a run");
+        };
         assert!(!report.delegated, "a hand-made plan is not delegated");
+        assert!(!report.doors.is_empty());
+        assert!(selection.draft.is_none());
         assert!(session.board_entry(&target_id).is_none());
     }
 
@@ -474,7 +492,7 @@ mod tests {
             UiAction::Save,
             dispatch(&data, &mut session, &mut selection, &mut notifications),
         );
-        assert_eq!(command, Some(SaveCommand::Save));
+        assert!(matches!(command, Some(GameCommand::Save)));
     }
 
     #[test]

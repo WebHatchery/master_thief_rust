@@ -1,13 +1,18 @@
 //! The frame loop: draw the screen, collect intents, hand them to the
 //! dispatcher, and own the save slot.
 
+pub mod playback;
+
 use crate::data::{GameConfig, GameData};
-use crate::heist_actions::{self, Dispatch, SaveCommand, Selection};
+use crate::game::playback::RunPlayback;
+use crate::heist_actions::{self, Dispatch, GameCommand, Selection};
+use crate::rules::Outcome;
 use crate::sim;
 use crate::state::{migrate_save_value, GameSession, SaveData};
 use crate::ui::{self, Screen, UiAction, UiContext};
 use macroquad::prelude::*;
 use macroquad_toolkit::events::EventBus;
+use macroquad_toolkit::fx::FloatingTextLayer;
 use macroquad_toolkit::notifications::{
     NotificationAnchor, NotificationManager, NotificationRenderConfig,
 };
@@ -21,6 +26,10 @@ pub struct Game {
     data: GameData,
     session: GameSession,
     selection: Selection,
+    /// The job currently being watched, if any.
+    playback: Option<RunPlayback>,
+    /// Crit punctuation, hung over the room it happened in.
+    floats: FloatingTextLayer,
     notifications: NotificationManager,
     events: EventBus<UiAction>,
     save_exists: bool,
@@ -44,6 +53,8 @@ impl Game {
             data,
             session,
             selection: Selection::default(),
+            playback: None,
+            floats: FloatingTextLayer::new(),
             notifications,
             events: EventBus::new(),
             save_exists: false,
@@ -71,6 +82,18 @@ impl Game {
             "planning" | "plan" => {
                 self.open_capture_plan();
                 Screen::Planning
+            }
+            "run" => {
+                self.run_capture_job();
+                if let Some(report) = self.selection.last_report.take() {
+                    self.playback = Some(RunPlayback::new(report));
+                    // Park the capture mid-job: first door read out, second in
+                    // the air, so the shot shows the plan lighting up.
+                    if let Some(playback) = self.playback.as_mut() {
+                        playback.update(4.0, false);
+                    }
+                }
+                Screen::Run
             }
             "results" => {
                 self.run_capture_job();
@@ -113,13 +136,17 @@ impl Game {
 
     pub fn update(&mut self, dt: f32) {
         self.notifications.update(dt);
+        self.floats.update(dt);
+        self.advance_run(dt);
 
         if is_key_pressed(KeyCode::Tab) {
             let next = match self.selection.screen {
                 Screen::Crew => Screen::Board,
                 Screen::Board => Screen::Results,
-                // Tab never walks into or out of a plan under construction.
+                // Tab never walks out of a plan under construction, and never
+                // out of a run in progress.
                 Screen::Planning => Screen::Planning,
+                Screen::Run => Screen::Run,
                 Screen::Results => Screen::Crew,
             };
             self.events.push(UiAction::ShowScreen(next));
@@ -148,10 +175,12 @@ impl Game {
             selected_member: self.selection.member.as_deref(),
             selected_target: self.selection.target.as_deref(),
             draft: self.selection.draft.as_ref(),
+            playback: self.playback.as_ref(),
             last_report: self.selection.last_report.as_ref(),
             save_exists: self.save_exists,
             ui: &virtual_ui,
         });
+        self.floats.draw();
         end_virtual_ui_frame();
 
         for action in actions {
@@ -177,18 +206,74 @@ impl Game {
         );
 
         match command {
-            Some(SaveCommand::NewCampaign) => self.new_campaign(),
-            Some(SaveCommand::Save) => self.save_game(),
-            Some(SaveCommand::Load) => self.load_game(),
-            Some(SaveCommand::Delete) => self.delete_save(),
+            Some(GameCommand::NewCampaign) => self.new_campaign(),
+            Some(GameCommand::Save) => self.save_game(),
+            Some(GameCommand::Load) => self.load_game(),
+            Some(GameCommand::Delete) => self.delete_save(),
+            Some(GameCommand::StartRun(report)) => self.start_run(*report),
+            Some(GameCommand::SkipRun) => {
+                if let Some(playback) = self.playback.as_mut() {
+                    playback.skip_to_end();
+                }
+            }
+            Some(GameCommand::FinishRun) => self.finish_run(),
             None => {}
         }
+    }
+
+    fn start_run(&mut self, report: crate::sim::JobReport) {
+        self.floats.clear();
+        self.playback = Some(RunPlayback::new(report));
+        self.selection.screen = Screen::Run;
+    }
+
+    /// Walk the run forward and punctuate each critical as its verdict lands.
+    fn advance_run(&mut self, dt: f32) {
+        let Some(playback) = self.playback.as_mut() else {
+            return;
+        };
+
+        let was_phase = playback.phase();
+        let was_door = playback.door_index();
+        let fast_forward = is_key_down(KeyCode::Space);
+        playback.update(dt, fast_forward);
+
+        if !playback.verdict_just_landed(was_phase, was_door) {
+            return;
+        }
+        let _ = was_phase;
+
+        let index = playback.door_index();
+        let doors = playback.report().doors.len();
+        let Some(door) = playback.current_door() else {
+            return;
+        };
+        let (text, color) = match door.result.outcome {
+            Outcome::CriticalSuccess => ("CRITICAL", Color::new(0.46, 0.88, 0.56, 1.0)),
+            Outcome::CriticalFailure => ("DISASTER", Color::new(0.92, 0.36, 0.34, 1.0)),
+            _ => return,
+        };
+
+        if let Some(center) = ui::run::room_center(index, doors) {
+            self.floats.spawn(text, center, color);
+        }
+    }
+
+    fn finish_run(&mut self) {
+        let Some(playback) = self.playback.take() else {
+            return;
+        };
+        self.floats.clear();
+        self.selection.last_report = Some(playback.into_report());
+        self.selection.screen = Screen::Results;
     }
 
     fn new_campaign(&mut self) {
         let seed = new_seed();
         self.session = GameSession::new(&self.data.config, &self.data, seed);
         self.selection = Selection::default();
+        self.playback = None;
+        self.floats.clear();
         self.notifications
             .info(format!("New campaign opened on seed {}", seed));
     }
@@ -223,6 +308,8 @@ impl Game {
             Ok(save) => {
                 self.session = GameSession::from_save(save);
                 self.selection = Selection::default();
+                self.playback = None;
+                self.floats.clear();
                 self.notifications.success("Campaign picked back up");
                 self.refresh_save_state();
             }

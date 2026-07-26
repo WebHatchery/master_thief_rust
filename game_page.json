@@ -12,6 +12,7 @@
   "controls": [
     { "key": "Mouse", "desc": "Select crew and marks, case a target, assign each door, commit" },
     { "key": "Tab", "desc": "Cycle crew / the board / last job" },
+    { "key": "Space", "desc": "Hold to fast-forward a running job" },
     { "key": "S / L", "desc": "Save / load the campaign" }
   ],
   "details": [
