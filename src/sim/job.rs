@@ -59,6 +59,9 @@ pub struct JobReport {
     pub success: bool,
     /// Equipment ids carried out along with the money.
     pub loot: Vec<String>,
+    /// Doors a better hand was free for. Empty for a hand-made plan, which is
+    /// the player's own business (GDD 5.3).
+    pub delegation_misses: Vec<super::delegation::DelegationMiss>,
     pub payout: i64,
     pub notoriety_gained: i32,
     pub reputation_gained: i32,
@@ -146,6 +149,14 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
         return empty_report(plan);
     };
 
+    // Audited before a single die is thrown, while the crew is still in the
+    // state the plan was made against.
+    let delegation_misses = if plan.delegated {
+        super::delegation::audit(session, data, &target, plan)
+    } else {
+        Vec::new()
+    };
+
     let crew_on_job = plan.crew_on_job();
     let mut doors = Vec::new();
     let mut queue: Vec<(String, bool)> = plan
@@ -192,7 +203,7 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
         doors.push(outcome);
     }
 
-    settle(session, data, &target, plan, doors)
+    settle(session, data, &target, plan, doors, delegation_misses)
 }
 
 /// Everybody else on the job watched that door. What they made of it depends
@@ -343,12 +354,14 @@ fn missed_door(encounter: &Encounter) -> DoorOutcome {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn settle(
     session: &mut GameSession,
     data: &GameData,
     target: &HeistTarget,
     plan: &JobPlan,
     doors: Vec<DoorOutcome>,
+    delegation_misses: Vec<super::delegation::DelegationMiss>,
 ) -> JobReport {
     let passed = doors.iter().filter(|door| door.result.passed()).count();
     let rate = if doors.is_empty() {
@@ -396,6 +409,7 @@ fn settle(
         doors,
         success,
         loot,
+        delegation_misses,
         payout: net,
         notoriety_gained: notoriety,
         reputation_gained: reputation,
@@ -421,6 +435,7 @@ fn empty_report(plan: &JobPlan) -> JobReport {
         doors: Vec::new(),
         success: false,
         loot: Vec::new(),
+        delegation_misses: Vec::new(),
         payout: 0,
         notoriety_gained: 0,
         reputation_gained: 0,

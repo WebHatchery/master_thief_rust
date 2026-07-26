@@ -17,6 +17,23 @@ pub struct CampaignLog {
     pub injuries_taken: usize,
     pub loot_found: usize,
     pub hires: usize,
+    /// Every narrative line the campaign printed, in order. GDD 13 calls M6
+    /// done when a full campaign rarely repeats one, so the campaign has to
+    /// remember what it said.
+    pub narrative_lines: Vec<String>,
+}
+
+impl CampaignLog {
+    /// Share of printed lines that were the first time the player saw them.
+    pub fn narrative_freshness(&self) -> f32 {
+        if self.narrative_lines.is_empty() {
+            return 1.0;
+        }
+        let mut unique = self.narrative_lines.clone();
+        unique.sort();
+        unique.dedup();
+        unique.len() as f32 / self.narrative_lines.len() as f32
+    }
 }
 
 /// Play `weeks` of campaign the way an unattended fixer would: case what the
@@ -64,6 +81,8 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
                         log.loot_found += report.loot.len();
                         log.injuries_taken +=
                             report.doors.iter().filter(|d| d.injury.is_some()).count();
+                        log.narrative_lines
+                            .extend(report.doors.iter().map(|d| d.narrative.clone()));
                     }
                 }
             }
@@ -130,6 +149,25 @@ mod tests {
         assert!(
             session.reputation > 0,
             "the outfit's name never got anywhere"
+        );
+    }
+
+    #[test]
+    fn a_full_campaign_rarely_repeats_a_narrative_line() {
+        // GDD 13, M6's done-when. A campaign that keeps telling the same three
+        // sentences has no texture, however good the dice underneath are.
+        let (_, _, log) = campaign(20_260_726, 20);
+
+        assert!(
+            log.narrative_lines.len() > 40,
+            "only {} lines printed in twenty weeks",
+            log.narrative_lines.len()
+        );
+        let freshness = log.narrative_freshness();
+        assert!(
+            freshness >= 0.75,
+            "only {:.0}% of the campaign's lines were new",
+            freshness * 100.0
         );
     }
 

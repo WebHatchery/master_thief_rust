@@ -5,43 +5,92 @@
       "Textbook, and then some. The crew is out before the window opened.",
       "Whatever was supposed to be hard about this was not.",
       "Clean enough that it will be told wrong for years.",
-      "The job gives up more than it was asked for."
+      "The job gives up more than it was asked for.",
+      "Somebody was owed a good night, and this was it."
     ],
     "stealth": [
       "Not one camera, not one floorboard, not one witness.",
       "The route is walked twice and remembered as empty both times.",
       "They pass a guard close enough to smell his coffee.",
-      "The building never notices it had company."
+      "The building never notices it had company.",
+      "A door is opened, held, and closed without a sound in any of it.",
+      "They move through the dark like it was a corridor they lived in.",
+      "The dust on the sill is the only thing that knows.",
+      "Three floors, and not a single light comes on behind them.",
+      "The patrol walks their route and never once looks left.",
+      "They are gone before the thought of them arrives.",
+      "Even the dog does not lift its head.",
+      "Whoever swept this floor will find it exactly as they left it."
     ],
     "athletics": [
       "The line is set, the drop is silent, and the way out is already rigged.",
       "Four storeys in under a minute, and the parapet holds.",
       "The gap gets crossed like it was a step.",
-      "They land soft, on the balls of the feet, and keep moving."
+      "They land soft, on the balls of the feet, and keep moving.",
+      "The climb takes less time than the argument about who should do it.",
+      "Every hold is where they said it would be.",
+      "They go over the rail in one movement and are already walking.",
+      "The rope is cut, coiled and pocketed before the echo settles.",
+      "A ledge that should not take a person's weight takes theirs.",
+      "The descent is so controlled it looks lazy.",
+      "They vault the counter and land without breaking stride.",
+      "Whatever they used to do for a living, it shows here."
     ],
     "combat": [
       "Two down, neither hurt badly, and neither able to describe anyone.",
       "It ends before it is a fight, which is the only way it should end.",
       "One sap, one shoulder, one very quiet corridor.",
-      "Nobody files a report on being surprised by nothing."
+      "Nobody files a report on being surprised by nothing.",
+      "He is asleep before he understands he is not alone.",
+      "The radio is taken out of his hand before he thinks to use it.",
+      "Three seconds, and the hallway is theirs.",
+      "Nobody is hurt in a way that will matter in the morning.",
+      "The guard wakes up warm, comfortable, and missing an hour.",
+      "It is over so fast the second one never turns around.",
+      "They put him down like folding a coat.",
+      "The only mark left is on his pride, and he will not mention it."
     ],
     "lockpicking": [
       "The last pin sets before the tension wrench has finished turning.",
       "The door opens like it was expecting them.",
       "The case comes open, the plate never knows, and the swap is perfect.",
-      "Whoever fitted this lock would want to watch that."
+      "Whoever fitted this lock would want to watch that.",
+      "Eleven seconds. The manufacturer advertises four minutes.",
+      "The tumbler gives up without ever admitting it was asked.",
+      "They open it, close it, and open it again to be sure it was that easy.",
+      "The pick comes out cleaner than it went in.",
+      "A lock that has held for thirty years holds for nine more seconds.",
+      "Not a scratch on the plate, not a mark on the housing.",
+      "They feel the shear line the way other people read a sentence.",
+      "The safe swings open on a hand that never seemed to hurry."
     ],
     "hacking": [
       "The log rewrites itself into a scheduled maintenance window.",
       "Every camera on the floor agrees the corridor was empty.",
       "The system lets them in, and then forgets both of them.",
-      "The door reads a thumbprint that went home at six."
+      "The door reads a thumbprint that went home at six.",
+      "The intrusion is logged as a firmware update, and signed.",
+      "They own the building's opinion of itself for four minutes.",
+      "The alarm is disarmed, tested, and re-armed behind them.",
+      "Somebody's credentials get used politely and put back.",
+      "The network hands over the floor plan like a receptionist.",
+      "Access, copy, close — and the session never existed.",
+      "The panel throws no error because it has nothing to complain about.",
+      "It goes so smoothly they check twice that it worked."
     ],
     "social": [
       "They are walked in, introduced, and offered a drink.",
       "The story is better than the truth and holds up longer.",
       "By the end of it he is asking when they will visit again.",
-      "The crew leaves with a name badge and an invitation."
+      "The crew leaves with a name badge and an invitation.",
+      "She apologises for the delay and holds the lift.",
+      "Two minutes of conversation buys a key and a floor number.",
+      "He tells them things nobody thought to ask about.",
+      "They are remembered fondly and described inaccurately.",
+      "The lie is so comfortable he helps carry it.",
+      "By the third sentence they are the most reasonable person in the room.",
+      "Somebody vouches for them who has no idea who they are.",
+      "The doorman waves off the sign-in sheet as a formality."
     ]
   },
   "success": {
@@ -50,43 +99,92 @@
       "It goes the way it was drawn on the board.",
       "Professional, unremarkable, and finished on time.",
       "No noise, no marks, no reason to look twice.",
-      "The plan holds, which is the whole point of a plan."
+      "The plan holds, which is the whole point of a plan.",
+      "Competent, unhurried, and over."
     ],
     "stealth": [
       "Three rooms, no shadow out of place.",
       "The patrol passes four metres away and keeps walking.",
       "They move in the noise of the building and are part of it.",
-      "The floor takes the weight without comment."
+      "The floor takes the weight without comment.",
+      "A slow count of thirty behind a pillar, and the corridor is clear.",
+      "They wait out the sweep and go when it is time.",
+      "Nothing is knocked, nothing is moved, nothing is noticed.",
+      "The route holds, and so do their nerves.",
+      "They keep to the wall and the wall keeps them.",
+      "One held breath, and it passes.",
+      "The camera arc is timed and beaten by two seconds.",
+      "Quiet work in a loud building."
     ],
     "athletics": [
       "Up, over, and down with breath to spare.",
       "The rig holds and the descent is controlled all the way.",
       "The roller door is cleared before the shift bell.",
-      "Hard work, done properly, and quietly."
+      "Hard work, done properly, and quietly.",
+      "The fence takes a moment and gives it back.",
+      "They make the ledge on the second reach and hold it.",
+      "It is a long climb and it is finished without drama.",
+      "The drop is taken on bent knees and absorbed.",
+      "A gap that needed a run-up gets one.",
+      "The gutter holds, which was the whole gamble.",
+      "They are over the wall while the argument is still going.",
+      "Sweat, but no noise."
     ],
     "combat": [
       "Short, decisive, and over before anyone reaches a radio.",
       "One down, out of sight, and breathing.",
       "The confrontation resolves without a shot or a shout.",
-      "They put him somewhere comfortable and take the keys."
+      "They put him somewhere comfortable and take the keys.",
+      "A grip, a turn, and a conversation that never happens.",
+      "It is settled with a hand on a wrist.",
+      "He goes down the way people do when they are surprised.",
+      "Nobody has to explain a broken jaw to anybody.",
+      "The scuffle lasts four seconds and leaves one bruise.",
+      "They take the baton off him and hand it back later.",
+      "It stays quiet, which was the only requirement.",
+      "One less problem, laid out neatly behind a door."
     ],
     "lockpicking": [
       "Sixty seconds, and the tumbler gives up its argument.",
       "The cabinet opens without a scratch on the escutcheon.",
       "Steady tension, patient rake, open door.",
-      "The safe yields on the second attempt and stays quiet."
+      "The safe yields on the second attempt and stays quiet.",
+      "It takes longer than the file said and works anyway.",
+      "The pins set one after another, unhurried.",
+      "The bolt slides back with a sound smaller than a cough.",
+      "A decent lock, respectfully beaten.",
+      "The case opens and the plate stays asleep.",
+      "They work it patiently and it comes.",
+      "Two picks, one wrench, and no fuss.",
+      "The door gives, and it is not even close to an alarm."
     ],
     "hacking": [
       "The feed loops for ninety seconds, which is eighty more than needed.",
       "The controller accepts the credentials without asking twice.",
       "In, copied, and out, with the session closed behind them.",
-      "The lockout timer resets and nobody is paged."
+      "The lockout timer resets and nobody is paged.",
+      "The panel opens, the wire goes where it should, and the light turns green.",
+      "One reboot, well timed, and the door forgets its instructions.",
+      "The badge reader is convinced by a badge it has never seen.",
+      "The camera looks at the wrong thirty seconds.",
+      "A clean entry, and a log that reads like a Tuesday.",
+      "It takes three attempts, and the third is not flagged.",
+      "The system opens up under a patient hand.",
+      "Nothing breaks; nothing needs to."
     ],
     "social": [
       "The badge is glanced at, not read.",
       "They are believed, which is all that was required.",
       "A polite conversation, and a door held open at the end of it.",
-      "The right name, dropped at the right moment."
+      "The right name, dropped at the right moment.",
+      "He decides it is not his problem and goes back to his crossword.",
+      "The story is dull enough that nobody wants more of it.",
+      "She is too busy to care, and that is enough.",
+      "They are waved through with a nod.",
+      "The paperwork looks right and nobody looks harder.",
+      "Two names and a floor number, given freely.",
+      "He is glad of the company more than he is suspicious of it.",
+      "Nobody asks the one question that would have ended it."
     ]
   },
   "neutral": {
@@ -95,43 +193,92 @@
       "The door opens. Something about it will be noticed tomorrow.",
       "Through, but slower than planned and with less margin.",
       "It works, and everyone knows how close it was.",
-      "A win by the width of a wrench."
+      "A win by the width of a wrench.",
+      "Not a disaster. Not a story worth telling either."
     ],
     "stealth": [
       "A footfall lands wrong, and the corridor stays empty anyway.",
       "They freeze for eleven seconds that cost more than the job pays.",
       "Something is knocked, caught, and set down carefully.",
-      "The guard turns at the wrong moment and sees an empty hall."
+      "The guard turns at the wrong moment and sees an empty hall.",
+      "A door closes harder than intended, and nobody comes.",
+      "They are half a second from being seen, twice.",
+      "The floor complains and is not believed.",
+      "Somebody's coat catches, and the seam gives instead of the shelf.",
+      "They make it, sweating, and both know it.",
+      "The route works, but only because a light was out.",
+      "A shadow moves when it should not, and no one is looking.",
+      "Close enough that nobody speaks for a minute afterwards."
     ],
     "athletics": [
       "The grip slips, and holds on the second try.",
       "A hard landing, absorbed badly, and walked off.",
       "They make it up, but the parapet loses some render.",
-      "The gap gets crossed with nothing to spare."
+      "The gap gets crossed with nothing to spare.",
+      "The rope burns a palm and does its job.",
+      "They arrive at the top out of breath and out of patience.",
+      "One foot goes through something that was not load-bearing.",
+      "A drainpipe gives an inch and then decides not to.",
+      "It takes two attempts and a boost.",
+      "They land on the wrong foot and limp the next stretch.",
+      "The fence is cleared, loudly, by somebody who is not built for it.",
+      "It works. It should not have."
     ],
     "combat": [
       "It becomes a fight, briefly, and ends in a draw nobody wanted.",
       "He goes down, but not before the radio hits the floor.",
       "They get past. Somebody will have a story and a bruise.",
-      "Messy, loud, and survivable."
+      "Messy, loud, and survivable.",
+      "Two of them, one of him, and it still takes too long.",
+      "He is put down on the third try and remembers a face.",
+      "A chair goes over. Nobody comes, but somebody heard it.",
+      "It ends with both of them on the floor and one getting up.",
+      "The scuffle is won and the noise is not.",
+      "They win it, and lose four minutes doing so.",
+      "A knuckle splits, and the job goes on.",
+      "Not clean. Not caught either."
     ],
     "lockpicking": [
       "The lock opens on the fourth attempt, and a pick stays inside it.",
       "It gives, eventually, and leaves a scratch that will be seen.",
       "Two minutes over, and the sweat is a problem for the grip.",
-      "Open, but the housing is bent and will not close again."
+      "Open, but the housing is bent and will not close again.",
+      "The bolt sticks, then goes, and takes some paint with it.",
+      "It opens on stubbornness rather than skill.",
+      "A pin sets late and the whole thing has to be reset twice.",
+      "The plate is scored where a steady hand would have left nothing.",
+      "The safe opens, and the dial will never read true again.",
+      "It works, and the locksmith will know somebody was here.",
+      "They force the last of it, which was not the plan.",
+      "Open, at the cost of a tool and a temper."
     ],
     "hacking": [
       "In, but the session is logged and the log is not clean.",
       "The loop holds for forty seconds, which is barely enough.",
       "Access granted, alert raised, alert dismissed, for now.",
-      "The system lets them through and files a question about it."
+      "The system lets them through and files a question about it.",
+      "The panel resets twice and takes the credentials on the third pass.",
+      "It works, and leaves a timestamp somebody will read.",
+      "The camera comes back early and catches an empty corridor.",
+      "The door opens on a credential that will be revoked by morning.",
+      "A warning fires somewhere and goes to an unread inbox.",
+      "They are in, but the session is noisy and they know it.",
+      "The lock disengages, and so does the audit trail, badly.",
+      "It holds together long enough. Just."
     ],
     "social": [
       "He believes about half of it, and lets them past anyway.",
       "The story wobbles and is propped up in time.",
       "She waves them through with a look that will be remembered.",
-      "Nobody is convinced; nobody quite objects either."
+      "Nobody is convinced; nobody quite objects either.",
+      "The name is nearly right, and nearly is enough tonight.",
+      "He asks a second question and gets a worse answer, and shrugs.",
+      "They talk their way past a man who will think about it later.",
+      "It works, and everyone in the room knows something is off.",
+      "The badge is looked at properly and handed back slowly.",
+      "She lets it go because it is nearly the end of her shift.",
+      "They get through on tone rather than content.",
+      "A conversation survived rather than won."
     ]
   },
   "failure": {
@@ -140,43 +287,92 @@
       "A setback. Recoverable, expensive, and embarrassing.",
       "The plan meets the building and the building wins this one.",
       "They fall back and rethink with less time than before.",
-      "No injury, no arrest, no progress."
+      "No injury, no arrest, no progress.",
+      "It fails the ordinary way, which is the least interesting way."
     ],
     "stealth": [
       "A door closes louder than it should and the corridor answers.",
       "They are seen — not identified, but seen.",
       "The floor gives them away and there is nowhere to be.",
-      "The patrol turns early and there is no shadow deep enough."
+      "The patrol turns early and there is no shadow deep enough.",
+      "A torch beam finds a shoe and stops.",
+      "Something falls, and the whole wing hears which floor it fell on.",
+      "The camera arc was mistimed by four seconds, and four is plenty.",
+      "They are halfway across when the lights come up.",
+      "A radio crackles behind them and does not stop crackling.",
+      "The route was clear an hour ago and is not clear now.",
+      "Somebody looks up at exactly the wrong moment.",
+      "They back out, and the building keeps the memory."
     ],
     "athletics": [
       "The grip fails and the drop is short but badly taken.",
       "The rig slips a metre and everything above it hears about it.",
       "Halfway up, out of strength, and back down again.",
-      "A bad landing, a turned ankle, and a slow walk to the next door."
+      "A bad landing, a turned ankle, and a slow walk to the next door.",
+      "The ledge crumbles and takes the plan with it.",
+      "They come off the wall and land badly on a bin.",
+      "The gap is wider than the file said, by about a boot.",
+      "The rope is six feet short and there is no fixing that tonight.",
+      "They get stuck at the overhang and have to be talked down.",
+      "A hand slips on wet steel and the whole climb resets.",
+      "The fence wins, twice.",
+      "They are too tired for this and it shows in the first metre."
     ],
     "combat": [
       "It goes to ground, badly, and the radio gets used.",
       "Two of them and both still standing when it matters.",
       "He takes the hit and shouts anyway.",
-      "The fight is lost quietly, which is the only mercy in it."
+      "The fight is lost quietly, which is the only mercy in it.",
+      "They swing, miss, and spend the next ten seconds regretting it.",
+      "He is bigger than the file suggested and considerably more awake.",
+      "The sap connects with a shoulder and nothing useful.",
+      "It becomes a wrestle, and wrestles are loud.",
+      "Somebody gets an arm free and finds the alarm with it.",
+      "They break off and run, which is at least a decision.",
+      "He holds his ground and calls it in while holding it.",
+      "The wrong person got put on this door and everybody knows it now."
     ],
     "lockpicking": [
       "The pick snaps in the keyway and the lock is now a wall.",
       "The tumbler will not set, and the clock does not care.",
       "The plate registers the lift and starts a very short countdown.",
-      "Five minutes of nothing, and the shift change coming."
+      "Five minutes of nothing, and the shift change coming.",
+      "The lock is newer than the file, and better.",
+      "Their hands are shaking and the pins know it.",
+      "It is a make they have never seen, and it shows.",
+      "The wrench slips for the ninth time and they stop counting.",
+      "The bolt moves half a millimetre and then refuses.",
+      "There is a second lock behind the first, and no time for it.",
+      "The keyway is packed with something, deliberately.",
+      "They give it up and take the loss."
     ],
     "hacking": [
       "The credentials are rejected and the rejection is interesting to somebody.",
       "The session drops and the reconnect is flagged.",
       "The camera comes back up early, pointed the wrong way for them.",
-      "Access denied, ticket filed, name attached."
+      "Access denied, ticket filed, name attached.",
+      "The port is dead, and the live one is behind a locked panel.",
+      "The firmware is a version newer than everything they prepared.",
+      "The lockout hits at three attempts and holds for an hour.",
+      "It asks for a second factor that walked out at six.",
+      "The network segment is not the one the survey promised.",
+      "They get a shell and lose it before it is worth anything.",
+      "The console asks a question nobody has the answer to.",
+      "It fails cleanly, and the log records exactly how."
     ],
     "social": [
       "He does not buy it, and he is polite about calling the desk.",
       "The name is wrong, and she knows exactly how wrong.",
       "A perfectly good story told to a person who checks things.",
-      "The conversation ends with a phone being picked up."
+      "The conversation ends with a phone being picked up.",
+      "He asks where they parked, and there is no good answer.",
+      "The badge is the right colour and the wrong year.",
+      "She has worked here eleven years and knows every face but this one.",
+      "The story has a hole in it and he walks straight into it.",
+      "They are asked to wait, which is the same as being caught, slower.",
+      "He smiles, agrees, and does not move out of the doorway.",
+      "The accent slips at the worst possible moment.",
+      "It ends with a very courteous refusal and a note in a book."
     ]
   },
   "critical_failure": {
@@ -185,43 +381,92 @@
       "It falls apart in the worst way and takes the schedule with it.",
       "This is the one they will not talk about afterwards.",
       "The job stops being a job and becomes an escape.",
-      "Catastrophe, and it is nobody's fault but the dice."
+      "Catastrophe, and it is nobody's fault but the dice.",
+      "Whatever the opposite of the plan was, this is it."
     ],
     "stealth": [
       "They walk into a guard, at a distance where explaining is not an option.",
       "The alarm goes, and the building's lights come on floor by floor.",
       "A cleaner opens the door they are standing behind.",
-      "Every camera in the wing gets a clear, well-lit face."
+      "Every camera in the wing gets a clear, well-lit face.",
+      "A whole shelf comes down, and then another one.",
+      "The fire door they chose was alarmed, and enthusiastically.",
+      "They are caught in a stairwell with people above and below.",
+      "Somebody is standing in the dark waiting, and has been for a while.",
+      "The floor gives, loudly, into the office underneath.",
+      "They knock over the one thing in the room that was irreplaceable.",
+      "The torch beam finds a face and holds it.",
+      "The whole building wakes at once, and knows where to look."
     ],
     "athletics": [
       "The line parts at eleven metres.",
       "The parapet gives, and so does a wrist.",
       "The fall is long enough to be heard on the street.",
-      "They land badly, and the ankle will not take weight."
+      "They land badly, and the ankle will not take weight.",
+      "The anchor pulls out of the brick, taking the brick with it.",
+      "They go through the skylight rather than past it.",
+      "A shoulder meets a stair rail and loses.",
+      "The rope holds; the harness does not.",
+      "They come down in the middle of the loading bay, in the light.",
+      "The drop is two metres more than anyone measured.",
+      "Something snaps, and it is not equipment.",
+      "The climb ends in the worst place a climb can end."
     ],
     "combat": [
       "It becomes exactly the kind of incident this crew does not do.",
       "Somebody is badly hurt, and it is not the guard.",
       "A weapon is drawn, and after that nothing is quiet.",
-      "Backup is called on an open channel with a description attached."
+      "Backup is called on an open channel with a description attached.",
+      "The fight spills into a corridor with witnesses at both ends.",
+      "He gets a hand to the panic strip and leans on it.",
+      "Two more come around the corner, and then a third.",
+      "It goes to the floor, and the floor is where the alarm is.",
+      "Somebody's blood ends up somewhere it can be tested.",
+      "The guard is hurt in a way that will be in a newspaper.",
+      "They lose the fight and the exit in the same minute.",
+      "This is how a burglary becomes something with a longer sentence."
     ],
     "lockpicking": [
       "The drill slips, the housing screams, and the floor wakes up.",
       "The case seals and locks with the piece still inside it.",
       "The plate goes off, and it is the loud kind.",
-      "Broken pick, broken lock, and a door that is now evidence."
+      "Broken pick, broken lock, and a door that is now evidence.",
+      "The relocker fires and turns the safe into a very heavy cupboard.",
+      "The glass goes, and the glass was the alarm.",
+      "They snap the pick in a way that jams the mechanism forever.",
+      "The tension wrench slips and gouges a signature into the plate.",
+      "The bolt work seizes with the door half open and them half through.",
+      "A second, hidden switch trips, and it has its own siren.",
+      "The cabinet tips, and everything in it announces itself.",
+      "Whatever was in there is now sealed in there until a locksmith comes."
     ],
     "hacking": [
       "The intrusion is caught live and the floor goes to lockdown.",
       "The shutters come down with the crew on the wrong side of them.",
       "Every door in the building relocks at once.",
-      "The system logs the attempt, the source, and the time, in that order."
+      "The system logs the attempt, the source, and the time, in that order.",
+      "The screen goes red and somebody in another city sees it.",
+      "The panel shorts and takes the lift controller with it.",
+      "An automated call goes out and is answered on the second ring.",
+      "The credentials burn, and they were expensive.",
+      "The network segments itself and strands them behind a locked door.",
+      "A tamper switch fires that nobody knew was there.",
+      "The deck bricks itself, mid-transfer, with everything on it.",
+      "Somebody is watching the same console, live, and starts typing back."
     ],
     "social": [
       "He recognises the face, and he has seen it on a notice.",
       "The lie collapses in front of three people who all repeat it.",
       "She smiles, agrees, and has already pressed the button.",
-      "A witness panics, runs, and is believed."
+      "A witness panics, runs, and is believed.",
+      "The name they used belongs to someone who is standing right there.",
+      "He asks for a supervisor, and one comes immediately.",
+      "The story is contradicted by a poster on the wall behind them.",
+      "She has already called upstairs and is keeping them talking.",
+      "Somebody says the name loudly, and the room turns.",
+      "The badge is confiscated, and it had a real serial number on it.",
+      "He was warned about exactly this yesterday, and remembers.",
+      "It ends with a description that is accurate in every detail."
     ]
   }
 }

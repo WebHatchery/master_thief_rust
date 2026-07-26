@@ -181,26 +181,40 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
     }
 
     let note = if report.delegated {
-        "Delegated: the crew picked their own doors. A hand-made plan would have put better people on the hard ones."
+        crate::sim::delegation::summarise(&report.delegation_misses)
     } else {
-        "Planned by you, door by door."
+        "Planned by you, door by door.".to_owned()
     };
     draw_text_block(
-        note,
+        &note,
         content.x,
         content.y + 172.0,
         content.w,
-        60.0,
+        56.0,
         15.0,
         3.0,
         dark::TEXT_DIM,
     );
 
+    // Naming the hand who was standing free is the whole point: it is what
+    // teaches the planning screen (GDD 5.3).
+    for (index, miss) in report.delegation_misses.iter().take(3).enumerate() {
+        draw_ui_text_ex(
+            &format!(
+                "{}: {} ({:+}) — {} was free ({:+})",
+                miss.encounter_name, miss.chosen, miss.chosen_bonus, miss.better, miss.better_bonus
+            ),
+            content.x,
+            content.y + 226.0 + index as f32 * 18.0,
+            TextStyle::new(13.0, Color::new(0.88, 0.72, 0.44, 1.0)).params(),
+        );
+    }
+
     if !report.loot.is_empty() {
         draw_ui_text_ex(
             "Carried out",
             content.x,
-            content.y + 240.0,
+            content.y + 296.0,
             TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
         );
         let names: Vec<&str> = report
@@ -220,9 +234,9 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
 ",
             ),
             content.x,
-            content.y + 248.0,
+            content.y + 304.0,
             content.w,
-            60.0,
+            56.0,
             14.0,
             3.0,
             Color::new(0.56, 0.82, 0.60, 1.0),

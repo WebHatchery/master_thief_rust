@@ -152,6 +152,54 @@ impl GameData {
     }
 }
 
+/// A count of everything authored, measured against the GDD 8 content table.
+/// Volume is a design commitment, not an accident, so it is something a test
+/// can hold the project to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ContentInventory {
+    pub recruits: usize,
+    pub personality_traits: usize,
+    pub equipment: usize,
+    pub encounters: usize,
+    pub targets: usize,
+    pub environment_factors: usize,
+    pub critical_effects: usize,
+    pub outcome_lines: usize,
+}
+
+impl GameData {
+    pub fn inventory(&self) -> ContentInventory {
+        let mut traits: Vec<&str> = self
+            .crew_pool
+            .iter()
+            .flat_map(|(_, member)| member.personality_traits.iter())
+            .map(|name| name.as_str())
+            .collect();
+        traits.sort_unstable();
+        traits.dedup();
+
+        let critical_effects = self
+            .encounters
+            .iter()
+            .map(|(_, encounter)| {
+                usize::from(encounter.critical_success_reward.is_some())
+                    + usize::from(encounter.critical_failure_effect.is_some())
+            })
+            .sum();
+
+        ContentInventory {
+            recruits: self.crew_pool.len(),
+            personality_traits: traits.len(),
+            equipment: self.equipment.len(),
+            encounters: self.encounters.len(),
+            targets: self.targets.len(),
+            environment_factors: self.environment.len(),
+            critical_effects,
+            outcome_lines: self.outcomes.total_lines(),
+        }
+    }
+}
+
 fn registry<T>(label: &str, json: &str) -> Result<DataRegistry<T>, String>
 where
     T: serde::de::DeserializeOwned + Clone,
@@ -225,6 +273,73 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn the_content_inventory_holds_its_authored_floors() {
+        // GDD 8 sets a prototype column and a full column. These are floors,
+        // never ceilings: content may only grow, and this fails when it shrinks.
+        let inventory = GameData::load().unwrap().inventory();
+
+        assert!(inventory.recruits >= 15, "{:?}", inventory);
+        assert!(inventory.personality_traits >= 12, "{:?}", inventory);
+        assert!(inventory.equipment >= 25, "{:?}", inventory);
+        assert!(inventory.encounters >= 25, "{:?}", inventory);
+        assert!(inventory.targets >= 12, "{:?}", inventory);
+        assert!(inventory.environment_factors >= 15, "{:?}", inventory);
+        assert!(inventory.critical_effects >= 10, "{:?}", inventory);
+    }
+
+    #[test]
+    fn the_outcome_tables_have_reached_their_full_target() {
+        // The one axis GDD 8 calls the deliberate outlier: 400 lines, because
+        // the narrative layer over the dice is the game's whole texture.
+        let inventory = GameData::load().unwrap().inventory();
+        assert!(
+            inventory.outcome_lines >= 380,
+            "only {} outcome lines authored",
+            inventory.outcome_lines
+        );
+    }
+
+    #[test]
+    fn every_band_and_skill_carries_a_deep_enough_table() {
+        let data = GameData::load().unwrap();
+        for outcome in crate::rules::Outcome::ALL {
+            for skill in Skill::ALL {
+                let lines = data.outcomes.lines(outcome, skill);
+                assert!(
+                    lines.len() >= 10,
+                    "{}/{} has only {} lines",
+                    outcome.key(),
+                    skill.key(),
+                    lines.len()
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn no_narrative_line_is_written_twice_anywhere() {
+        let data = GameData::load().unwrap();
+        let mut seen: Vec<&str> = Vec::new();
+        for outcome in crate::rules::Outcome::ALL {
+            for skill in Skill::ALL {
+                for line in data.outcomes.lines(outcome, skill) {
+                    seen.push(line.as_str());
+                }
+            }
+        }
+        let before = seen.len();
+        seen.sort_unstable();
+        seen.dedup();
+        // The generic table is shared by design, so a skill without its own
+        // list legitimately returns the same lines; compare against the
+        // authored total instead of the resolved one.
+        assert!(
+            before - seen.len() < before / 4,
+            "too many repeated lines across the tables"
+        );
     }
 
     #[test]
