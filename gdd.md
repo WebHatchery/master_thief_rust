@@ -149,9 +149,18 @@ Job length: ~1 minute to resolve; a week is 3–5 minutes. A campaign runs 4–8
 
 ## 4. Player Role & Verbs
 
-The player is the fixer. Verbs: **recruit**, **case**, **equip**, **assign**, **commit**,
-**rest**, **treat**, **train** (spend progression points), **delegate** (auto-assign a
-job), **advance the week**.
+The player is the fixer. Verbs: **recruit**, **let go**, **case**, **equip**, **assign**,
+**commit**, **rest**, **treat**, **train** (spend progression points), **delegate**
+(auto-assign a job), **advance the week**.
+
+*Let go* exists because *recruit* acquired a permanent price. Once a hand draws a weekly
+retainer, taking one on is a standing commitment, and for a while there was no way out of
+one: a hand the outfit could not use and could not afford could only be shed by stopping
+paying the **whole** crew until that one quit. Rewarding a fixer for starving everybody is
+not a decision, it is an exploit. Paying somebody off costs their notice in cash and costs
+goodwill with everybody still on the books, because a crew who watch somebody go draw the
+obvious conclusion. The last hand standing cannot be let go — an outfit cannot dissolve
+itself by accident.
 
 Non-verbs: the player never controls a character in the building, never re-rolls, never
 aborts mid-run. Committing is committing.

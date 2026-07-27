@@ -145,6 +145,22 @@ fn draw_dossier(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     };
 
     let content = draw_panel(rect, &format!("{} — {}", member.name, member.specialty));
+
+    // Somebody has to be able to leave. Retainers made a hand a standing cost
+    // and nothing could stop one — the only exit was to starve the whole crew
+    // until the unwanted one quit.
+    let severance = crate::sim::severance_cost(member, &ctx.data.config.payroll);
+    let can_pay_off = ctx.session.crew.len() > 1 && ctx.session.budget >= severance;
+    if button_rect_tone_at(
+        Rect::new(rect.right() - 158.0, rect.y + 8.0, 146.0, 24.0),
+        &format!("Let go — {}", format_compact_money(severance)),
+        can_pay_off,
+        ButtonTone::Danger,
+        ctx.mouse(),
+    ) {
+        actions.push(UiAction::DismissMember(member.id.clone()));
+    }
+
     let loadout = ctx.session.loadout(member, ctx.data);
     let attributes = equipped_attributes(member, &loadout);
     let skills = equipped_skills(member, &loadout);

@@ -28,8 +28,8 @@ pub use kit::{refit, refit_quote, wear_penalty};
 pub use law::{attention_chance, bail_cost, bribe_cost, grease_palms, post_bail, LawEvent};
 pub use leads::{chance_of_a_lead, Lead};
 pub use payroll::{
-    bonus_cost, crew_cut, crew_cut_for, pay_bonus, retainer_for, runway_after_hiring,
-    safehouse_upkeep, weekly_outgoings, weeks_of_runway, CrewCut,
+    bonus_cost, crew_cut, crew_cut_for, dismiss, pay_bonus, retainer_for, runway_after_hiring,
+    safehouse_upkeep, severance_cost, weekly_outgoings, weeks_of_runway, CrewCut,
 };
 pub use plan::{candidates, Candidate, PlanDraft};
 pub use rivals::{interest_in as rival_interest, RivalJob};

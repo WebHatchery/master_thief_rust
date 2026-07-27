@@ -100,6 +100,8 @@
     "unpaid_loyalty_cost": 15,
     "notice_loyalty_threshold": 22,
     "bonus_retainer_weeks": 3,
+    "severance_weeks": 2,
+    "dismissal_loyalty_cost": 6,
     "bonus_loyalty_restored": 30
   },
 

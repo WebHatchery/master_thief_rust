@@ -138,6 +138,8 @@ pub enum UiAction {
     RefitKit(String),
     /// Sell a spare out of the lockup.
     SellItem(String),
+    /// Pay somebody off and take them off the payroll.
+    DismissMember(String),
 }
 
 /// The three things the crew screen's left panel can be showing.

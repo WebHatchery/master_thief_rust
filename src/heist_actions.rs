@@ -182,6 +182,13 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
             report(notifications, sim::sell(session, data, &data.config, &id));
             check_awards(data, session, notifications);
         }
+        UiAction::DismissMember(id) => {
+            if selection.member.as_deref() == Some(id.as_str()) {
+                selection.member = None;
+            }
+            report(notifications, sim::dismiss(session, &data.config, &id));
+            check_awards(data, session, notifications);
+        }
     }
 
     None

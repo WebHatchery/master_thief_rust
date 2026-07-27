@@ -243,6 +243,10 @@ pub struct PayrollConfig {
     pub notice_loyalty_threshold: i32,
     /// A goodwill payment costs this many weeks of that hand's retainer.
     pub bonus_retainer_weeks: i64,
+    /// Paying somebody off costs this many weeks of theirs.
+    pub severance_weeks: i64,
+    /// Loyalty every remaining hand loses when one of them is let go.
+    pub dismissal_loyalty_cost: i32,
     pub bonus_loyalty_restored: i32,
 }
 

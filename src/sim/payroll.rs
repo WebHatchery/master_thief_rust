@@ -315,6 +315,61 @@ fn resign_or_stay(session: &mut GameSession, config: &PayrollConfig, outcome: &m
     }
 }
 
+/// What paying somebody off would cost.
+pub fn severance_cost(member: &CrewMember, config: &PayrollConfig) -> i64 {
+    retainer_for(member, config) * config.severance_weeks.max(1)
+}
+
+/// Let somebody go.
+///
+/// Retainers made a crew member a standing cost, and nothing anywhere could
+/// stop one. A hand the outfit could not use and could not afford was a
+/// permanent drain whose only exit was to stop paying the *whole* crew until
+/// that one quit — which is a perverse thing for a game to reward, and it was
+/// the optimal play.
+///
+/// Paying somebody off costs their notice in cash and costs goodwill with
+/// everybody still on the books, because a crew who watch somebody let go draw
+/// the obvious conclusion. So clearing house is possible, priced, and never
+/// free of consequences.
+pub fn dismiss(
+    session: &mut GameSession,
+    config: &GameConfig,
+    member_id: &str,
+) -> Result<String, String> {
+    let payroll = &config.payroll;
+    let Some(member) = session.member(member_id) else {
+        return Err("They are not on the payroll".to_owned());
+    };
+    let cost = severance_cost(member, payroll);
+    let name = member.name.clone();
+
+    if session.crew.len() <= 1 {
+        return Err(format!("{} is the whole outfit", name));
+    }
+    if session.budget < cost {
+        return Err(format!("Paying {} off costs {}", name, format_money(cost)));
+    }
+
+    session.budget -= cost;
+    session.tally.severance_paid += cost;
+    session.tally.dismissals += 1;
+    session.crew.retain(|other| other.id != member_id);
+
+    // Everybody left saw it happen.
+    for other in &mut session.crew {
+        other
+            .condition
+            .adjust_loyalty(-payroll.dismissal_loyalty_cost);
+    }
+
+    Ok(format!(
+        "{} paid off for {} — the rest noticed",
+        name,
+        format_money(cost)
+    ))
+}
+
 /// Buy back some goodwill. Costs real money, cancels a notice, and is the only
 /// thing that moves loyalty upward on demand.
 pub fn pay_bonus(
@@ -458,6 +513,87 @@ mod tests {
         // Talked round, they survive the next payroll instead of walking.
         let after = settle_payroll(&mut session, &data.config);
         assert!(after.walkouts.is_empty());
+    }
+
+    #[test]
+    fn a_hand_can_be_paid_off_and_the_bill_shrinks() {
+        // The trap this closes: a retainer with no way to stop it.
+        let (data, mut session) = setup(50);
+        session.budget = 5_000_000;
+        let id = session.crew[0].id.clone();
+        let roster = session.crew.len();
+        let before = weekly_outgoings(&session, &data.config.payroll);
+        let cost = severance_cost(&session.crew[0], &data.config.payroll);
+
+        assert!(dismiss(&mut session, &data.config, &id).is_ok());
+
+        assert_eq!(session.crew.len(), roster - 1);
+        assert!(session.member(&id).is_none());
+        assert_eq!(session.budget, 5_000_000 - cost);
+        assert!(
+            weekly_outgoings(&session, &data.config.payroll) < before,
+            "the outfit is still paying somebody who left"
+        );
+    }
+
+    #[test]
+    fn the_rest_of_the_crew_watch_it_happen() {
+        let (data, mut session) = setup(51);
+        session.budget = 5_000_000;
+        let id = session.crew[0].id.clone();
+        let watcher = session.crew[1].id.clone();
+        let before = session.member(&watcher).unwrap().condition.loyalty;
+
+        dismiss(&mut session, &data.config, &id).unwrap();
+
+        assert_eq!(
+            session.member(&watcher).unwrap().condition.loyalty,
+            before - data.config.payroll.dismissal_loyalty_cost,
+            "clearing house cost nothing in goodwill"
+        );
+    }
+
+    #[test]
+    fn the_last_hand_standing_cannot_be_paid_off() {
+        let (data, mut session) = setup(52);
+        session.budget = 5_000_000;
+        session.crew.truncate(1);
+        let id = session.crew[0].id.clone();
+
+        assert!(dismiss(&mut session, &data.config, &id).is_err());
+        assert_eq!(session.crew.len(), 1, "the outfit dissolved itself");
+    }
+
+    #[test]
+    fn a_severance_nobody_can_afford_keeps_them_on_the_books() {
+        let (data, mut session) = setup(53);
+        session.budget = 0;
+        let id = session.crew[0].id.clone();
+        let roster = session.crew.len();
+
+        assert!(dismiss(&mut session, &data.config, &id).is_err());
+        assert_eq!(session.crew.len(), roster);
+    }
+
+    #[test]
+    fn a_dismissed_hands_kit_comes_back_to_the_lockup() {
+        let (data, mut session) = setup(54);
+        session.budget = 5_000_000;
+        let id = session
+            .crew
+            .iter()
+            .find(|member| member.equipment.item_ids().count() > 0)
+            .expect("somebody carries the starting kit")
+            .id
+            .clone();
+        let shelf = session.unassigned_inventory(&data).len();
+
+        dismiss(&mut session, &data.config, &id).unwrap();
+
+        assert!(
+            session.unassigned_inventory(&data).len() > shelf,
+            "their tools left with them"
+        );
     }
 
     #[test]

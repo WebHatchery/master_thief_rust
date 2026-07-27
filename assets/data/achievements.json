@@ -70,5 +70,7 @@
   { "id": "moving_it_on", "name": "Moving It On", "description": "Sell something out of the lockup.", "stat": "items_fenced", "at_least": 1 },
   { "id": "half_a_business", "name": "Half a Business", "description": "Take half a million through the fence.", "stat": "fenced_total", "at_least": 500000 },
   { "id": "somebody_heard_something", "name": "Somebody Heard Something", "description": "Have a contented hand bring in a mark.", "stat": "leads_brought_in", "at_least": 1 },
-  { "id": "a_crew_worth_keeping", "name": "A Crew Worth Keeping", "description": "Have the crew bring in ten marks of their own.", "stat": "leads_brought_in", "at_least": 10 }
+  { "id": "a_crew_worth_keeping", "name": "A Crew Worth Keeping", "description": "Have the crew bring in ten marks of their own.", "stat": "leads_brought_in", "at_least": 10 },
+  { "id": "nothing_personal", "name": "Nothing Personal", "description": "Pay somebody off and take them off the payroll.", "stat": "dismissals", "at_least": 1 },
+  { "id": "a_hard_year", "name": "A Hard Year", "description": "Let five hands go.", "stat": "dismissals", "at_least": 5 }
 ]

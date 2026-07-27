@@ -79,6 +79,11 @@ pub struct CampaignTally {
     /// Marks the crew brought in themselves.
     #[serde(default)]
     pub leads_brought_in: i64,
+    /// Paid to hands the outfit let go.
+    #[serde(default)]
+    pub severance_paid: i64,
+    #[serde(default)]
+    pub dismissals: i64,
 }
 
 /// The statistics an achievement can be written against.
@@ -120,6 +125,8 @@ pub enum TallyStat {
     FencedTotal,
     ItemsFenced,
     LeadsBroughtIn,
+    SeverancePaid,
+    Dismissals,
     /// Live campaign state rather than a running total.
     Week,
     Reputation,
@@ -174,6 +181,8 @@ impl TallyStat {
             TallyStat::FencedTotal => tally.fenced_total,
             TallyStat::ItemsFenced => tally.items_fenced,
             TallyStat::LeadsBroughtIn => tally.leads_brought_in,
+            TallyStat::SeverancePaid => tally.severance_paid,
+            TallyStat::Dismissals => tally.dismissals,
 
             TallyStat::Week => session.week as i64,
             TallyStat::Reputation => session.reputation as i64,
