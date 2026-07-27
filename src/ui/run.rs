@@ -151,39 +151,19 @@ fn draw_dice(ctx: &UiContext<'_>, playback: &RunPlayback, actions: &mut Vec<UiAc
         door.result.roll,
     );
 
-    // The modifiers stack up beside the die, one line at a time.
-    let revealed = playback.revealed_modifiers();
-    let lines = Rect::new(
-        content.x + 124.0,
-        content.y + 34.0,
-        content.w - 124.0,
-        108.0,
+    // The modifiers stack up beside the die, one at a time, in as many
+    // columns as it takes to show all of them (pillar 2).
+    super::chrome::draw_modifier_grid(
+        Rect::new(
+            content.x + 124.0,
+            content.y + 28.0,
+            content.w - 124.0,
+            114.0,
+        ),
+        check.significant(),
+        playback.revealed_modifiers(),
+        13.0,
     );
-    for (index, entry) in check.significant().take(revealed).enumerate() {
-        let y = lines.y + 18.0 + index as f32 * 19.0;
-        if y > lines.bottom() {
-            break;
-        }
-        draw_ui_text_ex(
-            &entry.label,
-            lines.x,
-            y,
-            TextStyle::new(14.0, dark::TEXT_DIM).params(),
-        );
-        draw_text_right(
-            &entry.signed(),
-            lines.right(),
-            y,
-            TextStyle::new(
-                14.0,
-                if entry.value >= 0 {
-                    Color::new(0.56, 0.80, 0.60, 1.0)
-                } else {
-                    Color::new(0.88, 0.52, 0.44, 1.0)
-                },
-            ),
-        );
-    }
 
     draw_total(
         Rect::new(content.x, content.y + 152.0, content.w, 54.0),

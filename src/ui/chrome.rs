@@ -190,6 +190,91 @@ pub fn draw_footer(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     let _ = x;
 }
 
+/// The narrowest a modifier column can usefully be before the label and its
+/// value collide.
+const MIN_MODIFIER_COLUMN: f32 = 118.0;
+
+/// Every modifier on a check, named, laid out in as many columns as the space
+/// allows and never silently dropped.
+///
+/// Pillar 2 says the player sees "every modifier by name". That was easy when a
+/// door carried four of them and they fitted on one line. A door now routinely
+/// carries eight to fourteen — skill, focus, kit, proficiency, fatigue,
+/// loyalty, injuries, environment, city heat, a ripened mark, worn kit, a tail,
+/// chemistry — and the single joined line every screen used overflowed its
+/// panel, while the run's tally quietly stopped after the fifth and left the
+/// running total disagreeing with the arithmetic on screen.
+///
+/// `limit` caps how many are revealed, for the run's one-at-a-time tally; pass
+/// `usize::MAX` to show them all. Returns how many were drawn, so a caller can
+/// tell whether the space was really enough.
+pub fn draw_modifier_grid<'a>(
+    rect: Rect,
+    entries: impl Iterator<Item = &'a crate::rules::outcome::ModifierEntry>,
+    limit: usize,
+    size: f32,
+) -> usize {
+    let line_height = size + 5.0;
+    let rows = ((rect.h / line_height).floor() as usize).max(1);
+    let shown: Vec<&crate::rules::outcome::ModifierEntry> = entries.take(limit).collect();
+    if shown.is_empty() {
+        return 0;
+    }
+
+    // Grow columns rather than clip: a modifier the player cannot see is a
+    // modifier the game is hiding from them. Where even that will not fit,
+    // the last cell says how many are missing — silently dropping them is what
+    // broke this in the first place.
+    let max_columns = ((rect.w / MIN_MODIFIER_COLUMN).floor() as usize).max(1);
+    let columns = shown.len().div_ceil(rows).clamp(1, max_columns);
+    let capacity = rows * columns;
+    let overflowed = shown.len() > capacity;
+    let visible = if overflowed {
+        capacity - 1
+    } else {
+        shown.len()
+    };
+    let column_w = rect.w / columns as f32;
+
+    if overflowed {
+        let index = capacity - 1;
+        draw_ui_text_ex(
+            &format!("+{} more", shown.len() - visible),
+            rect.x + (index / rows) as f32 * column_w,
+            rect.y + (index % rows + 1) as f32 * line_height,
+            TextStyle::new(size, dark::TEXT_DIM).params(),
+        );
+    }
+
+    for (index, entry) in shown.iter().take(visible).enumerate() {
+        let column = index / rows;
+        let row = index % rows;
+        let x = rect.x + column as f32 * column_w;
+        let y = rect.y + (row + 1) as f32 * line_height;
+
+        draw_ui_text_ex(
+            &entry.label,
+            x,
+            y,
+            TextStyle::new(size, dark::TEXT_DIM).params(),
+        );
+        draw_text_right(
+            &entry.signed(),
+            x + column_w - 10.0,
+            y,
+            TextStyle::new(
+                size,
+                if entry.value >= 0 {
+                    Color::new(0.56, 0.80, 0.60, 1.0)
+                } else {
+                    Color::new(0.88, 0.52, 0.44, 1.0)
+                },
+            ),
+        );
+    }
+    visible
+}
+
 /// A left-aligned label with a right-aligned value on one line.
 pub fn stat_row(rect: Rect, label: &str, value: &str, size: f32, color: Color) {
     draw_ui_text_ex(

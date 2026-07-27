@@ -343,7 +343,7 @@ fn draw_candidates(
         content.w,
         content.bottom() - content.y - 90.0,
     );
-    let layout = GridLayout::new(list.x, list.y, list.w, 8.0, 1, 76.0);
+    let layout = GridLayout::new(list.x, list.y, list.w, 8.0, 1, 96.0);
     let mouse = ctx.mouse();
 
     for (index, candidate) in ranked.iter().enumerate() {
@@ -439,12 +439,13 @@ fn draw_candidate(
         TextStyle::new(13.0, dark::TEXT_DIM).params(),
     );
 
-    // The whole point of the screen: every modifier, by name, before commit.
-    draw_ui_text_ex(
-        &modifier_line(candidate),
-        rect.x + 12.0,
-        rect.y + 63.0,
-        TextStyle::new(13.0, Color::new(0.62, 0.68, 0.80, 1.0)).params(),
+    // The whole point of the screen: every modifier, by name, before commit —
+    // in columns, because a door now carries up to fourteen of them.
+    super::chrome::draw_modifier_grid(
+        Rect::new(rect.x + 12.0, rect.y + 50.0, rect.w - 24.0, 44.0),
+        candidate.check.significant(),
+        usize::MAX,
+        12.0,
     );
 
     draw_text_right(
@@ -467,15 +468,6 @@ fn draw_candidate(
     }
 
     hovered && is_mouse_button_released(MouseButton::Left)
-}
-
-fn modifier_line(candidate: &Candidate) -> String {
-    candidate
-        .check
-        .significant()
-        .map(|entry| format!("{} {}", entry.label, entry.signed()))
-        .collect::<Vec<_>>()
-        .join("  ")
 }
 
 fn chance_color(chance: f32) -> Color {

@@ -3,7 +3,6 @@
 use super::chrome::{draw_panel, empty_notice, panel_style, stat_row, title_style};
 use super::run::outcome_color;
 use super::{content_rect, UiContext};
-use crate::rules::encounter::EncounterResult;
 use crate::sim::{DoorOutcome, JobReport};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
@@ -53,7 +52,7 @@ fn draw_doors(ctx: &UiContext<'_>, report: &JobReport) {
         doors_rect(),
         &format!("{} — door by door", report.target_name),
     );
-    let layout = GridLayout::new(content.x, content.y, content.w, 8.0, 1, 92.0);
+    let layout = GridLayout::new(content.x, content.y, content.w, 8.0, 1, 124.0);
 
     for (index, door) in report.doors.iter().enumerate() {
         let (x, y, w, h) = layout.get_item_rect(index, 0.0);
@@ -117,11 +116,13 @@ fn draw_door(rect: Rect, door: &DoorOutcome, ordinal: usize) {
         rect.y + 22.0,
         TextStyle::new(15.0, tone),
     );
-    draw_text_right(
-        &modifier_summary(&door.result),
-        rect.right() - 12.0,
-        rect.y + 43.0,
-        TextStyle::new(13.0, dark::TEXT_DIM),
+    // Every modifier, in columns, rather than one joined line that ran off the
+    // side of the panel once doors started carrying a dozen of them.
+    super::chrome::draw_modifier_grid(
+        Rect::new(rect.x + 12.0, rect.y + 84.0, rect.w - 24.0, 36.0),
+        door.result.check.significant(),
+        usize::MAX,
+        12.0,
     );
 
     if let Some(injury) = &door.injury {
@@ -149,15 +150,6 @@ fn draw_door(rect: Rect, door: &DoorOutcome, ordinal: usize) {
             TextStyle::new(13.0, tone).params(),
         );
     }
-}
-
-fn modifier_summary(result: &EncounterResult) -> String {
-    result
-        .check
-        .significant()
-        .map(|entry| format!("{} {}", entry.label, entry.signed()))
-        .collect::<Vec<_>>()
-        .join("  ")
 }
 
 fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
