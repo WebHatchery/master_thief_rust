@@ -119,7 +119,7 @@ fn draw_standing(ctx: &UiContext<'_>) {
     } else {
         0.0
     };
-    let rows: [(String, String); 8] = [
+    let rows: [(String, String); 9] = [
         ("Week".to_owned(), session.week.to_string()),
         (
             "Jobs run".to_owned(),
@@ -145,15 +145,36 @@ fn draw_standing(ctx: &UiContext<'_>) {
             ),
         ),
         (
-            "Injuries taken".to_owned(),
-            tally.injuries_taken.to_string(),
+            "Injuries · quiet weeks".to_owned(),
+            format!("{} · {}", tally.injuries_taken, tally.quiet_weeks),
         ),
-        ("Quiet weeks".to_owned(), tally.quiet_weeks.to_string()),
+        // The other half of the ledger: the outfit is not only what it takes.
+        (
+            "Paid out in wages".to_owned(),
+            format!(
+                "{}{}",
+                format_money(tally.wages_paid),
+                if tally.weeks_missed_payroll > 0 {
+                    format!(" ({} short)", tally.weeks_missed_payroll)
+                } else {
+                    String::new()
+                }
+            ),
+        ),
+        (
+            "Lost to the city".to_owned(),
+            format!(
+                "{} · {} taken, {} left",
+                format_money(tally.cash_seized + tally.bribes_paid + tally.bails_paid),
+                tally.arrests,
+                tally.walkouts
+            ),
+        ),
     ];
 
     for (index, (label, value)) in rows.iter().enumerate() {
         stat_row(
-            Rect::new(content.x, content.y + index as f32 * 23.0, content.w, 20.0),
+            Rect::new(content.x, content.y + index as f32 * 21.0, content.w, 20.0),
             label,
             value,
             15.0,
@@ -162,15 +183,15 @@ fn draw_standing(ctx: &UiContext<'_>) {
     }
 
     draw_curves(
-        Rect::new(content.x, content.y + 210.0, content.w, 118.0),
+        Rect::new(content.x, content.y + 206.0, content.w, 112.0),
         ctx,
     );
     draw_awards(
         Rect::new(
             content.x,
-            content.y + 344.0,
+            content.y + 336.0,
             content.w,
-            content.bottom() - content.y - 352.0,
+            content.bottom() - content.y - 344.0,
         ),
         ctx,
     );

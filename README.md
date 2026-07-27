@@ -10,6 +10,14 @@ Rules engine, planning, run, campaign, delegation reporting, content at the full
 GDD §8 targets, achievements, records, tutorial hints, settings and procedurally
 generated audio. `publish.ps1` is clean and the capture set covers every screen.
 
+**The week has a clock in it.** The safehouse charges rent scaled to the
+outfit's reputation and every hand draws a weekly retainer, so lying low is a
+priced decision rather than a free one; unpaid crew lose loyalty, give a week's
+notice, and leave. Heat above a threshold rolls each week for the city's
+attention — a tail, a raid, or an arrest that puts somebody in a cell until bail
+is posted. The three answers are all purchases, and all of them are shown with
+their price on the Crew screen's **Outfit** tab.
+
 ### Content against GDD §8
 
 | Axis | Authored | Full target |
@@ -17,7 +25,7 @@ generated audio. `publish.ps1` is clean and the capture set covers every screen.
 | Outcome narrative lines | 400 | 400 |
 | Encounter templates | 71 | 70 |
 | Equipment templates | 67 | 60 |
-| Achievements | 48 | 40 |
+| Achievements | 60 | 40 |
 | Heist targets | 45 | 45 |
 | Recruit archetypes | 40 | 40 |
 | Personality traits | 30 | 30 |
@@ -38,6 +46,8 @@ tests and the distribution soak in `sim::job` rely on.
 | `src/model/` | Pure types: attributes, skills, crew, equipment, targets |
 | `src/rules/` | The d20 engine and crew chemistry. No macroquad, no I/O, fully tested |
 | `src/sim/` | Planning drafts, job resolution, loot, the week, and whole-campaign playthroughs |
+| `src/sim/payroll.rs` | The standing weekly bill: upkeep, retainers, missed wages, notice, walkouts |
+| `src/sim/law.rs` | What the city does about an outfit it has noticed: tails, raids, custody, bribes, bail |
 | `src/state.rs` | `GameSession`, the save shape, and migration |
 | `src/ui/` | View layer only — returns `UiAction`, mutates nothing |
 | `src/audio.rs` | Every sound effect, rendered from `synth` voices at boot |

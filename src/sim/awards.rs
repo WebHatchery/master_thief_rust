@@ -34,6 +34,32 @@ pub struct CampaignTally {
     /// Weeks advanced without running anything.
     pub quiet_weeks: i64,
     pub heat_peak: i64,
+    /// Wages and safehouse upkeep the outfit actually covered.
+    #[serde(default)]
+    pub wages_paid: i64,
+    /// Weeks the outfit could not cover its own bill.
+    #[serde(default)]
+    pub weeks_missed_payroll: i64,
+    /// Goodwill payments made to keep somebody from walking.
+    #[serde(default)]
+    pub bonuses_paid: i64,
+    /// Hands who left over money.
+    #[serde(default)]
+    pub walkouts: i64,
+    /// Weeks the city took an interest, of any kind.
+    #[serde(default)]
+    pub law_incidents: i64,
+    /// Hands the city took into custody.
+    #[serde(default)]
+    pub arrests: i64,
+    #[serde(default)]
+    pub cash_seized: i64,
+    #[serde(default)]
+    pub bribes_paid: i64,
+    #[serde(default)]
+    pub heat_bought_down: i64,
+    #[serde(default)]
+    pub bails_paid: i64,
 }
 
 /// The statistics an achievement can be written against.
@@ -58,6 +84,16 @@ pub enum TallyStat {
     BlindJobs,
     QuietWeeks,
     HeatPeak,
+    WagesPaid,
+    WeeksMissedPayroll,
+    BonusesPaid,
+    Walkouts,
+    LawIncidents,
+    Arrests,
+    CashSeized,
+    BribesPaid,
+    HeatBoughtDown,
+    BailsPaid,
     /// Live campaign state rather than a running total.
     Week,
     Reputation,
@@ -95,6 +131,16 @@ impl TallyStat {
             TallyStat::BlindJobs => tally.blind_jobs,
             TallyStat::QuietWeeks => tally.quiet_weeks,
             TallyStat::HeatPeak => tally.heat_peak,
+            TallyStat::WagesPaid => tally.wages_paid,
+            TallyStat::WeeksMissedPayroll => tally.weeks_missed_payroll,
+            TallyStat::BonusesPaid => tally.bonuses_paid,
+            TallyStat::Walkouts => tally.walkouts,
+            TallyStat::LawIncidents => tally.law_incidents,
+            TallyStat::Arrests => tally.arrests,
+            TallyStat::CashSeized => tally.cash_seized,
+            TallyStat::BribesPaid => tally.bribes_paid,
+            TallyStat::HeatBoughtDown => tally.heat_bought_down,
+            TallyStat::BailsPaid => tally.bails_paid,
 
             TallyStat::Week => session.week as i64,
             TallyStat::Reputation => session.reputation as i64,

@@ -50,6 +50,18 @@ impl Rarity {
             Rarity::Legendary => "Legendary",
         }
     }
+
+    /// 0-4. What a hand of this standing thinks they are worth is a step per
+    /// tier, so the retainer formula needs the tier as a number.
+    pub fn tier(self) -> i32 {
+        match self {
+            Rarity::Common => 0,
+            Rarity::Uncommon => 1,
+            Rarity::Rare => 2,
+            Rarity::Epic => 3,
+            Rarity::Legendary => 4,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -103,6 +115,13 @@ pub struct Condition {
     /// 0-100. High loyalty steadies a hand; low loyalty makes it shake.
     pub loyalty: i32,
     pub injuries: Vec<Injury>,
+    /// Consecutive weeks the outfit could not cover their retainer.
+    #[serde(default)]
+    pub weeks_unpaid: i32,
+    /// True once they have said they are done. One week of warning, then they
+    /// take their kit and go.
+    #[serde(default)]
+    pub notice_given: bool,
 }
 
 impl Default for Condition {
@@ -111,6 +130,8 @@ impl Default for Condition {
             fatigue: 0,
             loyalty: 60,
             injuries: Vec::new(),
+            weeks_unpaid: 0,
+            notice_given: false,
         }
     }
 }

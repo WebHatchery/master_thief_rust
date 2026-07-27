@@ -61,6 +61,71 @@ pub struct GameConfig {
     pub reputation_per_job: i32,
     /// Share of the payout the crew takes before the fixer sees any.
     pub crew_cut: f32,
+
+    /// What the outfit costs to keep standing, week in, week out.
+    pub payroll: PayrollConfig,
+    /// What the city does about an outfit it has started to notice.
+    pub law: LawConfig,
+    /// How fatigue and loyalty grade into modifiers on the die.
+    pub condition: crate::rules::ConditionTuning,
+}
+
+/// The standing weekly bill. Nothing here is optional: an outfit that stops
+/// paying stops being an outfit (GDD 3, "advance the week").
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PayrollConfig {
+    /// The safehouse's floor cost before the outfit's name inflates it.
+    pub safehouse_upkeep_base: i64,
+    /// Every point of reputation adds this much to the standing overheads: a
+    /// bigger name needs a better door to hide behind.
+    pub safehouse_upkeep_per_reputation: i64,
+    pub retainer_base: i64,
+    pub retainer_per_level: i64,
+    /// Added once per rarity tier ([`crate::model::Rarity::tier`]).
+    pub retainer_per_rarity: i64,
+    /// Loyalty lost by a hand the outfit could not pay this week.
+    pub unpaid_loyalty_cost: i32,
+    /// Loyalty at or below which a hand gives notice.
+    pub notice_loyalty_threshold: i32,
+    /// A goodwill payment costs this many weeks of that hand's retainer.
+    pub bonus_retainer_weeks: i64,
+    pub bonus_loyalty_restored: i32,
+}
+
+/// How the city pushes back. Heat is the short-term half of notoriety, and
+/// above a threshold it stops being a difficulty modifier and starts taking
+/// things (GDD 5.6).
+/// Not `Eq`: two of these carry floats, and pretending they compare exactly
+/// would be a lie about what comparing them means.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct LawConfig {
+    /// Heat below this and nobody is looking.
+    pub attention_threshold: i32,
+    /// Chance per week of an incident, per point of heat above the threshold.
+    pub attention_chance_per_point: f32,
+    pub attention_chance_max: f32,
+    /// Heat at or above which an incident can be an arrest.
+    pub custody_threshold: i32,
+    /// A d100 below this is an arrest, below `raid_share` a raid, else a tail.
+    pub arrest_share: usize,
+    pub raid_share: usize,
+    /// Share of the outfit's cash a raid takes off the table.
+    pub raid_seizure_share: f32,
+    pub raid_heat_relief: i32,
+    pub arrest_heat_relief: i32,
+    /// Weeks a tail stays on the crew.
+    pub surveillance_weeks: u32,
+    /// What a tail costs on every door while it lasts.
+    pub surveillance_penalty: i32,
+    pub bribe_cost_base: i64,
+    /// A better-known outfit is more expensive to make quiet.
+    pub bribe_cost_per_notoriety: i64,
+    pub bribe_heat_relief: i32,
+    pub bail_base: i64,
+    pub bail_per_level: i64,
+    pub bail_per_notoriety: i64,
+    /// Loyalty a bailed hand comes back with. A cell is not a holiday.
+    pub bail_return_loyalty: i32,
 }
 
 #[derive(Debug, Clone)]

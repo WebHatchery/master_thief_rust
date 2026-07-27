@@ -6,9 +6,11 @@
 
 pub mod attributes;
 pub mod chemistry;
+pub mod condition;
 pub mod encounter;
 pub mod environment;
 pub mod outcome;
 
 pub use attributes::attribute_modifier;
+pub use condition::ConditionTuning;
 pub use outcome::Outcome;

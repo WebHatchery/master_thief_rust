@@ -36,7 +36,7 @@ pub fn draw_header(ctx: &UiContext<'_>) {
     );
 
     let session = ctx.session;
-    let badges: [(String, Color); 5] = [
+    let badges: [(String, Color); 6] = [
         (
             format!("Week {}", session.week),
             Color::new(0.18, 0.24, 0.32, 1.0),
@@ -45,6 +45,7 @@ pub fn draw_header(ctx: &UiContext<'_>) {
             format_money(session.budget),
             Color::new(0.16, 0.28, 0.20, 1.0),
         ),
+        (payroll_label(ctx), payroll_color(ctx)),
         (
             format!("Rep {}", session.reputation),
             Color::new(0.18, 0.26, 0.34, 1.0),
@@ -72,6 +73,26 @@ pub fn draw_header(ctx: &UiContext<'_>) {
 
 fn badge_width(label: &str) -> f32 {
     (label.len() as f32 * 8.4 + 20.0).max(72.0)
+}
+
+/// The standing weekly bill, and how many quiet weeks it still buys. This is
+/// the clock the week loop runs on, so it sits beside the money on every screen.
+fn payroll_label(ctx: &UiContext<'_>) -> String {
+    let due = crate::sim::weekly_outgoings(ctx.session, &ctx.data.config.payroll);
+    let weeks = crate::sim::weeks_of_runway(ctx.session, &ctx.data.config.payroll);
+    format!(
+        "{}/wk · {}wk left",
+        format_compact_money(due),
+        weeks.min(99)
+    )
+}
+
+fn payroll_color(ctx: &UiContext<'_>) -> Color {
+    match crate::sim::weeks_of_runway(ctx.session, &ctx.data.config.payroll) {
+        0..=1 => Color::new(0.44, 0.18, 0.18, 1.0),
+        2..=4 => Color::new(0.38, 0.30, 0.16, 1.0),
+        _ => Color::new(0.18, 0.24, 0.24, 1.0),
+    }
 }
 
 fn heat_label(ctx: &UiContext<'_>) -> String {

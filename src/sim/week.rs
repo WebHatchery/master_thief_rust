@@ -1,8 +1,17 @@
-//! Advancing the week: rest, healing, heat decay, and a new board.
+//! Advancing the week: rest, healing, the payroll, the city's attention, and a
+//! new board.
 //!
 //! Lying low — advancing with no job run — is a legitimate move, and this is
-//! where it pays (GDD 5.6).
+//! where it pays (GDD 5.6). It is no longer free: the safehouse and the crew
+//! both send a bill every week, so resting is a purchase and the fixer has to
+//! decide they can afford it.
+//!
+//! Order matters and is fixed. Everything that draws from the run's RNG does so
+//! at the same point every week — the law roll, then the board, then the hiring
+//! pool — so a seed replays a campaign exactly (GDD 5.7).
 
+use super::law::LawEvent;
+use super::payroll::{settle_payroll, PayrollOutcome};
 use crate::data::GameData;
 use crate::rules::attribute_modifier;
 use crate::state::GameSession;
@@ -15,6 +24,62 @@ pub struct WeekSummary {
     pub injuries_healed: usize,
     pub heat_shed: i32,
     pub new_marks: usize,
+    /// The bill, and whether the outfit covered it.
+    pub payroll: PayrollOutcome,
+    /// The city's move, if it made one.
+    pub law: Option<LawEvent>,
+    /// Weeks of a tail still to run after this one.
+    pub surveillance_weeks: u32,
+}
+
+impl WeekSummary {
+    /// The one line the week is always worth reporting.
+    pub fn ledger_line(&self) -> String {
+        use macroquad_toolkit::ui::format_money;
+        if self.payroll.was_short() {
+            format!(
+                "Week {} — payroll short by {}",
+                self.week,
+                format_money(self.payroll.shortfall)
+            )
+        } else {
+            format!(
+                "Week {} — {} paid out, {} fatigue shed, heat down {}",
+                self.week,
+                format_money(self.payroll.paid),
+                self.fatigue_shed,
+                self.heat_shed
+            )
+        }
+    }
+
+    /// What went wrong this week, worst first. Empty on a clean one.
+    pub fn warnings(&self) -> Vec<String> {
+        let mut warnings = Vec::new();
+
+        if let Some(event) = &self.law {
+            warnings.push(event.headline.clone());
+        }
+        for name in &self.payroll.walkouts {
+            warnings.push(format!("{} took their kit and left", name));
+        }
+        for name in &self.payroll.notices {
+            warnings.push(format!("{} is talking about walking", name));
+        }
+        warnings
+    }
+
+    /// The week's ordinary news.
+    pub fn notes(&self) -> Vec<String> {
+        let mut notes = Vec::new();
+        if self.injuries_healed > 0 {
+            notes.push(format!("{} back on their feet", self.injuries_healed));
+        }
+        if self.new_marks > 0 {
+            notes.push(format!("{} new marks on the board", self.new_marks));
+        }
+        notes
+    }
 }
 
 pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
@@ -47,8 +112,15 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
         }
     }
 
+    // The bill comes before anything else the fixer might want to spend on.
+    let payroll = settle_payroll(session, config);
+
     let heat_before = session.heat;
     session.heat = (session.heat - config.heat_decay_per_week).max(0);
+    session.surveillance_weeks = session.surveillance_weeks.saturating_sub(1);
+
+    // The first and only draw of the week from the RNG before the board.
+    let law = super::law::roll_attention(session, config);
     let heat_shed = heat_before - session.heat;
 
     session.age_board();
@@ -78,6 +150,9 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
         injuries_healed,
         heat_shed,
         new_marks,
+        payroll,
+        law,
+        surveillance_weeks: session.surveillance_weeks,
     }
 }
 
@@ -85,6 +160,8 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
 mod tests {
     use super::*;
     use crate::model::crew::Injury;
+    use crate::sim::law::LawEventKind;
+    use crate::sim::payroll::weekly_outgoings;
 
     fn setup(seed: u64) -> (GameData, GameSession) {
         let data = GameData::load().unwrap();
@@ -160,5 +237,104 @@ mod tests {
         advance_week(&mut session, &data);
         assert!(session.crew[0].condition.loyalty > 50);
         assert!(session.crew[1].condition.loyalty < 50);
+    }
+
+    #[test]
+    fn a_quiet_week_costs_the_outfit_a_weeks_pay() {
+        // The whole point of the change: "rest until everyone is fresh" is now
+        // a purchase, and the fixer can read the price.
+        let (data, mut session) = setup(7);
+        let due = weekly_outgoings(&session, &data.config.payroll);
+        let budget = session.budget;
+
+        let summary = advance_week(&mut session, &data);
+
+        assert!(due > 0);
+        assert_eq!(summary.payroll.total_due(), due);
+        assert_eq!(session.budget, budget - due);
+        assert!(summary.ledger_line().contains("paid out"));
+    }
+
+    #[test]
+    fn an_outfit_that_never_works_runs_itself_into_the_ground() {
+        // Twenty weeks of lying low used to leave a rested crew and a full
+        // wallet. It should now leave neither.
+        let (data, mut session) = setup(8);
+
+        for _ in 0..20 {
+            advance_week(&mut session, &data);
+        }
+
+        assert!(session.budget <= 0, "idling never cost anything");
+        assert!(
+            session.crew.len() < 3 || session.crew.iter().any(|m| m.condition.notice_given),
+            "twenty unpaid weeks and the crew stayed cheerful"
+        );
+    }
+
+    #[test]
+    fn a_missed_payroll_is_reported_rather_than_swallowed() {
+        let (data, mut session) = setup(9);
+        session.budget = 0;
+
+        let summary = advance_week(&mut session, &data);
+
+        assert!(summary.payroll.was_short());
+        assert!(summary.ledger_line().contains("short by"));
+    }
+
+    #[test]
+    fn a_hot_week_can_end_with_somebody_in_a_cell() {
+        let (data, mut session) = setup(10);
+        session.budget = 5_000_000;
+
+        let mut arrested = false;
+        for _ in 0..60 {
+            session.heat = data.config.law.custody_threshold + 30;
+            let summary = advance_week(&mut session, &data);
+            if summary
+                .law
+                .as_ref()
+                .is_some_and(|event| event.kind == LawEventKind::Arrest)
+            {
+                arrested = true;
+                break;
+            }
+        }
+
+        assert!(arrested, "sixty of the hottest weeks and nobody was taken");
+        assert_eq!(session.custody.len(), 1);
+        assert!(session
+            .custody
+            .first()
+            .is_some_and(|record| record.bail > 0));
+    }
+
+    #[test]
+    fn a_tail_runs_out_on_its_own() {
+        let (data, mut session) = setup(11);
+        session.surveillance_weeks = 2;
+
+        let summary = advance_week(&mut session, &data);
+        assert_eq!(summary.surveillance_weeks, 1);
+        advance_week(&mut session, &data);
+        assert_eq!(session.surveillance_weeks, 0);
+    }
+
+    #[test]
+    fn the_same_seed_advances_the_same_week() {
+        let data = GameData::load().unwrap();
+        let mut a = GameSession::new(&data.config, &data, 4242);
+        let mut b = GameSession::new(&data.config, &data, 4242);
+        a.heat = 90;
+        b.heat = 90;
+
+        for _ in 0..8 {
+            let left = advance_week(&mut a, &data);
+            let right = advance_week(&mut b, &data);
+            assert_eq!(left, right);
+        }
+        assert_eq!(a.budget, b.budget);
+        assert_eq!(a.custody.len(), b.custody.len());
     }
 }

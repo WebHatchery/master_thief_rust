@@ -3,6 +3,7 @@
 use super::attributes::{
     attribute_modifier, effective_skills, equipped_attributes, proficiency_bonus,
 };
+use super::condition::{condition_entries, ConditionTuning};
 use super::outcome::{ModifierEntry, Outcome};
 use crate::model::{CrewMember, Encounter, EquipmentSlot, Loadout, RunEffect, Skill};
 use serde::{Deserialize, Serialize};
@@ -14,6 +15,7 @@ pub struct CheckInputs<'a> {
     pub member: &'a CrewMember,
     pub loadout: &'a Loadout<'a>,
     pub encounter: &'a Encounter,
+    pub tuning: &'a ConditionTuning,
     pub extra: &'a [ModifierEntry],
 }
 
@@ -96,6 +98,7 @@ pub fn build_check(inputs: CheckInputs<'_>) -> CheckBreakdown {
         member,
         loadout,
         encounter,
+        tuning,
         extra,
     } = inputs;
 
@@ -129,7 +132,7 @@ pub fn build_check(inputs: CheckInputs<'_>) -> CheckBreakdown {
         proficiency_bonus(member.progression.level),
     ));
 
-    entries.extend(condition_entries(member));
+    entries.extend(condition_entries(member, tuning));
     entries.extend(extra.iter().cloned());
 
     CheckBreakdown {
@@ -156,40 +159,6 @@ fn focus_attribute_entry(
         format!("{} focus", kind.short_label()),
         attribute_modifier(attributes.get(kind)),
     ))
-}
-
-/// Fatigue, loyalty, and injuries, each named separately so a player can see
-/// which one is costing them the job.
-fn condition_entries(member: &CrewMember) -> Vec<ModifierEntry> {
-    let condition = &member.condition;
-    let mut entries = Vec::new();
-
-    if condition.fatigue > 50 {
-        entries.push(ModifierEntry::new(
-            "Fatigue",
-            -((condition.fatigue - 50) / 10),
-        ));
-    }
-
-    if condition.loyalty > 80 {
-        entries.push(ModifierEntry::new("Loyalty", 1));
-    } else if condition.loyalty < 40 {
-        entries.push(ModifierEntry::new("Wavering loyalty", -2));
-    }
-
-    let injury_penalty: i32 = condition
-        .injuries
-        .iter()
-        .map(|injury| injury.severity.check_penalty())
-        .sum();
-    if injury_penalty != 0 {
-        entries.push(ModifierEntry::new(
-            format!("Injuries ({})", condition.injuries.len()),
-            injury_penalty,
-        ));
-    }
-
-    entries
 }
 
 /// Apply a d20 to a prepared check. The roll comes from the run's seeded RNG;
@@ -323,6 +292,7 @@ mod tests {
             member,
             loadout,
             encounter,
+            tuning: &ConditionTuning::default(),
             extra: &[],
         })
     }
@@ -421,6 +391,60 @@ mod tests {
     }
 
     #[test]
+    fn a_hand_working_their_notice_says_so_on_every_door() {
+        let mut member = test_member();
+        let encounter = test_encounter();
+        member.condition.loyalty = 15;
+
+        let sullen = check_for(&member, &encounter, &Loadout::empty());
+        assert!(sullen
+            .entries
+            .iter()
+            .any(|e| e.label == "Wavering loyalty" && e.value == -3));
+
+        member.condition.notice_given = true;
+        let leaving = check_for(&member, &encounter, &Loadout::empty());
+        assert!(leaving
+            .entries
+            .iter()
+            .any(|e| e.label == "Working their notice"));
+        assert_eq!(
+            leaving.bonus(),
+            sullen.bonus(),
+            "notice renames, not rebalances"
+        );
+    }
+
+    #[test]
+    fn the_tuning_is_data_so_a_harsher_city_is_one_edit_away() {
+        let mut member = test_member();
+        let encounter = test_encounter();
+        member.condition.fatigue = 60;
+
+        let standard = ConditionTuning::default();
+        let harsh = ConditionTuning {
+            fatigue_free_threshold: 30,
+            fatigue_step: 5,
+            ..standard
+        };
+
+        assert_eq!(standard.fatigue_modifier(60), -1);
+        assert_eq!(harsh.fatigue_modifier(60), -6);
+
+        let check = build_check(CheckInputs {
+            member: &member,
+            loadout: &Loadout::empty(),
+            encounter: &encounter,
+            tuning: &harsh,
+            extra: &[],
+        });
+        assert!(check
+            .entries
+            .iter()
+            .any(|e| e.label == "Fatigue" && e.value == -6));
+    }
+
+    #[test]
     fn injuries_stack_their_penalties() {
         let mut member = test_member();
         let encounter = test_encounter();
@@ -450,6 +474,7 @@ mod tests {
             member: &member,
             loadout: &Loadout::empty(),
             encounter: &encounter,
+            tuning: &ConditionTuning::default(),
             extra: &extra,
         });
 

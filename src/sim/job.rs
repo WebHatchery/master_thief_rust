@@ -112,6 +112,7 @@ pub fn auto_assign(session: &GameSession, data: &GameData, target: &HeistTarget)
                 member,
                 loadout: &loadout,
                 encounter,
+                tuning: &data.config.condition,
                 extra: &situational_modifiers(data, target, encounter, session, &member.id, &used),
             });
             let mut score = check.bonus();
@@ -280,6 +281,7 @@ fn resolve_door(
             member,
             loadout: &loadout,
             encounter,
+            tuning: &data.config.condition,
             extra: &extras,
         })
     };

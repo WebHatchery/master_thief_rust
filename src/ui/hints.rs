@@ -17,7 +17,26 @@ use macroquad_toolkit::ui::draw_ui_text_ex;
 pub fn hint_for(ctx: &UiContext<'_>) -> Option<&'static str> {
     let session = ctx.session;
 
+    // The bill outranks every other piece of advice: a fixer who cannot make
+    // payroll has one problem and it is not their skill assignments.
+    if crate::sim::weeks_of_runway(session, &ctx.data.config.payroll) <= 1 {
+        return Some(
+            "The outfit cannot cover next week's payroll. Take a job, or let somebody go before they walk.",
+        );
+    }
+    if session.crew.iter().any(|m| m.condition.notice_given) {
+        return Some(
+            "Somebody has given notice. The Outfit tab shows what a bonus costs — after next week it is too late.",
+        );
+    }
+    if !session.custody.is_empty() {
+        return Some("The city is holding one of yours. Bail is on the Outfit tab, and it is not getting cheaper.");
+    }
+
     Some(match ctx.screen {
+        Screen::Crew if crate::sim::attention_chance(session, &ctx.data.config.law) >= 0.25 => {
+            "Heat this high risks a raid or an arrest every week. Grease palms on the Outfit tab, or lie low and pay for it."
+        }
         Screen::Crew if session.crew.len() < 4 => {
             "Every door wants a specialist. Check the For Hire tab — a crew of three cannot cover six skills."
         }
@@ -44,7 +63,7 @@ pub fn hint_for(ctx: &UiContext<'_>) -> Option<&'static str> {
             "Reputation opens better marks; notoriety brings heat, which raises every difficulty in the city."
         }
         Screen::Records => {
-            "When the notoriety line climbs above reputation, it is time to lie low for a week."
+            "Lying low cools the city and still costs a week's wages. Both curves are here; so is the bill."
         }
     })
 }

@@ -7,7 +7,9 @@ pub mod awards;
 pub mod campaign;
 pub mod delegation;
 pub mod job;
+pub mod law;
 pub mod loot;
+pub mod payroll;
 pub mod plan;
 pub mod week;
 
@@ -15,5 +17,9 @@ pub use awards::{award, AwardDef, CampaignTally};
 pub use campaign::{play, CampaignLog};
 pub use delegation::DelegationMiss;
 pub use job::{auto_assign, run_job, DoorOutcome, JobPlan, JobReport};
+pub use law::{attention_chance, bail_cost, bribe_cost, grease_palms, post_bail, LawEvent};
+pub use payroll::{
+    bonus_cost, pay_bonus, retainer_for, safehouse_upkeep, weekly_outgoings, weeks_of_runway,
+};
 pub use plan::{candidates, Candidate, PlanDraft};
-pub use week::advance_week;
+pub use week::{advance_week, WeekSummary};

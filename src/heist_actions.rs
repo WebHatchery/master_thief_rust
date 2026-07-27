@@ -5,7 +5,7 @@ use crate::data::GameData;
 use crate::prefs::Preferences;
 use crate::sim::{self, JobReport, PlanDraft};
 use crate::state::GameSession;
-use crate::ui::{Screen, UiAction};
+use crate::ui::{CrewTab, Screen, UiAction};
 use macroquad_toolkit::notifications::NotificationManager;
 use macroquad_toolkit::ui::format_money;
 
@@ -15,8 +15,8 @@ pub struct Selection {
     pub screen: Screen,
     pub member: Option<String>,
     pub target: Option<String>,
-    /// True while the crew screen is showing applicants rather than payroll.
-    pub hiring: bool,
+    /// Which panel the crew screen's left column is showing.
+    pub crew_tab: CrewTab,
     pub settings_open: bool,
     /// The plan under construction, if the fixer is at the planning table.
     pub draft: Option<PlanDraft>,
@@ -72,7 +72,7 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
 
         UiAction::CaseTarget(id) => case_target(data, session, notifications, &id),
 
-        UiAction::ShowHiring(hiring) => selection.hiring = hiring,
+        UiAction::ShowCrewTab(tab) => selection.crew_tab = tab,
 
         UiAction::OpenSettings => selection.settings_open = true,
         UiAction::CloseSettings => {
@@ -157,6 +157,19 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
             return delegate_job(data, session, selection, notifications, &id)
         }
         UiAction::AdvanceWeek => advance_week(data, session, notifications),
+
+        UiAction::PayBonus(id) => {
+            report(notifications, sim::pay_bonus(session, &data.config, &id));
+            check_awards(data, session, notifications);
+        }
+        UiAction::GreasePalms => {
+            report(notifications, sim::grease_palms(session, &data.config));
+            check_awards(data, session, notifications);
+        }
+        UiAction::PostBail(id) => {
+            report(notifications, sim::post_bail(session, &data.config, &id));
+            check_awards(data, session, notifications);
+        }
     }
 
     None
@@ -354,6 +367,8 @@ fn delegate_job(
     Some(GameCommand::StartRun(Box::new(report)))
 }
 
+/// Turn the week over and tell the player everything it cost them. The ledger
+/// line always shows; the alerts only exist when the week did something.
 fn advance_week(
     data: &GameData,
     session: &mut GameSession,
@@ -361,14 +376,19 @@ fn advance_week(
 ) {
     let summary = sim::advance_week(session, data);
     check_awards(data, session, notifications);
-    notifications.info(format!(
-        "Week {} — {} fatigue shed, {} healed, heat down {}, {} new marks",
-        summary.week,
-        summary.fatigue_shed,
-        summary.injuries_healed,
-        summary.heat_shed,
-        summary.new_marks
-    ));
+
+    if summary.payroll.was_short() {
+        notifications.danger(summary.ledger_line());
+    } else {
+        notifications.info(summary.ledger_line());
+    }
+
+    for warning in summary.warnings() {
+        notifications.warning(warning);
+    }
+    for note in summary.notes() {
+        notifications.info(note);
+    }
 }
 
 #[cfg(test)]

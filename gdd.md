@@ -124,8 +124,9 @@ Sources: `game_apps/master_thief/` (React 19 + Zustand original),
    game's central screen**; it shows every modifier for every candidate at every node.
 5. **Commit** — the run resolves encounter by encounter, visibly.
 6. **Fallout** — payout, XP, loot, injuries, fatigue, notoriety, heat. Read the results.
-7. **Advance the week** — heat decays or escalates, new targets appear, rivals and law
-   enforcement react.
+7. **Advance the week** — the payroll comes out first, then heat decays, the city rolls
+   once for whether it takes an interest, and new targets appear. The week summary reports
+   all of it: what was paid, what was short, who gave notice, and what the law did.
 
 Job length: ~1 minute to resolve; a week is 3–5 minutes. A campaign runs 4–8 hours.
 
@@ -217,13 +218,33 @@ decorative — a mechanical job.
 ### 5.6 Reputation, Notoriety, and Heat
 
 - **Reputation** rises with clean, high-value jobs; gates access to better targets, better
-  recruits, and better equipment.
-- **Notoriety** rises with every job and spikes on failures, alarms, and violence.
-- **Heat** is notoriety's short-term component: it decays weekly, and above a threshold
-  it raises DCs across the board, adds law-enforcement encounters, and can retire a crew
-  member into custody.
+  recruits, and better equipment. It is also what the safehouse costs: upkeep scales with
+  reputation, so the outfit's own name is the largest line on its weekly bill.
+- **Notoriety** rises with every job and spikes on failures, alarms, and violence. It is
+  **monotonic** — see open question 5, settled.
+- **Heat** is notoriety's short-term component. It decays weekly, can be bought down, and
+  above a threshold it stops being only a difficulty modifier: each week rolls once for
+  the city's attention, and a hit is a **tail** (a named penalty on every check for a
+  couple of weeks), a **raid** (a share of the outfit's cash seized), or — above a second,
+  higher threshold — an **arrest**, which takes the hand the city has seen most of off the
+  roster and holds them until somebody posts bail.
 
-Lying low — advancing a week with no job — is a legitimate, sometimes optimal move.
+**The week has a bill.** The safehouse charges rent and every hand on the payroll draws a
+retainer scaled to their level and standing, whether or not they worked. A week the outfit
+cannot cover is a week the crew go unpaid, and unpaid hands lose loyalty faster each time
+it happens; below a threshold they give a week's notice and then leave. The fixer's answers
+are all purchases: take a job, pay a bonus to talk somebody round, grease palms to shed
+heat, post bail to get somebody back — or let the roster shrink.
+
+Lying low — advancing a week with no job — is a legitimate move and a *priced* one. It
+sheds fatigue, closes injuries, and cools the city, and it costs a full week's payroll. The
+header carries the two numbers that decide it: what the week costs, and how many quiet
+weeks the outfit can still afford.
+
+**Loyalty is graded, not banded.** It contributes a modifier stepping from +2 down to −3
+across the 0–100 range rather than two flat bands, so goodwill the outfit burns is visible
+on the die immediately. The curve's numbers live in `game_config.json` under `condition`,
+alongside fatigue's.
 
 ### 5.7 Randomness & Determinism
 
@@ -238,7 +259,7 @@ the sim — this is the specific bug the original has at `heistExecution.ts:459`
 
 | File | Defines | Loaded via |
 | --- | --- | --- |
-| `assets/data/game_config.json` | Starting budget, XP curve, fatigue/injury thresholds, heat decay, DC bands | `load_embedded_json_labeled` |
+| `assets/data/game_config.json` | Starting budget, XP curve, heat decay, DC bands, plus `payroll` (upkeep, retainers, notice thresholds, bonus cost), `law` (attention odds, raid/arrest/surveillance, bribe and bail pricing), and `condition` (the fatigue and loyalty curves) | `load_embedded_json_labeled` |
 | `assets/characters.json` | Recruit archetypes: classes (7), rarities (5), attribute ranges, special abilities, personality traits, backgrounds | `DataRegistry` |
 | `assets/equipment.json` | Templates (19+), slots (5), rarities (5), bonuses, special effects, requirements | `DataRegistry` |
 | `assets/targets.json` | Heist targets: difficulty, payout, encounter sequence, environmental factors | `DataRegistry` |
@@ -291,7 +312,7 @@ UI is a pure view layer returning `UiAction`; a `heist_actions.rs` dispatcher ap
 
 | Screen | Purpose | Toolkit pieces |
 | --- | --- | --- |
-| Crew | Roster: attributes, skills, condition, chemistry matrix | `GridLayout`, meters, badges, tooltips |
+| Crew | Roster: attributes, skills, condition, chemistry matrix. Three left-hand tabs: **Payroll** (the roster, each hand showing their weekly retainer), **For Hire**, and **The Outfit** — the books: safehouse upkeep, total retainers, quiet weeks affordable, the odds of a visit from the law, and buttons for the three purchases that answer them (grease palms, pay a bonus, post bail) | `GridLayout`, meters, badges, tooltips |
 | Targets | Available jobs, payout, difficulty, casing state | Scroll list, badges |
 | **Planning** | Floorplan + per-node assignment with full modifier breakdown for every candidate | `paint`/`ui` primitives, `GridLayout`, `TextStyle` |
 | Run | Encounters resolving in order, dice and modifiers shown | `fx`, `timing`, `NotificationManager` |
@@ -379,9 +400,12 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
 
 **Open questions:**
 
-1. Is crew death on the table, or is capture/retirement the terminal state? Capture keeps
-   the memorial screen meaningful without the roguelike sting — and a captured member who
-   can be *broken out* is a target generator.
+1. **Settled: capture, not death.** A crew member lost to the law is taken into custody —
+   off the roster, whole, and recoverable by posting bail. Bail scales with their level and
+   the outfit's notoriety, so leaving somebody in a cell is a decision with a running cost
+   rather than a fixed one. Crew are also lost to *money*: a hand who goes unpaid long
+   enough gives notice and walks, and that loss is permanent. Breaking a captured member
+   out as a generated target remains unbuilt and is out of scope for now.
 2. Should casing cost the week's action, or a resource? Costing the week makes casing a
    real trade-off but may make blind runs strictly bad early.
 3. How much should critical results restructure a run? Skipping an encounter is a strong,
@@ -389,9 +413,13 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
 4. Does chemistry (§5.5) earn its complexity, or is it feature creep on a system the
    original never built? Prototype it in M4 and cut it if the planning screen gets
    illegible.
-5. Should notoriety ever be reducible (bribes, a fall guy, lying low for a month), or is
-   it strictly monotonic and the campaign therefore finite by design? The finite version
-   is a stronger game.
+5. **Settled: split the axis.** *Notoriety* is the ledger and never moves down — the
+   campaign is finite by design, which is the stronger game. *Heat* is the reducible half:
+   it decays on its own, and it can be bought down by greasing palms at a price that rises
+   with notoriety, so buying quiet gets steadily worse value as the campaign runs. The
+   player therefore has three ways to answer heat, all of them costed — lie low and pay a
+   week's wages for a small decay, pay a bribe for an immediate larger cut, or keep working
+   and accept the odds of a tail, a raid, or an arrest. None of them touches notoriety.
 
 ---
 

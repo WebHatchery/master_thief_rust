@@ -42,6 +42,13 @@ pub struct GameSession {
     pub notoriety: i32,
     pub heat: i32,
     pub crew: Vec<CrewMember>,
+    /// Hands the city is holding. Off the roster, still on the books, and one
+    /// bail payment away from working again (GDD 5.6, and open question 1).
+    #[serde(default)]
+    pub custody: Vec<CustodyRecord>,
+    /// Weeks a tail stays on the crew, costing every door.
+    #[serde(default)]
+    pub surveillance_weeks: u32,
     /// Equipment ids in the lockup, including items currently assigned.
     pub inventory: Vec<String>,
     pub board: Vec<BoardEntry>,
@@ -59,6 +66,15 @@ pub struct GameSession {
     /// One line per job, oldest first — the records screen reads this.
     #[serde(default)]
     pub history: Vec<JobRecord>,
+}
+
+/// Somebody the city is holding, kept whole so bail returns the same person
+/// with the same levels, kit, and history.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CustodyRecord {
+    pub member: CrewMember,
+    pub week_taken: u32,
+    pub bail: i64,
 }
 
 /// A finished job, kept for the records screen and its charts.
@@ -94,6 +110,8 @@ impl GameSession {
             notoriety: 0,
             heat: 0,
             crew,
+            custody: Vec::new(),
+            surveillance_weeks: 0,
             inventory: config.starting_inventory.clone(),
             board: Vec::new(),
             chemistry: Chemistry::default(),
@@ -115,12 +133,22 @@ impl GameSession {
         self.crew.iter().map(|member| member.id.clone()).collect()
     }
 
+    /// Is the city holding this hand?
+    pub fn is_held(&self, member_id: &str) -> bool {
+        self.custody
+            .iter()
+            .any(|record| record.member.id == member_id)
+    }
+
     /// Redraw the hiring pool from everyone not already on the payroll.
     pub fn refresh_recruits(&mut self, config: &GameConfig, data: &GameData) {
+        // Nobody in a cell is out looking for work, and nobody already on the
+        // payroll answers their own advertisement.
         let mut pool: Vec<String> = data
             .crew_pool
             .ids()
             .filter(|id| !self.crew.iter().any(|member| &member.id == *id))
+            .filter(|id| !self.is_held(id))
             .cloned()
             .collect();
         pool.sort();

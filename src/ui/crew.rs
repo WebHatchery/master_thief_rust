@@ -3,9 +3,10 @@
 use super::chrome::{
     draw_panel, empty_notice, list_card, panel_style, rarity_color, stat_row, title_style,
 };
-use super::{detail_rect, list_rect, UiAction, UiContext};
+use super::{detail_rect, list_rect, CrewTab, UiAction, UiContext};
 use crate::model::{AttributeKind, CrewMember, EquipmentSlot, Skill};
 use crate::rules::attributes::{derived_stats, equipped_attributes, equipped_skills, power_level};
+use crate::sim::retainer_for;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
@@ -17,21 +18,26 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     let strip = Rect::new(content.x, content.y, content.w, 30.0);
     let body = Rect::new(content.x, content.y + 38.0, content.w, content.h - 38.0);
 
+    let labels: Vec<&str> = CrewTab::ALL.iter().map(|tab| tab.label()).collect();
+    let active = CrewTab::ALL
+        .iter()
+        .position(|tab| *tab == ctx.crew_tab)
+        .unwrap_or(0);
     if let Some(index) = tab_bar_styled_at(
         strip,
-        &["Payroll", "For Hire"],
-        usize::from(ctx.hiring),
+        &labels,
+        active,
         TabOrientation::Horizontal,
         &TabStyle::default(),
         ctx.mouse(),
     ) {
-        actions.push(UiAction::ShowHiring(index == 1));
+        actions.push(UiAction::ShowCrewTab(CrewTab::ALL[index]));
     }
 
-    if ctx.hiring {
-        super::hiring::draw(ctx, body, actions);
-    } else {
-        draw_roster(ctx, body, actions);
+    match ctx.crew_tab {
+        CrewTab::Roster => draw_roster(ctx, body, actions),
+        CrewTab::ForHire => super::hiring::draw(ctx, body, actions),
+        CrewTab::Outfit => super::outfit::draw(ctx, body, actions),
     }
     draw_dossier(ctx, actions);
 }
@@ -71,7 +77,11 @@ fn draw_roster(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) 
             TextStyle::new(18.0, dark::TEXT_BRIGHT).params(),
         );
         draw_ui_text_ex(
-            &format!("{} · {}", member.specialty, member.class.label()),
+            &format!(
+                "{} · {}/wk",
+                member.specialty,
+                format_compact_money(retainer_for(member, &ctx.data.config.payroll))
+            ),
             rect.x + 14.0,
             rect.y + 46.0,
             TextStyle::new(14.0, dark::TEXT_DIM).params(),
@@ -102,7 +112,9 @@ fn draw_roster(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) 
 }
 
 fn condition_summary(member: &CrewMember) -> (String, Color) {
-    if !member.condition.injuries.is_empty() {
+    if member.condition.notice_given {
+        ("Notice".to_owned(), Color::new(0.94, 0.36, 0.34, 1.0))
+    } else if !member.condition.injuries.is_empty() {
         (
             format!("{} injured", member.condition.injuries.len()),
             Color::new(0.90, 0.42, 0.36, 1.0),
@@ -173,6 +185,7 @@ fn draw_dossier(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
             column_w,
             190.0,
         ),
+        ctx,
         member,
         &stats,
     );
@@ -299,9 +312,26 @@ fn draw_skills(
     }
 }
 
-fn draw_condition(rect: Rect, member: &CrewMember, stats: &crate::model::DerivedStats) {
+fn draw_condition(
+    rect: Rect,
+    ctx: &UiContext<'_>,
+    member: &CrewMember,
+    stats: &crate::model::DerivedStats,
+) {
     section_title(rect, "Condition");
     let condition = &member.condition;
+
+    // What this hand costs to keep, beside the state they are in — the two
+    // numbers a fixer weighs against each other every week.
+    draw_text_right(
+        &format!(
+            "{}/wk",
+            format_compact_money(retainer_for(member, &ctx.data.config.payroll))
+        ),
+        rect.right(),
+        rect.y + 16.0,
+        TextStyle::new(14.0, dark::TEXT_DIM),
+    );
 
     meter(
         Rect::new(rect.x, rect.y + 30.0, rect.w, 20.0),
@@ -315,7 +345,17 @@ fn draw_condition(rect: Rect, member: &CrewMember, stats: &crate::model::Derived
         condition.loyalty as f32,
         100.0,
         Color::new(0.40, 0.66, 0.88, 1.0),
-        Some(&format!("Loyalty {}", condition.loyalty)),
+        Some(&format!(
+            "Loyalty {}{}",
+            condition.loyalty,
+            if condition.notice_given {
+                " — notice given"
+            } else if condition.weeks_unpaid > 0 {
+                " — unpaid"
+            } else {
+                ""
+            }
+        )),
     );
 
     stat_row(

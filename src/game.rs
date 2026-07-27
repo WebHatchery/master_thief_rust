@@ -101,7 +101,14 @@ impl Game {
                 Screen::Records
             }
             "hiring" => {
-                self.selection.hiring = true;
+                self.selection.crew_tab = ui::CrewTab::ForHire;
+                Screen::Crew
+            }
+            "outfit" | "payroll" => {
+                // Twelve weeks in, the books have something to say: wages
+                // paid, heat carried, and whoever is threatening to walk.
+                crate::sim::play(&mut self.session, &self.data, 12);
+                self.selection.crew_tab = ui::CrewTab::Outfit;
                 Screen::Crew
             }
             "planning" | "plan" => {
@@ -208,7 +215,7 @@ impl Game {
             screen: self.selection.screen,
             selected_member: self.selection.member.as_deref(),
             selected_target: self.selection.target.as_deref(),
-            hiring: self.selection.hiring,
+            crew_tab: self.selection.crew_tab,
             draft: self.selection.draft.as_ref(),
             playback: self.playback.as_ref(),
             last_report: self.selection.last_report.as_ref(),

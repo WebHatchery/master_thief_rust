@@ -34,6 +34,15 @@ pub fn situational_modifiers(
         extras.push(ModifierEntry::new("City heat", -heat));
     }
 
+    // A tail is heat the crew can see out of the window, and it costs the same
+    // on every door until it gets bored (GDD 5.6).
+    if session.surveillance_weeks > 0 {
+        extras.push(ModifierEntry::new(
+            "Under surveillance",
+            -data.config.law.surveillance_penalty,
+        ));
+    }
+
     if let Some(entry) = session.chemistry.modifier(member_id, crew_on_job) {
         extras.push(entry);
     }
@@ -84,6 +93,7 @@ pub fn candidate_check(
         member,
         loadout: &loadout,
         encounter,
+        tuning: &data.config.condition,
         extra: &situational_modifiers(data, target, encounter, session, &member.id, crew_on_job),
     })
 }
@@ -415,6 +425,37 @@ mod tests {
                 best
             );
         }
+    }
+
+    #[test]
+    fn a_tail_is_named_on_the_planning_screen_before_anybody_commits() {
+        // Pillar 2: no hidden difficulty, ever. A penalty the city applied last
+        // week has to be readable on the breakdown this week.
+        let (data, mut session, target) = setup(19);
+        let draft = PlanDraft::new(&target, &data);
+        let encounter = data.encounters.get(&draft.doors[0]).unwrap();
+        let member = &session.crew[0];
+
+        let clear = candidate_check(&session, &data, &target, encounter, member, &[]);
+        assert!(!clear
+            .entries
+            .iter()
+            .any(|entry| entry.label == "Under surveillance"));
+
+        session.surveillance_weeks = 2;
+        let member = &session.crew[0];
+        let tailed = candidate_check(&session, &data, &target, encounter, member, &[]);
+
+        let entry = tailed
+            .entries
+            .iter()
+            .find(|entry| entry.label == "Under surveillance")
+            .expect("a tail shows up by name");
+        assert_eq!(entry.value, -data.config.law.surveillance_penalty);
+        assert_eq!(
+            clear.bonus() - tailed.bonus(),
+            data.config.law.surveillance_penalty
+        );
     }
 
     #[test]

@@ -7,6 +7,7 @@ pub mod crew;
 pub mod floorplan;
 pub mod hints;
 pub mod hiring;
+pub mod outfit;
 pub mod planning;
 pub mod records;
 pub mod results;
@@ -76,8 +77,9 @@ pub enum UiAction {
     ShowScreen(Screen),
     SelectMember(String),
     SelectTarget(String),
-    /// Switch the crew screen's left panel between payroll and applicants.
-    ShowHiring(bool),
+    /// Switch the crew screen's left panel between roster, applicants, and the
+    /// outfit's own books.
+    ShowCrewTab(CrewTab),
     OpenSettings,
     CloseSettings,
     SetPacing(RunPacing),
@@ -124,6 +126,34 @@ pub enum UiAction {
     /// Hand the job to the crew's own judgement and run it (GDD 5.3).
     DelegateJob(String),
     AdvanceWeek,
+    /// Buy a wavering hand's goodwill back.
+    PayBonus(String),
+    /// Pay the city to look elsewhere for a while.
+    GreasePalms,
+    /// Buy somebody out of custody.
+    PostBail(String),
+}
+
+/// The three things the crew screen's left panel can be showing.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CrewTab {
+    #[default]
+    Roster,
+    ForHire,
+    /// The outfit's own books: what the week costs and who is holding what.
+    Outfit,
+}
+
+impl CrewTab {
+    pub const ALL: [CrewTab; 3] = [CrewTab::Roster, CrewTab::ForHire, CrewTab::Outfit];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            CrewTab::Roster => "Payroll",
+            CrewTab::ForHire => "For Hire",
+            CrewTab::Outfit => "The Outfit",
+        }
+    }
 }
 
 pub struct UiContext<'a> {
@@ -132,8 +162,8 @@ pub struct UiContext<'a> {
     pub screen: Screen,
     pub selected_member: Option<&'a str>,
     pub selected_target: Option<&'a str>,
-    /// True while the crew screen is showing applicants rather than payroll.
-    pub hiring: bool,
+    /// Which panel the crew screen's left column is showing.
+    pub crew_tab: CrewTab,
     pub draft: Option<&'a PlanDraft>,
     pub playback: Option<&'a RunPlayback>,
     pub last_report: Option<&'a JobReport>,

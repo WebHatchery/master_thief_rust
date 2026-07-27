@@ -17,6 +17,14 @@ pub struct CampaignLog {
     pub injuries_taken: usize,
     pub loot_found: usize,
     pub hires: usize,
+    /// Weeks the outfit could not cover its own bill.
+    pub weeks_short: usize,
+    /// Hands who walked over money.
+    pub walkouts: usize,
+    /// Weeks the city took an interest, of any kind.
+    pub law_incidents: usize,
+    pub arrests: usize,
+    pub bails_posted: usize,
     /// Every narrative line the campaign printed, in order. GDD 13 calls M6
     /// done when a full campaign rarely repeats one, so the campaign has to
     /// remember what it said.
@@ -48,9 +56,12 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
 
     for _ in 0..weeks {
         log.weeks += 1;
+        keep_the_outfit_standing(session, data, &mut log);
 
         // Take on a hand when the money is comfortable and somebody is asking.
-        if session.budget > 60_000 {
+        // Comfortable now means a month of everybody's wages, not a fixed
+        // number: a bigger bench is a standing cost, not a one-off purchase.
+        if session.budget > super::weekly_outgoings(session, &data.config.payroll) * 6 {
             if let Some(recruit) = session.recruits.first().cloned() {
                 if session.hire(data, &recruit).is_ok() {
                     log.hires += 1;
@@ -89,8 +100,15 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
             }
         }
 
-        super::advance_week(session, data);
+        let summary = super::advance_week(session, data);
         super::award(session, &data.awards);
+
+        log.weeks_short += usize::from(summary.payroll.was_short());
+        log.walkouts += summary.payroll.walkouts.len();
+        if let Some(event) = &summary.law {
+            log.law_incidents += 1;
+            log.arrests += usize::from(event.taken.is_some());
+        }
     }
 
     let levels: i32 = session
@@ -100,6 +118,47 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
         .sum();
     log.levels_gained = levels - starting_levels - log.hires as i32;
     log
+}
+
+/// What an unattended fixer spends money on before they spend it on work: the
+/// people who are threatening to leave, the ones already in a cell, and the
+/// city's attention. Only ever with money the outfit can spare — a headless
+/// campaign that bankrupts itself buying goodwill proves nothing.
+fn keep_the_outfit_standing(session: &mut GameSession, data: &GameData, log: &mut CampaignLog) {
+    let payroll = &data.config.payroll;
+    let comfortable = super::weekly_outgoings(session, payroll) * 4;
+
+    // Nobody works from a cell, so bail comes first.
+    let held: Vec<String> = session
+        .custody
+        .iter()
+        .filter(|record| session.budget - record.bail > comfortable)
+        .map(|record| record.member.id.clone())
+        .collect();
+    for id in held {
+        if super::post_bail(session, &data.config, &id).is_ok() {
+            log.bails_posted += 1;
+        }
+    }
+
+    // Then anybody who has said they are done.
+    let wavering: Vec<String> = session
+        .crew
+        .iter()
+        .filter(|member| member.condition.notice_given)
+        .filter(|member| session.budget - super::bonus_cost(member, payroll) > comfortable)
+        .map(|member| member.id.clone())
+        .collect();
+    for id in wavering {
+        let _ = super::pay_bonus(session, &data.config, &id);
+    }
+
+    // Then the city, but only once it is genuinely dangerous.
+    if super::attention_chance(session, &data.config.law) >= 0.25
+        && session.budget - super::bribe_cost(session, &data.config.law) > comfortable
+    {
+        let _ = super::grease_palms(session, &data.config);
+    }
 }
 
 /// The best-paying mark the crew's name currently opens.
@@ -234,6 +293,98 @@ mod tests {
             serde_json::to_value(GameSession::from_save(restored)).unwrap(),
             serde_json::to_value(&session).unwrap()
         );
+    }
+
+    #[test]
+    fn a_campaign_pays_its_own_way_every_single_week() {
+        // The week now has a bill in it. Twenty weeks of work should have paid
+        // out real money, and the ledger should be able to prove it.
+        let (_, session, log) = campaign(20_260_726, 20);
+
+        assert!(
+            session.tally.wages_paid > 0,
+            "twenty weeks and nobody drew a wage"
+        );
+        assert!(
+            session.tally.wages_paid as f32 > session.tally.payout_total as f32 * 0.05,
+            "wages of {} against takings of {} is not a payroll",
+            session.tally.wages_paid,
+            session.tally.payout_total
+        );
+        assert_eq!(log.weeks, 20);
+    }
+
+    #[test]
+    fn an_outfit_that_only_rests_goes_broke_and_loses_its_crew() {
+        // The complaint this change answers: resting until everyone is fresh
+        // used to be free, so it was never wrong. It is now a slow bankruptcy.
+        let data = GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data, 20_260_726);
+        let roster = session.crew.len();
+
+        let mut short_weeks = 0;
+        for _ in 0..25 {
+            let summary = super::super::advance_week(&mut session, &data);
+            short_weeks += usize::from(summary.payroll.was_short());
+        }
+
+        assert!(session.budget <= 0, "idling stayed free");
+        assert!(short_weeks > 0, "the bill was always covered");
+        assert!(
+            session.crew.len() < roster,
+            "twenty-five unpaid weeks and the whole crew stayed"
+        );
+        assert!(session.tally.walkouts > 0);
+    }
+
+    #[test]
+    fn a_campaign_that_never_cools_off_loses_somebody_to_a_cell() {
+        // GDD 5.6's other promise: above a threshold heat "can retire a crew
+        // member into custody". A working outfit that never buys quiet should
+        // meet the law sooner or later.
+        let data = GameData::load().unwrap();
+        let mut arrested = 0;
+        let mut incidents = 0;
+
+        for seed in 0..12u64 {
+            let mut session = GameSession::new(&data.config, &data, seed);
+            // The unattended fixer would bribe its way out; this one does not.
+            let log = play_without_bribes(&mut session, &data, 24);
+            arrested += log.arrests;
+            incidents += log.law_incidents;
+        }
+
+        assert!(incidents > 0, "twelve hot campaigns and nobody called");
+        assert!(
+            arrested > 0,
+            "{} incidents across twelve campaigns and never an arrest",
+            incidents
+        );
+    }
+
+    /// A campaign played the same way, minus the money spent on staying quiet.
+    fn play_without_bribes(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignLog {
+        let mut log = CampaignLog::default();
+        for _ in 0..weeks {
+            log.weeks += 1;
+            if let Some(target_id) = richest_openable_mark(session, data) {
+                if session.available_crew().count() > 0 {
+                    if let Some(target) = data.targets.get(&target_id).cloned() {
+                        let plan = super::super::auto_assign(session, data, &target);
+                        if !plan.assignments.is_empty() {
+                            super::super::run_job(session, data, &plan);
+                            log.jobs_run += 1;
+                        }
+                    }
+                }
+            }
+            let summary = super::super::advance_week(session, data);
+            if let Some(event) = &summary.law {
+                log.law_incidents += 1;
+                log.arrests += usize::from(event.taken.is_some());
+            }
+        }
+        log
     }
 
     #[test]

@@ -46,5 +46,17 @@
   { "id": "going_in_blind", "name": "Going In Blind", "description": "Run five jobs on marks nobody cased.", "stat": "blind_jobs", "at_least": 5 },
   { "id": "walking_wounded", "name": "The Walking Wounded", "description": "Have the crew take twenty injuries.", "stat": "injuries_taken", "at_least": 20 },
   { "id": "a_full_season", "name": "A Full Season", "description": "Reach week twenty.", "stat": "week", "at_least": 20 },
-  { "id": "a_full_year", "name": "A Full Year", "description": "Reach week fifty-two.", "stat": "week", "at_least": 52 }
+  { "id": "a_full_year", "name": "A Full Year", "description": "Reach week fifty-two.", "stat": "week", "at_least": 52 },
+  { "id": "the_books_balance", "name": "The Books Balance", "description": "Pay out a million in wages and upkeep.", "stat": "wages_paid", "at_least": 1000000 },
+  { "id": "a_good_employer", "name": "A Good Employer", "description": "Pay out ten million in wages and upkeep.", "stat": "wages_paid", "at_least": 10000000 },
+  { "id": "short_this_week", "name": "Short This Week", "description": "Fail to cover the payroll once.", "stat": "weeks_missed_payroll", "at_least": 1 },
+  { "id": "running_on_fumes", "name": "Running on Fumes", "description": "Fail to cover the payroll five weeks.", "stat": "weeks_missed_payroll", "at_least": 5 },
+  { "id": "squared_away", "name": "Squared Away", "description": "Buy somebody's goodwill back before they walk.", "stat": "bonuses_paid", "at_least": 1 },
+  { "id": "they_walked", "name": "They Walked", "description": "Lose a hand over money.", "stat": "walkouts", "at_least": 1 },
+  { "id": "a_knock_at_the_door", "name": "A Knock at the Door", "description": "Draw the city's attention once.", "stat": "law_incidents", "at_least": 1 },
+  { "id": "known_to_the_law", "name": "Known to the Law", "description": "Draw the city's attention ten times.", "stat": "law_incidents", "at_least": 10 },
+  { "id": "one_of_ours", "name": "One of Ours", "description": "Have somebody taken into custody.", "stat": "arrests", "at_least": 1 },
+  { "id": "nobody_left_behind", "name": "Nobody Left Behind", "description": "Post bail and get somebody back.", "stat": "bails_paid", "at_least": 1 },
+  { "id": "the_right_palms", "name": "The Right Palms", "description": "Buy the city's silence once.", "stat": "bribes_paid", "at_least": 1 },
+  { "id": "quietly_arranged", "name": "Quietly Arranged", "description": "Buy a hundred points of heat away.", "stat": "heat_bought_down", "at_least": 100 }
 ]
