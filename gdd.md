@@ -123,7 +123,11 @@ Sources: `game_apps/master_thief/` (React 19 + Zustand original),
    price that scales with the wait it saves and leaves the hand tired rather than fresh.
    With a payroll running, a ripening board, and rivals on it, weeks are the expensive
    thing — so the doctor is the same money-for-time trade the rest of the week is made of.
-3. **Outfit** — buy, assign, and repair equipment.
+3. **Outfit** — buy, assign, and repair equipment. Kit takes a job's worth of wear every
+   time it goes through a door, and worn tools read as a named `Worn kit` penalty on every
+   check the hand makes. Refitting is a bill that grows with neglect, so the good tool is
+   something the outfit keeps paying to keep good — the ordinary decision every working
+   outfit has, and the one thing the Outfitter previously had none of.
 4. **Plan** — pick a target and assign a specialist to each encounter node. **This is the
    game's central screen**; it shows every modifier for every candidate at every node.
 5. **Commit** — the run resolves encounter by encounter, visibly.
@@ -365,7 +369,7 @@ UI is a pure view layer returning `UiAction`; a `heist_actions.rs` dispatcher ap
 | **Planning** | Floorplan + per-node assignment with full modifier breakdown for every candidate | `paint`/`ui` primitives, `GridLayout`, `TextStyle` |
 | Run | Encounters resolving in order, dice and modifiers shown | `fx`, `timing`, `NotificationManager` |
 | Results | Payout, XP, loot, injuries, notoriety delta, narrative lines | Modal surface |
-| Shop | Equipment purchase, repair, assignment | Scroll list, badges |
+| Shop | Equipment purchase and assignment. **Repair** lives on the crew dossier's Kit section, beside the tools it fixes and next to the treat quote — a refit is a fact about a person's tools, not a line item in a catalogue | Scroll list, badges |
 | Records | Job history, crew memorial, seed, statistics | `series` for the reputation/notoriety curves |
 | Pause / Settings | | `settings` |
 

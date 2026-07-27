@@ -61,6 +61,13 @@
     "max_chance": 0.35
   },
 
+  "kit": {
+    "jobs_per_penalty": 4,
+    "max_penalty_per_item": 3,
+    "refit_base": 900,
+    "refit_per_job": 450
+  },
+
   "treatment": {
     "base_cost": 5000,
     "cost_per_week": 7000,

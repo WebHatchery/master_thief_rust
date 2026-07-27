@@ -197,6 +197,7 @@ fn draw_dossier(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         ctx,
         member,
         power_level(member, &loadout),
+        actions,
     );
 }
 
@@ -436,11 +437,40 @@ fn draw_condition(
     }
 }
 
-fn draw_kit(rect: Rect, ctx: &UiContext<'_>, member: &CrewMember, power: i32) {
+fn draw_kit(
+    rect: Rect,
+    ctx: &UiContext<'_>,
+    member: &CrewMember,
+    power: i32,
+    actions: &mut Vec<UiAction>,
+) {
     section_title(rect, "Kit");
+
+    // Kit wears through doors, so the Outfitter is no longer a shop you visit
+    // once — the good tool is something the outfit keeps paying to keep good.
+    let refit = crate::sim::refit_quote(ctx.session, member, &ctx.data.config.kit);
+    let power_right = if refit.is_needed() {
+        if button_rect_tone_at(
+            Rect::new(rect.right() - 168.0, rect.y + 2.0, 168.0, 20.0),
+            &format!(
+                "Refit {} — {} (+{})",
+                refit.pieces,
+                format_compact_money(refit.cost),
+                refit.penalty_cleared
+            ),
+            ctx.session.budget >= refit.cost,
+            ButtonTone::Primary,
+            ctx.mouse(),
+        ) {
+            actions.push(UiAction::RefitKit(member.id.clone()));
+        }
+        rect.right() - 178.0
+    } else {
+        rect.right()
+    };
     draw_text_right(
         &format!("Power {}", power),
-        rect.right(),
+        power_right,
         rect.y + 16.0,
         TextStyle::new(15.0, dark::TEXT_DIM),
     );
@@ -475,6 +505,17 @@ fn draw_kit(rect: Rect, ctx: &UiContext<'_>, member: &CrewMember, power: i32) {
             slot_rect.y + 20.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
+        if let Some(def) = item {
+            let worn = ctx.session.kit_wear.get(&def.id).copied().unwrap_or(0);
+            if worn > 0 {
+                draw_text_right(
+                    &format!("{} jobs", worn),
+                    slot_rect.right() - 8.0,
+                    slot_rect.y + 20.0,
+                    TextStyle::new(12.0, Color::new(0.88, 0.66, 0.40, 1.0)),
+                );
+            }
+        }
         draw_ui_text_ex(
             item.map(|def| def.name.as_str()).unwrap_or("— empty —"),
             slot_rect.x + 10.0,

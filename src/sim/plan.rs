@@ -44,6 +44,15 @@ pub fn situational_modifiers(
         extras.push(ModifierEntry::new("Mark has ripened", -ripe));
     }
 
+    // Tools that have been through too many doors without a bench. Named like
+    // everything else, so the shop bill is visible in the dice (GDD 3, 9).
+    if let Some(member) = session.member(member_id) {
+        let worn = super::kit::wear_penalty(session, member, &data.config.kit);
+        if worn > 0 {
+            extras.push(ModifierEntry::new("Worn kit", -worn));
+        }
+    }
+
     // A tail is heat the crew can see out of the window, and it costs the same
     // on every door until it gets bored (GDD 5.6).
     if session.surveillance_weeks > 0 {

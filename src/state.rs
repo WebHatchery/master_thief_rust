@@ -99,6 +99,12 @@ pub struct GameSession {
     pub casing_this_week: u32,
     /// Equipment ids in the lockup, including items currently assigned.
     pub inventory: Vec<String>,
+    /// Jobs each piece of kit has been carried through since its last refit.
+    /// Keyed by item id: the lockup has no per-instance identity, and two of
+    /// the same tool wearing at the same rate is a smaller lie than wear that
+    /// vanishes when a tool changes hands (GDD 3, "repair equipment").
+    #[serde(default)]
+    pub kit_wear: std::collections::BTreeMap<String, u32>,
     pub board: Vec<BoardEntry>,
     /// Who works well with whom (GDD 5.5).
     #[serde(default)]
@@ -162,6 +168,7 @@ impl GameSession {
             surveillance_weeks: 0,
             casing_this_week: 0,
             inventory: config.starting_inventory.clone(),
+            kit_wear: std::collections::BTreeMap::new(),
             board: Vec::new(),
             chemistry: Chemistry::default(),
             recruits: Vec::new(),

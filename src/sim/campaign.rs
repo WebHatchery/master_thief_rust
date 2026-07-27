@@ -351,6 +351,27 @@ mod tests {
     }
 
     #[test]
+    fn tools_wear_out_over_a_campaign() {
+        // The Outfitter used to be a shop you visited once: a tool bought in
+        // week two was exactly as good in week forty.
+        let (data, session, _) = campaign(20_260_726, 20);
+
+        assert!(
+            !session.kit_wear.is_empty(),
+            "twenty weeks of jobs and nothing wore out"
+        );
+        let worn = session
+            .crew
+            .iter()
+            .filter(|member| crate::sim::wear_penalty(&session, member, &data.config.kit) > 0)
+            .count();
+        assert!(
+            worn > 0,
+            "kit accrued wear but none of it ever reached a check"
+        );
+    }
+
+    #[test]
     fn the_city_notices_a_working_outfit() {
         let (data, session, log) = campaign(4_242, 20);
 

@@ -174,6 +174,10 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
             report(notifications, sim::treat(session, &data.config, &id));
             check_awards(data, session, notifications);
         }
+        UiAction::RefitKit(id) => {
+            report(notifications, sim::refit(session, &data.config, &id));
+            check_awards(data, session, notifications);
+        }
     }
 
     None

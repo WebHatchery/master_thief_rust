@@ -76,6 +76,8 @@ pub struct GameConfig {
     pub rivals: RivalConfig,
     /// What a doctor charges to buy back the weeks an injury would have cost.
     pub treatment: TreatmentConfig,
+    /// How fast kit wears out, and what putting it right costs.
+    pub kit: KitConfig,
     /// What the outfit costs to keep standing, week in, week out.
     pub payroll: PayrollConfig,
     /// What the city does about an outfit it has started to notice.
@@ -84,6 +86,21 @@ pub struct GameConfig {
     pub condition: crate::rules::ConditionTuning,
     /// How long it takes a hand to get good at their own trade.
     pub mastery: crate::rules::MasteryTuning,
+}
+
+/// Kit wearing out and being refitted (GDD 3, 9). Without this the Outfitter
+/// is a shop you visit once; with it, the good tool is something the outfit
+/// keeps paying to keep good.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct KitConfig {
+    /// Jobs a piece of kit survives per point of penalty it picks up.
+    pub jobs_per_penalty: u32,
+    /// However neglected, one tool can only cost this much on a check.
+    pub max_penalty_per_item: i32,
+    /// Bench fee per piece of kit refitted.
+    pub refit_base: i64,
+    /// Added per job of wear on that piece.
+    pub refit_per_job: i64,
 }
 
 /// Treating an injury rather than waiting it out (GDD 3, 4). The bill scales

@@ -447,6 +447,12 @@ fn settle(
     let loot = super::loot::roll_loot(&mut session.rng, data, target, &outcomes, success);
     session.inventory.extend(loot.iter().cloned());
 
+    // A night out is a night out: every hand who worked wears what they carried
+    // once, not once per door (GDD 3, "repair equipment").
+    for member_id in plan.crew_on_job() {
+        super::kit::wear_kit(session, &member_id);
+    }
+
     let was_cased = session
         .board_entry(&target.id)
         .map(|entry| !entry.is_blind())
