@@ -74,12 +74,29 @@ pub struct GameConfig {
     pub board: BoardConfig,
     /// The other outfits working the same city.
     pub rivals: RivalConfig,
+    /// What a doctor charges to buy back the weeks an injury would have cost.
+    pub treatment: TreatmentConfig,
     /// What the outfit costs to keep standing, week in, week out.
     pub payroll: PayrollConfig,
     /// What the city does about an outfit it has started to notice.
     pub law: LawConfig,
     /// How fatigue and loyalty grade into modifiers on the die.
     pub condition: crate::rules::ConditionTuning,
+}
+
+/// Treating an injury rather than waiting it out (GDD 3, 4). The bill scales
+/// with the wait it saves, so the injuries worth paying to fix are the ones
+/// that would have cost the most weeks.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TreatmentConfig {
+    /// What a doctor charges for turning up at all.
+    pub base_cost: i64,
+    /// Added per week the injury still had to run.
+    pub cost_per_week: i64,
+    /// Anything serious costs this many times as much.
+    pub major_multiplier: i64,
+    /// Fatigue a patched-up hand carries out of the surgery.
+    pub fatigue_cost: i32,
 }
 
 /// The competition. A rival is a name and a weekly roll — not a faction, not a

@@ -6,6 +6,7 @@
 pub mod awards;
 pub mod campaign;
 pub mod delegation;
+pub mod infirmary;
 pub mod job;
 pub mod law;
 pub mod loot;
@@ -17,6 +18,7 @@ pub mod week;
 pub use awards::{award, AwardDef, CampaignTally};
 pub use campaign::{play, CampaignLog};
 pub use delegation::DelegationMiss;
+pub use infirmary::{quote as treatment_quote, treat, Treatment};
 pub use job::{auto_assign, run_job, DoorOutcome, JobPlan, JobReport};
 pub use law::{attention_chance, bail_cost, bribe_cost, grease_palms, post_bail, LawEvent};
 pub use payroll::{

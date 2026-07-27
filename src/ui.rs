@@ -132,6 +132,8 @@ pub enum UiAction {
     GreasePalms,
     /// Buy somebody out of custody.
     PostBail(String),
+    /// Pay a doctor rather than waiting an injury out (GDD 4, "treat").
+    TreatInjuries(String),
 }
 
 /// The three things the crew screen's left panel can be showing.

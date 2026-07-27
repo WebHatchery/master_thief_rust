@@ -43,6 +43,9 @@ pub fn hint_for(ctx: &UiContext<'_>) -> Option<&'static str> {
         Screen::Crew if session.crew.iter().any(|m| m.progression.skill_points > 0) => {
             "Somebody has points to spend. The + buttons beside a skill are how a hand gets better at their trade."
         }
+        Screen::Crew if session.crew.iter().any(|m| !m.condition.injuries.is_empty()) => {
+            "An injury heals free but slowly. Treat pays a doctor to buy those weeks back — the week costs wages either way."
+        }
         Screen::Crew => {
             "Fatigue above 50 costs dice, and injuries cost more. Advance the week to rest them."
         }

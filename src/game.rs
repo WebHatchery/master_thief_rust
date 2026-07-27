@@ -122,6 +122,14 @@ impl Game {
                 // paid, heat carried, and whoever is threatening to walk.
                 crate::sim::play(&mut self.session, &self.data, 12);
                 self.selection.crew_tab = ui::CrewTab::Outfit;
+                // Show a dossier with something on it: whoever is hurt, so the
+                // shot carries the treat quote rather than an idle column.
+                self.selection.member = self
+                    .session
+                    .crew
+                    .iter()
+                    .find(|member| !member.condition.injuries.is_empty())
+                    .map(|member| member.id.clone());
                 Screen::Crew
             }
             "planning" | "plan" => {

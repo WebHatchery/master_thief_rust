@@ -188,6 +188,7 @@ fn draw_dossier(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         ctx,
         member,
         &stats,
+        actions,
     );
 
     let kit_y = columns_y + 202.0;
@@ -317,6 +318,7 @@ fn draw_condition(
     ctx: &UiContext<'_>,
     member: &CrewMember,
     stats: &crate::model::DerivedStats,
+    actions: &mut Vec<UiAction>,
 ) {
     section_title(rect, "Condition");
     let condition = &member.condition;
@@ -395,11 +397,29 @@ fn draw_condition(
         rect.x,
         rect.y + 150.0,
         rect.w,
-        36.0,
+        32.0,
         14.0,
         2.0,
         Color::new(0.86, 0.50, 0.44, 1.0),
     );
+
+    // Waiting an injury out is free and slow; a doctor is neither (GDD 4).
+    let quoted = crate::sim::treatment_quote(condition, &ctx.data.config.treatment);
+    if quoted.is_needed()
+        && button_rect_tone_at(
+            Rect::new(rect.x, rect.y + 176.0, rect.w, 22.0),
+            &format!(
+                "Treat — {} saves {} wk",
+                format_compact_money(quoted.cost),
+                quoted.weeks_saved
+            ),
+            ctx.session.budget >= quoted.cost,
+            ButtonTone::Positive,
+            ctx.mouse(),
+        )
+    {
+        actions.push(UiAction::TreatInjuries(member.id.clone()));
+    }
 }
 
 fn draw_kit(rect: Rect, ctx: &UiContext<'_>, member: &CrewMember, power: i32) {

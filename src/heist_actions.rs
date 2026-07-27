@@ -170,6 +170,10 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
             report(notifications, sim::post_bail(session, &data.config, &id));
             check_awards(data, session, notifications);
         }
+        UiAction::TreatInjuries(id) => {
+            report(notifications, sim::treat(session, &data.config, &id));
+            check_awards(data, session, notifications);
+        }
     }
 
     None
@@ -552,6 +556,29 @@ mod tests {
 
         assert!(session.board_entry(&target_id).unwrap().is_blind());
         assert_eq!(session.budget, 0);
+    }
+
+    #[test]
+    fn treating_a_hurt_hand_buys_the_week_back() {
+        let (data, mut session) = setup();
+        let mut selection = Selection::default();
+        let mut notifications = NotificationManager::new();
+        let id = session.crew[0].id.clone();
+        session.crew[0]
+            .condition
+            .injuries
+            .push(crate::model::crew::Injury::major("Torn shoulder"));
+        session.budget = 5_000_000;
+        let budget = session.budget;
+
+        apply(
+            UiAction::TreatInjuries(id.clone()),
+            dispatch(&data, &mut session, &mut selection, &mut notifications),
+        );
+
+        assert!(session.member(&id).unwrap().condition.injuries.is_empty());
+        assert!(session.budget < budget, "the doctor worked for free");
+        assert!(session.tally.injuries_treated > 0);
     }
 
     #[test]

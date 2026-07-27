@@ -118,7 +118,11 @@ Sources: `game_apps/master_thief/` (React 19 + Zustand original),
 1. **Case** — review available targets. Casing puts one door at a time on a mark's file,
    front to back, spending both cash and one of the week's limited looks. A mark can be
    half known, and a partly-scouted run is a position rather than a punishment.
-2. **Crew** — recruit, rest, treat injuries, spend level-up points, manage chemistry.
+2. **Crew** — recruit, rest, treat injuries, spend level-up points, manage chemistry. An
+   injury heals free but slowly; *treating* it pays a doctor to buy those weeks back, at a
+   price that scales with the wait it saves and leaves the hand tired rather than fresh.
+   With a payroll running, a ripening board, and rivals on it, weeks are the expensive
+   thing — so the doctor is the same money-for-time trade the rest of the week is made of.
 3. **Outfit** — buy, assign, and repair equipment.
 4. **Plan** — pick a target and assign a specialist to each encounter node. **This is the
    game's central screen**; it shows every modifier for every candidate at every node.

@@ -63,6 +63,11 @@ pub struct CampaignTally {
     /// Marks another outfit took while the crew were still thinking about it.
     #[serde(default)]
     pub marks_lost_to_rivals: i64,
+    /// Spent on doctors rather than waiting injuries out.
+    #[serde(default)]
+    pub treatment_paid: i64,
+    #[serde(default)]
+    pub injuries_treated: i64,
 }
 
 /// The statistics an achievement can be written against.
@@ -98,6 +103,8 @@ pub enum TallyStat {
     HeatBoughtDown,
     BailsPaid,
     MarksLostToRivals,
+    TreatmentPaid,
+    InjuriesTreated,
     /// Live campaign state rather than a running total.
     Week,
     Reputation,
@@ -146,6 +153,8 @@ impl TallyStat {
             TallyStat::HeatBoughtDown => tally.heat_bought_down,
             TallyStat::BailsPaid => tally.bails_paid,
             TallyStat::MarksLostToRivals => tally.marks_lost_to_rivals,
+            TallyStat::TreatmentPaid => tally.treatment_paid,
+            TallyStat::InjuriesTreated => tally.injuries_treated,
 
             TallyStat::Week => session.week as i64,
             TallyStat::Reputation => session.reputation as i64,

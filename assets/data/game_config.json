@@ -61,6 +61,13 @@
     "max_chance": 0.35
   },
 
+  "treatment": {
+    "base_cost": 5000,
+    "cost_per_week": 7000,
+    "major_multiplier": 2,
+    "fatigue_cost": 12
+  },
+
   "payroll": {
     "safehouse_upkeep_base": 4000,
     "safehouse_upkeep_per_reputation": 1400,
