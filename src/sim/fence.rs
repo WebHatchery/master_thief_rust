@@ -117,13 +117,17 @@ mod tests {
         (data, session)
     }
 
-    /// Put a spare on the shelf that nobody is carrying.
+    /// Put a spare on the shelf that nobody is carrying, and that the outfit
+    /// does not already own a copy of. `DataRegistry::ids()` has no defined
+    /// order — the rest of the codebase sorts before drawing from it — so the
+    /// pick has to be made deterministic here or the test is a coin toss.
     fn shelve(session: &mut GameSession, data: &GameData) -> String {
-        let id = data
-            .equipment
-            .ids()
-            .next()
-            .expect("the catalogue is not empty")
+        let mut ids: Vec<&String> = data.equipment.ids().collect();
+        ids.sort();
+        let id = ids
+            .into_iter()
+            .find(|id| !session.inventory.contains(id))
+            .expect("the catalogue is wider than the starting kit")
             .clone();
         session.inventory.push(id.clone());
         id
@@ -222,7 +226,8 @@ mod tests {
     fn a_spare_kept_on_the_shelf_keeps_its_history() {
         let (data, mut session) = setup(8);
         let id = shelve(&mut session, &data);
-        shelve(&mut session, &data);
+        // A second copy of the *same* piece, which is what the rule is about.
+        session.inventory.push(id.clone());
         session.kit_wear.insert(id.clone(), 4);
 
         sell(&mut session, &data, &data.config, &id).unwrap();

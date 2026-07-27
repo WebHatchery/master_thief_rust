@@ -171,6 +171,11 @@ pub struct PlanDraft {
     pub assignments: Vec<Option<String>>,
     /// The door whose candidate list is open.
     pub focus: usize,
+    /// True while every filled door is the crew's own pick and the fixer has
+    /// not argued with any of it. Letting them fill the board and committing it
+    /// unchanged *is* delegation, whichever button started it — otherwise the
+    /// label is a formality the player can step around (GDD 5.3).
+    pub crew_planned: bool,
 }
 
 impl PlanDraft {
@@ -187,6 +192,7 @@ impl PlanDraft {
             doors,
             assignments,
             focus: 0,
+            crew_planned: false,
         }
     }
 
@@ -207,18 +213,22 @@ impl PlanDraft {
                 }
             }
         }
+        draft.crew_planned = true;
         draft
     }
 
+    /// Putting somebody on a door makes the plan the fixer's, not the crew's.
     pub fn assign(&mut self, door: usize, member_id: impl Into<String>) {
         if door < self.assignments.len() {
             self.assignments[door] = Some(member_id.into());
+            self.crew_planned = false;
         }
     }
 
     pub fn clear(&mut self, door: usize) {
         if door < self.assignments.len() {
             self.assignments[door] = None;
+            self.crew_planned = false;
         }
     }
 
@@ -282,7 +292,7 @@ impl PlanDraft {
                     })
                 })
                 .collect(),
-            delegated: false,
+            delegated: self.crew_planned,
         })
     }
 }
@@ -444,6 +454,45 @@ mod tests {
                 best
             );
         }
+    }
+
+    #[test]
+    fn letting_the_crew_pick_and_committing_it_is_delegation() {
+        // The dodge this closes: "Let them pick" produced exactly the
+        // assignment delegation produces, and committing it recorded a
+        // hand-made plan. The label has to follow the work, not the button.
+        let (data, session, target) = setup(31);
+        let draft = PlanDraft::from_auto(&session, &data, &target);
+
+        assert!(draft.crew_planned);
+        assert!(
+            draft.to_job_plan().expect("a full draft commits").delegated,
+            "the crew's own plan committed as the fixer's"
+        );
+    }
+
+    #[test]
+    fn arguing_with_one_door_makes_the_plan_yours() {
+        let (data, session, target) = setup(32);
+        let mut draft = PlanDraft::from_auto(&session, &data, &target);
+        let hand = session.crew[0].id.clone();
+
+        draft.assign(0, hand);
+        assert!(!draft.crew_planned);
+        assert!(!draft.to_job_plan().unwrap().delegated);
+    }
+
+    #[test]
+    fn a_draft_built_by_hand_was_never_theirs() {
+        let (data, session, target) = setup(33);
+        let mut draft = PlanDraft::new(&target, &data);
+        let hand = session.crew[0].id.clone();
+
+        assert!(!draft.crew_planned);
+        for door in 0..draft.doors.len() {
+            draft.assign(door, hand.clone());
+        }
+        assert!(!draft.to_job_plan().unwrap().delegated);
     }
 
     #[test]

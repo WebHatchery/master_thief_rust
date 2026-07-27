@@ -213,7 +213,19 @@ The original's second resolution path — team power vs. required power against 
 timer — is deleted. Delegation instead means: **the game auto-assigns specialists to
 nodes using the same greedy best-fit the original used for automation, then runs the
 identical §5.2 engine.** The player trades a better assignment for the time they didn't
-spend. The results screen states plainly where the auto-assignment differed from the
+spend.
+
+**Delegation is what the crew planned, not which button was pressed.** Filling the draft
+with "Let them pick" and committing it unchanged produced exactly the assignment the
+Delegate button produces, and recorded it as a hand-made plan — so the label was a
+formality the player could step around, and with it the differential report. A draft is
+the crew's until the fixer argues with it; changing a single door makes it theirs.
+
+**And the crew charge for the thinking.** A plan they drew up themselves carries a named
+premium on their cut. Without it, delegation cost nothing at all — the same assignment for
+the same money, one click sooner — which made pillar 5 unenforceable. Now delegating is a
+priced convenience: worse assignments *and* a bigger share, bought by a fixer who would
+rather not plan this one. The results screen states plainly where the auto-assignment differed from the
 player's best available option, which teaches the planning screen.
 
 ### 5.4 Targets and Floorplans

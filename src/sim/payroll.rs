@@ -115,9 +115,29 @@ impl CrewCut {
 /// steady one does not haggle. Every term is named so the planning screen can
 /// show the player what their roster choice is costing them (pillar 2).
 pub fn crew_cut(session: &GameSession, config: &GameConfig, crew_on_job: &[String]) -> CrewCut {
+    crew_cut_for(session, config, crew_on_job, false)
+}
+
+/// The same, told whether the crew planned the job themselves. They charge for
+/// that: doing the fixer's thinking is work, and pillar 5 says delegation must
+/// never come out ahead of a plan somebody actually made.
+pub fn crew_cut_for(
+    session: &GameSession,
+    config: &GameConfig,
+    crew_on_job: &[String],
+    crew_planned: bool,
+) -> CrewCut {
     let cut = &config.cut;
     let mut reasons = Vec::new();
     let mut share = cut.base_share;
+
+    if crew_planned && !crew_on_job.is_empty() {
+        share += cut.delegation_premium;
+        reasons.push(CutReason {
+            label: "They planned it themselves".to_owned(),
+            points: cut.delegation_premium * 100.0,
+        });
+    }
 
     let members: Vec<&CrewMember> = crew_on_job
         .iter()
@@ -497,6 +517,30 @@ mod tests {
             apart.share < together.share,
             "the pair was free to keep together"
         );
+    }
+
+    #[test]
+    fn a_crew_who_did_the_thinking_charge_for_the_thinking() {
+        // Pillar 5: delegation is a discount, not a shortcut. It was neither —
+        // the same assignment for the same money, one click sooner.
+        let (data, session) = setup(30);
+        let ids = session.crew_ids();
+
+        let planned = crew_cut_for(&session, &data.config, &ids, false);
+        let delegated = crew_cut_for(&session, &data.config, &ids, true);
+
+        assert!(delegated.share > planned.share, "delegating was free");
+        assert!(delegated
+            .reasons
+            .iter()
+            .any(|reason| reason.label.contains("planned it themselves")));
+    }
+
+    #[test]
+    fn nobody_charges_for_planning_a_job_with_no_crew_on_it() {
+        let (data, session) = setup(31);
+        let cut = crew_cut_for(&session, &data.config, &[], true);
+        assert_eq!(cut.share, data.config.cut.base_share);
     }
 
     #[test]

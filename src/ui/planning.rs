@@ -260,7 +260,7 @@ fn draw_crew_cut(ctx: &UiContext<'_>, content: Rect, draft: &PlanDraft, y: f32) 
         return;
     }
 
-    let cut = crate::sim::crew_cut(ctx.session, &ctx.data.config, &crew);
+    let cut = crate::sim::crew_cut_for(ctx.session, &ctx.data.config, &crew, draft.crew_planned);
     let gross = ctx
         .data
         .targets

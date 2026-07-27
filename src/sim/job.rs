@@ -427,7 +427,8 @@ fn settle(
     };
     // What the hands who worked it want for having worked it, negotiated
     // against who they are and how they feel about the outfit (GDD 5.5).
-    let cut = super::payroll::crew_cut(session, &data.config, &plan.crew_on_job());
+    let cut =
+        super::payroll::crew_cut_for(session, &data.config, &plan.crew_on_job(), plan.delegated);
     let net = cut.net_of(payout);
 
     let notoriety = target.notoriety

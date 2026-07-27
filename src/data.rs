@@ -180,6 +180,9 @@ pub struct CutConfig {
     /// Added per established partnership on the job. A pair who work as one
     /// negotiate as one.
     pub partnership_premium: f32,
+    /// Added when the crew drew up the plan as well as working it. Doing the
+    /// fixer's thinking is work, and it is charged for (GDD 5.3, pillar 5).
+    pub delegation_premium: f32,
     /// The share can never fall below or climb above these, whatever the
     /// roster looks like.
     pub min_share: f32,

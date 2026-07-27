@@ -275,11 +275,14 @@ mod tests {
         // The tier has to be something play actually produces, or the premium
         // it carries is a rule nobody ever meets. It also must not be the
         // default state of every roster, or it is just a tax.
+        // A partnership forms in roughly a quarter of campaigns, so six seeds
+        // is not a sample — it is a coin toss that happened to land. Twenty-four
+        // is enough for both halves of the claim to be stable.
         let data = GameData::load().unwrap();
         let mut formed = 0;
         let mut campaigns = 0;
 
-        for seed in [20_260_726u64, 4_242, 777, 5_150, 31_337, 909] {
+        for seed in 0..24u64 {
             let mut session = GameSession::new(&data.config, &data, seed);
             play(&mut session, &data, 20);
             campaigns += 1;
