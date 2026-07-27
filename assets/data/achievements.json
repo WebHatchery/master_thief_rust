@@ -68,5 +68,7 @@
   { "id": "well_kept_tools", "name": "Well-Kept Tools", "description": "Put a hand's kit back in order.", "stat": "refits_paid", "at_least": 1 },
   { "id": "the_bench", "name": "The Bench", "description": "Spend a hundred thousand keeping the tools working.", "stat": "refits_paid", "at_least": 100000 },
   { "id": "moving_it_on", "name": "Moving It On", "description": "Sell something out of the lockup.", "stat": "items_fenced", "at_least": 1 },
-  { "id": "half_a_business", "name": "Half a Business", "description": "Take half a million through the fence.", "stat": "fenced_total", "at_least": 500000 }
+  { "id": "half_a_business", "name": "Half a Business", "description": "Take half a million through the fence.", "stat": "fenced_total", "at_least": 500000 },
+  { "id": "somebody_heard_something", "name": "Somebody Heard Something", "description": "Have a contented hand bring in a mark.", "stat": "leads_brought_in", "at_least": 1 },
+  { "id": "a_crew_worth_keeping", "name": "A Crew Worth Keeping", "description": "Have the crew bring in ten marks of their own.", "stat": "leads_brought_in", "at_least": 10 }
 ]

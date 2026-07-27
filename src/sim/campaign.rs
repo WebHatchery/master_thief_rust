@@ -375,6 +375,25 @@ mod tests {
     }
 
     #[test]
+    fn a_crew_worth_keeping_bring_in_work_of_their_own() {
+        // The one upside loyalty has. If it never fires in a real campaign it
+        // is a rule nobody meets, like the partnership tier used to be.
+        let data = GameData::load().unwrap();
+        let mut brought = 0;
+
+        for seed in 0..8u64 {
+            let mut session = GameSession::new(&data.config, &data, seed);
+            play(&mut session, &data, 25);
+            brought += session.tally.leads_brought_in;
+        }
+
+        assert!(
+            brought > 0,
+            "eight campaigns and nobody on any payroll ever heard anything"
+        );
+    }
+
+    #[test]
     fn the_city_notices_a_working_outfit() {
         let (data, session, log) = campaign(4_242, 20);
 

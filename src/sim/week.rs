@@ -30,6 +30,8 @@ pub struct WeekSummary {
     pub law: Option<LawEvent>,
     /// A mark another outfit got to first, if one went.
     pub rival: Option<super::rivals::RivalJob>,
+    /// Work somebody on the payroll brought in, if anybody did.
+    pub lead: Option<super::leads::Lead>,
     /// Weeks of a tail still to run after this one.
     pub surveillance_weeks: u32,
 }
@@ -79,6 +81,9 @@ impl WeekSummary {
         let mut notes = Vec::new();
         if self.injuries_healed > 0 {
             notes.push(format!("{} back on their feet", self.injuries_healed));
+        }
+        if let Some(lead) = &self.lead {
+            notes.push(lead.headline());
         }
         if self.new_marks > 0 {
             notes.push(format!("{} new marks on the board", self.new_marks));
@@ -140,6 +145,11 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
     session.refresh_board(config, data);
     let new_marks = session.board.len().saturating_sub(marks_before);
 
+    // A crew who are happy hear things. Rolled after the board is stocked, so
+    // a tip-off is work on top of the week's own rather than instead of it
+    // (GDD 5.5).
+    let lead = super::leads::roll_lead(session, data);
+
     // Word gets around; a different set of people come asking each week.
     session.refresh_recruits(config, data);
     let crew = session.crew_ids();
@@ -176,6 +186,7 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
         payroll,
         law,
         rival,
+        lead,
         surveillance_weeks: session.surveillance_weeks,
     }
 }

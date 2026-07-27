@@ -267,6 +267,22 @@ negative pair refuses to work together. This makes the roster a *composition* pr
 rather than a sum of individual power ratings, and it gives personality traits — currently
 decorative — a mechanical job.
 
+**A contented crew bring in their own work.** Loyalty did three things and every one of
+them was a threat — it moved the die, it decided who gave notice, and it decided who held
+out for a bigger cut. Keeping a hand happy only ever bought the absence of something bad,
+which is a weak pull against a thin week. A hand above a contentment threshold now hears
+things: once a week the outfit may be handed a mark that is *not* on the board, with a
+couple of its doors already on the file because the person who brought it knows the place,
+and a longer window because nobody else is looking at it yet. Every contented hand is
+another set of ears, up to a ceiling, so a happy roster generates opportunity instead of
+merely surviving. It also makes the board partly a function of who the outfit employs
+rather than entirely a function of the seed.
+
+Early on there is nothing to hear: at week one the outfit's name opens three marks and the
+board holds five, so the board *is* the city. Tip-offs start mattering exactly when
+reputation opens more work than the board can show — which is also about when loyalty has
+had time to build.
+
 **A partnership is an asset with a running cost.** Past a threshold a pair stops being two
 hands who get on and becomes a *unit*: they read each other at every door, and they know
 what a unit is worth when the cut is discussed, so putting them on the same job adds a

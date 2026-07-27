@@ -74,6 +74,8 @@ pub struct GameConfig {
     pub board: BoardConfig,
     /// The other outfits working the same city.
     pub rivals: RivalConfig,
+    /// Work the crew bring in themselves when they are content.
+    pub leads: LeadConfig,
     /// What a doctor charges to buy back the weeks an injury would have cost.
     pub treatment: TreatmentConfig,
     /// How fast kit wears out, and what putting it right costs.
@@ -136,6 +138,25 @@ pub struct TreatmentConfig {
     pub major_multiplier: i64,
     /// Fatigue a patched-up hand carries out of the surgery.
     pub fatigue_cost: i32,
+}
+
+/// Tip-offs from a contented crew — the one thing in the week a good roster
+/// generates rather than survives (GDD 5.5).
+///
+/// Not `Eq`: these are chances, and pretending two floats compare exactly would
+/// be a lie about what comparing them means.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct LeadConfig {
+    /// Loyalty at or above which a hand is content enough to be listening.
+    pub loyalty_threshold: i32,
+    /// Chance each such hand contributes in a week.
+    pub chance_per_hand: f32,
+    /// However happy and however many, no more than this.
+    pub max_chance: f32,
+    /// Doors of the mark already on the file, because they know the place.
+    pub doors_on_file: u32,
+    /// Weeks added to the window, because nobody else is looking at it yet.
+    pub extra_weeks: u32,
 }
 
 /// The competition. A rival is a name and a weekly roll — not a faction, not a

@@ -11,6 +11,7 @@ pub mod infirmary;
 pub mod job;
 pub mod kit;
 pub mod law;
+pub mod leads;
 pub mod loot;
 pub mod payroll;
 pub mod plan;
@@ -25,6 +26,7 @@ pub use infirmary::{quote as treatment_quote, treat, Treatment};
 pub use job::{auto_assign, run_job, DoorOutcome, JobPlan, JobReport};
 pub use kit::{refit, refit_quote, wear_penalty};
 pub use law::{attention_chance, bail_cost, bribe_cost, grease_palms, post_bail, LawEvent};
+pub use leads::{chance_of_a_lead, Lead};
 pub use payroll::{
     bonus_cost, crew_cut, crew_cut_for, pay_bonus, retainer_for, runway_after_hiring,
     safehouse_upkeep, weekly_outgoings, weeks_of_runway, CrewCut,

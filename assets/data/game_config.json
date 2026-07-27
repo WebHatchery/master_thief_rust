@@ -45,6 +45,14 @@
     "ripeness_max": 3
   },
 
+  "leads": {
+    "loyalty_threshold": 75,
+    "chance_per_hand": 0.05,
+    "max_chance": 0.35,
+    "doors_on_file": 2,
+    "extra_weeks": 2
+  },
+
   "rivals": {
     "names": [
       "The Kestrel crew",
