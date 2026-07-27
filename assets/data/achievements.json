@@ -72,5 +72,7 @@
   { "id": "somebody_heard_something", "name": "Somebody Heard Something", "description": "Have a contented hand bring in a mark.", "stat": "leads_brought_in", "at_least": 1 },
   { "id": "a_crew_worth_keeping", "name": "A Crew Worth Keeping", "description": "Have the crew bring in ten marks of their own.", "stat": "leads_brought_in", "at_least": 10 },
   { "id": "nothing_personal", "name": "Nothing Personal", "description": "Pay somebody off and take them off the payroll.", "stat": "dismissals", "at_least": 1 },
-  { "id": "a_hard_year", "name": "A Hard Year", "description": "Let five hands go.", "stat": "dismissals", "at_least": 5 }
+  { "id": "a_hard_year", "name": "A Hard Year", "description": "Let five hands go.", "stat": "dismissals", "at_least": 5 },
+  { "id": "out_clean", "name": "Out Clean", "description": "Walk away from the whole thing with a million.", "stat": "final_take", "at_least": 1000000 },
+  { "id": "the_long_con", "name": "The Long Con", "description": "Walk away with ten million.", "stat": "final_take", "at_least": 10000000 }
 ]

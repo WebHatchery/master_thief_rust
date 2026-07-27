@@ -523,13 +523,22 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
    those two together turn "who works with whom" into a standing decision with a bill
    attached. The planning screen stayed legible: the pair shows up as one named line among
    the cut's reasons, not as a new panel.
-5. **Settled: split the axis.** *Notoriety* is the ledger and never moves down — the
+5. **Settled: split the axis, and the campaign ends when the fixer says so.** *Notoriety* is the ledger and never moves down — the
    campaign is finite by design, which is the stronger game. *Heat* is the reducible half:
    it decays on its own, and it can be bought down by greasing palms at a price that rises
    with notoriety, so buying quiet gets steadily worse value as the campaign runs. The
    player therefore has three ways to answer heat, all of them costed — lie low and pay a
    week's wages for a small decay, pay a bribe for an immediate larger cut, or keep working
    and accept the odds of a tail, a raid, or an arrest. None of them touches notoriety.
+
+   Because notoriety only climbs, the campaign has to be able to *stop*, and for a long
+   while it could not — the week loop offered another week for as long as anybody kept
+   clicking, which is not what "finite by design" means. **Retiring is a verb.** The fixer
+   chooses when to get out, and walks away with the cash plus whatever the lockup fetches
+   through the same fence everything else goes through — so an outfit that runs for the
+   door while the city is watching liquidates at a watched outfit's rate. Cooling off
+   before you leave is worth real money, and every extra week worked is more of both. Being
+   wrong about when you had enough is the genre.
 
 ---
 

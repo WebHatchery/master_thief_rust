@@ -120,6 +120,11 @@ pub struct GameSession {
     /// One line per job, oldest first — the records screen reads this.
     #[serde(default)]
     pub history: Vec<JobRecord>,
+    /// Set once the outfit has walked away. A retired campaign takes no more
+    /// weeks and runs no more jobs; it is a finished thing to be read
+    /// (GDD 12, open question 5).
+    #[serde(default)]
+    pub retired: Option<crate::sim::retirement::Retirement>,
 }
 
 /// Somebody the city is holding, kept whole so bail returns the same person
@@ -175,6 +180,7 @@ impl GameSession {
             tally: CampaignTally::default(),
             achievements: Achievements::default(),
             history: Vec::new(),
+            retired: None,
         };
         session
             .achievements
@@ -217,6 +223,11 @@ impl GameSession {
         config
             .casing_steps_per_week
             .saturating_sub(self.casing_this_week)
+    }
+
+    /// Has the outfit stopped for good?
+    pub fn is_retired(&self) -> bool {
+        self.retired.is_some()
     }
 
     /// Is the city holding this hand?

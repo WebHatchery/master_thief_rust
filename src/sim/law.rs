@@ -244,6 +244,13 @@ pub fn post_bail(
     Ok(format!("{} walks out for {}", name, format_money(bail)))
 }
 
+/// Put one hand in a cell. Only for tests in other modules that need somebody
+/// held without reaching into the arrest logic themselves.
+#[cfg(test)]
+pub fn tests_support_arrest(session: &mut GameSession, config: &GameConfig) {
+    arrest(session, &config.law);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

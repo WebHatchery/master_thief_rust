@@ -196,6 +196,15 @@ fn draw_standing(ctx: &UiContext<'_>) {
         ctx,
     );
 
+    if let Some(done) = &session.retired {
+        draw_ui_text_ex(
+            &done.headline(),
+            content.x,
+            content.bottom() - 12.0,
+            TextStyle::new(15.0, Color::new(0.56, 0.82, 0.58, 1.0)).params(),
+        );
+    }
+
     draw_ui_text_ex(
         &format!("Seed {}", session.seed),
         content.x,

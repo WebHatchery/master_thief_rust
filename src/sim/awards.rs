@@ -84,6 +84,9 @@ pub struct CampaignTally {
     pub severance_paid: i64,
     #[serde(default)]
     pub dismissals: i64,
+    /// What the outfit walked away with, once it walked away.
+    #[serde(default)]
+    pub final_take: i64,
 }
 
 /// The statistics an achievement can be written against.
@@ -127,6 +130,7 @@ pub enum TallyStat {
     LeadsBroughtIn,
     SeverancePaid,
     Dismissals,
+    FinalTake,
     /// Live campaign state rather than a running total.
     Week,
     Reputation,
@@ -183,6 +187,7 @@ impl TallyStat {
             TallyStat::LeadsBroughtIn => tally.leads_brought_in,
             TallyStat::SeverancePaid => tally.severance_paid,
             TallyStat::Dismissals => tally.dismissals,
+            TallyStat::FinalTake => tally.final_take,
 
             TallyStat::Week => session.week as i64,
             TallyStat::Reputation => session.reputation as i64,

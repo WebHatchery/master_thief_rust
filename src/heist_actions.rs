@@ -182,6 +182,14 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
             report(notifications, sim::sell(session, data, &data.config, &id));
             check_awards(data, session, notifications);
         }
+        UiAction::Retire => {
+            report(
+                notifications,
+                sim::retire(session, data, &data.config).map(|line| format!("{}.", line)),
+            );
+            check_awards(data, session, notifications);
+            selection.screen = Screen::Records;
+        }
         UiAction::DismissMember(id) => {
             if selection.member.as_deref() == Some(id.as_str()) {
                 selection.member = None;
@@ -285,6 +293,10 @@ fn open_plan(
         return;
     };
 
+    if session.is_retired() {
+        notifications.info("The outfit is out. Start a new campaign to work again");
+        return;
+    }
     if session.available_crew().count() == 0 {
         notifications.warning("Nobody on the payroll is fit to work");
         return;
@@ -404,6 +416,10 @@ fn delegate_job(
         return None;
     };
 
+    if session.is_retired() {
+        notifications.info("The outfit is out. Start a new campaign to work again");
+        return None;
+    }
     if session.available_crew().count() == 0 {
         notifications.warning("Nobody on the payroll is fit to work");
         return None;
@@ -426,6 +442,10 @@ fn advance_week(
     session: &mut GameSession,
     notifications: &mut NotificationManager,
 ) {
+    if session.is_retired() {
+        notifications.info("The outfit is out. Start a new campaign to work again");
+        return;
+    }
     let summary = sim::advance_week(session, data);
     check_awards(data, session, notifications);
 
@@ -721,6 +741,35 @@ mod tests {
         assert!(selection.draft.is_none());
         assert_eq!(selection.screen, Screen::Board);
         assert!(session.board_entry(&target_id).is_some());
+    }
+
+    #[test]
+    fn a_retired_outfit_takes_no_more_weeks_and_runs_no_more_jobs() {
+        let (data, mut session) = setup();
+        let mut selection = Selection::default();
+        let mut notifications = NotificationManager::new();
+        let target_id = session.board[0].target_id.clone();
+
+        apply(
+            UiAction::Retire,
+            dispatch(&data, &mut session, &mut selection, &mut notifications),
+        );
+        assert!(session.is_retired());
+        let week = session.week;
+        let board = session.board.len();
+
+        apply(
+            UiAction::AdvanceWeek,
+            dispatch(&data, &mut session, &mut selection, &mut notifications),
+        );
+        assert_eq!(session.week, week, "a finished campaign moved on");
+
+        let command = apply(
+            UiAction::DelegateJob(target_id),
+            dispatch(&data, &mut session, &mut selection, &mut notifications),
+        );
+        assert!(command.is_none(), "a finished campaign started a job");
+        assert_eq!(session.board.len(), board);
     }
 
     #[test]

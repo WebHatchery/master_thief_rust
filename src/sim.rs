@@ -15,6 +15,7 @@ pub mod leads;
 pub mod loot;
 pub mod payroll;
 pub mod plan;
+pub mod retirement;
 pub mod rivals;
 pub mod week;
 
@@ -32,5 +33,6 @@ pub use payroll::{
     safehouse_upkeep, severance_cost, weekly_outgoings, weeks_of_runway, CrewCut,
 };
 pub use plan::{candidates, Candidate, PlanDraft};
+pub use retirement::{retire, Retirement};
 pub use rivals::{interest_in as rival_interest, RivalJob};
 pub use week::{advance_week, WeekSummary};

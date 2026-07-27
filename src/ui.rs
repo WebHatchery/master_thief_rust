@@ -140,6 +140,8 @@ pub enum UiAction {
     SellItem(String),
     /// Pay somebody off and take them off the payroll.
     DismissMember(String),
+    /// Stop. Liquidate, walk away, and end the campaign (GDD 12, question 5).
+    Retire,
 }
 
 /// The three things the crew screen's left panel can be showing.

@@ -64,8 +64,13 @@ pub fn draw(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) {
             content.x,
             heat_y + 104.0,
             content.w,
-            content.bottom() - heat_y - 104.0,
+            content.bottom() - heat_y - 164.0,
         ),
+        ctx,
+        actions,
+    );
+    draw_the_way_out(
+        Rect::new(content.x, content.bottom() - 52.0, content.w, 52.0),
         ctx,
         actions,
     );
@@ -118,6 +123,38 @@ fn draw_heat(rect: Rect, ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         ctx.mouse(),
     ) {
         actions.push(UiAction::GreasePalms);
+    }
+}
+
+/// The last decision the campaign asks for. Shown with what walking away is
+/// worth today, because a campaign should not end on a number nobody saw.
+fn draw_the_way_out(rect: Rect, ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
+    if let Some(done) = &ctx.session.retired {
+        draw_ui_text_ex(
+            &done.headline(),
+            rect.x,
+            rect.y + 14.0,
+            TextStyle::new(15.0, CALM).params(),
+        );
+        return;
+    }
+
+    let quoted = crate::sim::retirement::quote(ctx.session, ctx.data, &ctx.data.config);
+    stat_row(
+        Rect::new(rect.x, rect.y, rect.w, 20.0),
+        "Walk away with",
+        &format_compact_money(quoted.take()),
+        15.0,
+        CALM,
+    );
+    if button_rect_tone_at(
+        Rect::new(rect.x, rect.y + 24.0, rect.w, 24.0),
+        "Get out while you can",
+        true,
+        ButtonTone::Danger,
+        ctx.mouse(),
+    ) {
+        actions.push(UiAction::Retire);
     }
 }
 
