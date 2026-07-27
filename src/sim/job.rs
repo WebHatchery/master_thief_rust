@@ -62,6 +62,11 @@ pub struct JobReport {
     /// Doors a better hand was free for. Empty for a hand-made plan, which is
     /// the player's own business (GDD 5.3).
     pub delegation_misses: Vec<super::delegation::DelegationMiss>,
+    /// The take before the crew were paid for the job.
+    pub gross: i64,
+    /// What they wanted for it, and why.
+    pub cut: super::payroll::CrewCut,
+    /// What reached the outfit after the crew took theirs.
     pub payout: i64,
     pub notoriety_gained: i32,
     pub reputation_gained: i32,
@@ -386,8 +391,10 @@ fn settle(
     } else {
         (worth as f32 * 0.15) as i64
     };
-    let crew_cut = (payout as f32 * data.config.crew_cut) as i64;
-    let net = payout - crew_cut;
+    // What the hands who worked it want for having worked it, negotiated
+    // against who they are and how they feel about the outfit (GDD 5.5).
+    let cut = super::payroll::crew_cut(session, &data.config, &plan.crew_on_job());
+    let net = cut.net_of(payout);
 
     let notoriety = target.notoriety
         + if success {
@@ -428,6 +435,8 @@ fn settle(
         success,
         loot,
         delegation_misses,
+        gross: payout,
+        cut,
         payout: net,
         notoriety_gained: notoriety,
         reputation_gained: reputation,
@@ -516,6 +525,8 @@ fn empty_report(plan: &JobPlan) -> JobReport {
         success: false,
         loot: Vec::new(),
         delegation_misses: Vec::new(),
+        gross: 0,
+        cut: super::payroll::CrewCut::default(),
         payout: 0,
         notoriety_gained: 0,
         reputation_gained: 0,
@@ -655,6 +666,25 @@ mod tests {
             "a mark left three weeks paid {} against {} taken fresh",
             ripe,
             fresh
+        );
+    }
+
+    #[test]
+    fn the_report_shows_the_crew_taking_their_share_of_the_gross() {
+        // The results screen reads all three numbers, so the job has to settle
+        // them consistently: gross, what the crew took, what reached the outfit.
+        let (data, mut session) = setup(2_468);
+        let target = first_target(&data, &session).clone();
+        let plan = auto_assign(&session, &data, &target);
+
+        let report = run_job(&mut session, &data, &plan);
+
+        assert!(report.gross > 0);
+        assert_eq!(report.cut.net_of(report.gross), report.payout);
+        assert!(report.payout < report.gross, "the crew worked for nothing");
+        assert!(
+            !report.cut.reasons.is_empty(),
+            "the share moved off the base rate and said nothing about why"
         );
     }
 

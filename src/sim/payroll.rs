@@ -76,6 +76,105 @@ pub fn bonus_cost(member: &CrewMember, config: &PayrollConfig) -> i64 {
     retainer_for(member, config) * config.bonus_retainer_weeks.max(1)
 }
 
+/// The crew's share of one job, and who moved it. The retainer buys their week;
+/// the cut is what they want for *this* job, and it is a negotiation rather than
+/// a constant.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct CrewCut {
+    /// Share of the take the crew keeps, 0..1.
+    pub share: f32,
+    /// Every reason the share is not the base rate, named for the player.
+    pub reasons: Vec<CutReason>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CutReason {
+    pub label: String,
+    /// Percentage points added to the crew's share. Negative is a discount.
+    pub points: f32,
+}
+
+impl CrewCut {
+    pub fn percent(&self) -> f32 {
+        self.share * 100.0
+    }
+
+    /// What the fixer keeps of a given take.
+    pub fn net_of(&self, payout: i64) -> i64 {
+        payout - self.take_of(payout)
+    }
+
+    pub fn take_of(&self, payout: i64) -> i64 {
+        (payout as f32 * self.share) as i64
+    }
+}
+
+/// What the hands down for a job will want for it. Standing costs — a
+/// legendary safecracker does not work a job for a beginner's share — and so
+/// does discontent: a hand who is halfway out of the door holds out, and a
+/// steady one does not haggle. Every term is named so the planning screen can
+/// show the player what their roster choice is costing them (pillar 2).
+pub fn crew_cut(session: &GameSession, config: &GameConfig, crew_on_job: &[String]) -> CrewCut {
+    let cut = &config.cut;
+    let mut reasons = Vec::new();
+    let mut share = cut.base_share;
+
+    let members: Vec<&CrewMember> = crew_on_job
+        .iter()
+        .filter_map(|id| session.member(id))
+        .collect();
+
+    if members.len() > 1 {
+        let extra = (members.len() - 1) as f32 * cut.per_extra_hand;
+        share += extra;
+        reasons.push(CutReason {
+            label: format!("{} hands splitting it", members.len()),
+            points: extra * 100.0,
+        });
+    }
+
+    let standing: i32 = members.iter().map(|member| member.rarity.tier()).sum();
+    if standing > 0 {
+        let premium = standing as f32 * cut.per_rarity_tier;
+        share += premium;
+        reasons.push(CutReason {
+            label: "Names worth paying for".to_owned(),
+            points: premium * 100.0,
+        });
+    }
+
+    let holdouts = members
+        .iter()
+        .filter(|member| member.condition.loyalty <= cut.holdout_loyalty)
+        .count();
+    if holdouts > 0 {
+        let premium = holdouts as f32 * cut.holdout_premium;
+        share += premium;
+        reasons.push(CutReason {
+            label: format!("{} holding out", holdouts),
+            points: premium * 100.0,
+        });
+    }
+
+    let steady = members
+        .iter()
+        .filter(|member| member.condition.loyalty >= cut.steady_loyalty)
+        .count();
+    if steady > 0 {
+        let discount = steady as f32 * cut.steady_discount;
+        share -= discount;
+        reasons.push(CutReason {
+            label: format!("{} not haggling", steady),
+            points: -discount * 100.0,
+        });
+    }
+
+    CrewCut {
+        share: share.clamp(cut.min_share, cut.max_share),
+        reasons,
+    }
+}
+
 /// Pay the week's bill. The safehouse is covered first — there is nowhere to
 /// work without it — then the crew in roster order, so a short week is short
 /// for the same people until the fixer fixes it.
@@ -303,6 +402,71 @@ mod tests {
 
         assert!(pay_bonus(&mut session, &data.config, &id).is_err());
         assert_eq!(session.budget, 0);
+    }
+
+    #[test]
+    fn a_bigger_crew_wants_a_bigger_share() {
+        let (data, session) = setup(20);
+        let one = crew_cut(&session, &data.config, &session.crew_ids()[..1]);
+        let all = crew_cut(&session, &data.config, &session.crew_ids());
+
+        assert!(all.share > one.share, "extra hands were free");
+        assert!(all
+            .reasons
+            .iter()
+            .any(|reason| reason.label.contains("splitting it")));
+    }
+
+    #[test]
+    fn a_sullen_hand_holds_out_and_a_steady_one_does_not_haggle() {
+        let (data, mut session) = setup(21);
+        let ids = session.crew_ids();
+        let base = crew_cut(&session, &data.config, &ids).share;
+
+        session.crew[0].condition.loyalty = data.config.cut.holdout_loyalty;
+        let holding = crew_cut(&session, &data.config, &ids);
+        assert!(holding.share > base, "discontent came free");
+        assert!(holding
+            .reasons
+            .iter()
+            .any(|reason| reason.label.contains("holding out")));
+
+        for member in &mut session.crew {
+            member.condition.loyalty = 100;
+        }
+        let steady = crew_cut(&session, &data.config, &ids);
+        assert!(steady.share < base, "goodwill bought nothing");
+    }
+
+    #[test]
+    fn the_share_never_leaves_its_bounds_however_bad_the_roster_is() {
+        let (data, mut session) = setup(22);
+        let ids = session.crew_ids();
+        for member in &mut session.crew {
+            member.condition.loyalty = 0;
+        }
+
+        let cut = crew_cut(&session, &data.config, &ids);
+        assert!(cut.share <= data.config.cut.max_share);
+        assert!(cut.share >= data.config.cut.min_share);
+    }
+
+    #[test]
+    fn the_cut_is_arithmetic_the_player_can_check() {
+        let (data, session) = setup(23);
+        let cut = crew_cut(&session, &data.config, &session.crew_ids());
+
+        assert_eq!(cut.take_of(1_000_000) + cut.net_of(1_000_000), 1_000_000);
+        assert!((cut.percent() - cut.share * 100.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn nobody_on_the_job_means_nobody_to_pay() {
+        let (data, session) = setup(24);
+        let cut = crew_cut(&session, &data.config, &[]);
+
+        assert_eq!(cut.share, data.config.cut.base_share);
+        assert!(cut.reasons.is_empty());
     }
 
     #[test]

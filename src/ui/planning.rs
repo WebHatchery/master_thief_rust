@@ -69,7 +69,8 @@ fn draw_route(
     let cased = is_cased(ctx, &target.id);
     let mouse = ctx.mouse();
 
-    let area = Rect::new(content.x, content.y, content.w, content.h - 50.0);
+    // The buttons and the crew's-cut line both sit below the building.
+    let area = Rect::new(content.x, content.y, content.w, content.h - 74.0);
     let plan = floorplan::layout(area, draft.doors.len(), floorplan::seed_for(&target.id));
 
     let states: Vec<RoomState> = (0..draft.doors.len())
@@ -209,6 +210,8 @@ fn draw_route_footer(
     let y = content.bottom() - 40.0;
     let width = (content.w - 20.0) / 3.0;
 
+    draw_crew_cut(ctx, content, draft, y - 26.0);
+
     if button_rect_tone_at(
         Rect::new(content.x, y, width, 38.0),
         "Back",
@@ -243,6 +246,54 @@ fn draw_route_footer(
         mouse,
     ) {
         actions.push(UiAction::CommitPlan);
+    }
+}
+
+/// What this roster wants for the job, and why — read off the draft as it is
+/// built, so the fixer sees the cost of their own picks before they commit
+/// rather than on the results screen afterwards (pillar 2).
+fn draw_crew_cut(ctx: &UiContext<'_>, content: Rect, draft: &PlanDraft, y: f32) {
+    let crew = draft.crew_on_job();
+    if crew.is_empty() {
+        return;
+    }
+
+    let cut = crate::sim::crew_cut(ctx.session, &ctx.data.config, &crew);
+    let gross = ctx
+        .data
+        .targets
+        .get(&draft.target_id)
+        .map(|target| {
+            ctx.session
+                .board_entry(&target.id)
+                .map(|entry| entry.ripened_payout(target.potential_payout, &ctx.data.config.board))
+                .unwrap_or(target.potential_payout)
+        })
+        .unwrap_or(0);
+
+    draw_ui_text_ex(
+        &format!(
+            "Crew's cut {:.0}% — about {} to the outfit if it goes clean",
+            cut.percent(),
+            format_compact_money(cut.net_of(gross))
+        ),
+        content.x,
+        y,
+        TextStyle::new(14.0, dark::TEXT).params(),
+    );
+
+    let why: Vec<String> = cut
+        .reasons
+        .iter()
+        .map(|reason| format!("{} {:+.0}", reason.label, reason.points))
+        .collect();
+    if !why.is_empty() {
+        draw_text_right(
+            &why.join("   "),
+            content.right(),
+            y,
+            TextStyle::new(13.0, dark::TEXT_DIM),
+        );
     }
 }
 

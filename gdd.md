@@ -223,6 +223,16 @@ negative pair refuses to work together. This makes the roster a *composition* pr
 rather than a sum of individual power ratings, and it gives personality traits — currently
 decorative — a mechanical job.
 
+**The crew's cut is negotiated, not fixed.** The retainer buys their week (§5.6); the cut
+is what they want for *this* job, and it is read off the roster the plan puts on it. A
+base share, plus a step for every hand beyond the first, plus a premium for standing — a
+legendary safecracker does not work a job for a beginner's share — plus a premium for
+anybody sullen enough to hold out, less a discount for anybody steady enough not to
+haggle, clamped at both ends. Every term is named on the planning screen as the draft is
+built and again in the results ledger, so the obvious roster — everybody good, on every
+door — carries a visible price against the marginal odds it buys, and loyalty gains a
+third consequence after the die and the walkout.
+
 ### 5.6 Reputation, Notoriety, and Heat
 
 - **Reputation** rises with clean, high-value jobs; gates access to better targets, better

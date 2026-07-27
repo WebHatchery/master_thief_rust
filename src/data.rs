@@ -59,8 +59,8 @@ pub struct GameConfig {
 
     /// Reputation earned per clean job, scaled by the mark's difficulty band.
     pub reputation_per_job: i32,
-    /// Share of the payout the crew takes before the fixer sees any.
-    pub crew_cut: f32,
+    /// What the crew wants for the job itself, negotiated per job.
+    pub cut: CutConfig,
 
     /// How a mark left sitting on the board changes.
     pub board: BoardConfig,
@@ -70,6 +70,32 @@ pub struct GameConfig {
     pub law: LawConfig,
     /// How fatigue and loyalty grade into modifiers on the die.
     pub condition: crate::rules::ConditionTuning,
+}
+
+/// What the crew wants for a job, on top of the retainer that bought their
+/// week. A flat share made the roster a pure power calculation; a negotiated
+/// one puts a price on the obvious answer (GDD 5.5).
+///
+/// Not `Eq`: these are shares, and pretending two floats compare exactly would
+/// be a lie about what comparing them means.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct CutConfig {
+    /// What one steady, unremarkable hand would take.
+    pub base_share: f32,
+    /// Added per hand beyond the first — a bigger job splits more ways.
+    pub per_extra_hand: f32,
+    /// Added per rarity tier across everybody on the job.
+    pub per_rarity_tier: f32,
+    /// Loyalty at or below which a hand holds out for more.
+    pub holdout_loyalty: i32,
+    pub holdout_premium: f32,
+    /// Loyalty at or above which a hand does not haggle at all.
+    pub steady_loyalty: i32,
+    pub steady_discount: f32,
+    /// The share can never fall below or climb above these, whatever the
+    /// roster looks like.
+    pub min_share: f32,
+    pub max_share: f32,
 }
 
 /// What a week of nobody touching a mark does to it. A board that is only a

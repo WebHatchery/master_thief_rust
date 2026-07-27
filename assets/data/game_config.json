@@ -22,7 +22,17 @@
   "failure_notoriety": 6,
 
   "reputation_per_job": 4,
-  "crew_cut": 0.25,
+  "cut": {
+    "base_share": 0.18,
+    "per_extra_hand": 0.03,
+    "per_rarity_tier": 0.015,
+    "holdout_loyalty": 35,
+    "holdout_premium": 0.06,
+    "steady_loyalty": 80,
+    "steady_discount": 0.02,
+    "min_share": 0.10,
+    "max_share": 0.55
+  },
 
   "board": {
     "ripeness_payout_pct": 18,

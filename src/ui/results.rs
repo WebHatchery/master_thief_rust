@@ -149,7 +149,7 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
         if report.success { "Paid" } else { "Burned" },
     );
 
-    let rows: [(String, String); 6] = [
+    let rows: [(String, String); 8] = [
         (
             "Doors cleared".to_owned(),
             format!("{}/{}", report.doors_passed(), report.doors.len()),
@@ -157,6 +157,11 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
         (
             "Success rate".to_owned(),
             format!("{:.0}%", report.success_rate() * 100.0),
+        ),
+        ("Take (gross)".to_owned(), format_money(report.gross)),
+        (
+            format!("Crew's cut ({:.0}%)", report.cut.percent()),
+            format!("-{}", format_money(report.cut.take_of(report.gross))),
         ),
         ("Take (net)".to_owned(), format_money(report.payout)),
         (
@@ -172,7 +177,7 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
 
     for (index, (label, value)) in rows.iter().enumerate() {
         stat_row(
-            Rect::new(content.x, content.y + index as f32 * 26.0, content.w, 22.0),
+            Rect::new(content.x, content.y + index as f32 * 23.0, content.w, 22.0),
             label,
             value,
             17.0,
@@ -188,9 +193,9 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
     draw_text_block(
         &note,
         content.x,
-        content.y + 172.0,
+        content.y + 190.0,
         content.w,
-        56.0,
+        44.0,
         15.0,
         3.0,
         dark::TEXT_DIM,
@@ -205,7 +210,7 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
                 miss.encounter_name, miss.chosen, miss.chosen_bonus, miss.better, miss.better_bonus
             ),
             content.x,
-            content.y + 226.0 + index as f32 * 18.0,
+            content.y + 238.0 + index as f32 * 18.0,
             TextStyle::new(13.0, Color::new(0.88, 0.72, 0.44, 1.0)).params(),
         );
     }
@@ -214,7 +219,7 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
         draw_ui_text_ex(
             "Carried out",
             content.x,
-            content.y + 296.0,
+            content.y + 302.0,
             TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
         );
         let names: Vec<&str> = report
