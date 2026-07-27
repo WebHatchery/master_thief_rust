@@ -374,12 +374,26 @@ fn draw_condition(
         15.0,
         dark::TEXT,
     );
+    // Mastery is earned at the doors of their own trade, so the dossier says
+    // how close the next rank is rather than only where they stand.
+    let mastery = &ctx.data.config.mastery;
+    let rank = member.progression.mastery_level;
     stat_row(
         Rect::new(rect.x, rect.y + 128.0, rect.w, 20.0),
-        "Mastery",
-        &format!("{}/10", member.progression.mastery_level),
+        &format!("Mastery ({})", member.specialty_skill.label()),
+        &if mastery.is_capped(rank) {
+            format!("{}/{} — mastered", rank, mastery.max_level)
+        } else {
+            format!(
+                "{}/{} · {}/{}",
+                rank,
+                mastery.max_level,
+                member.progression.specialty_doors,
+                mastery.doors_for_next(rank)
+            )
+        },
         15.0,
-        dark::TEXT,
+        if rank > 0 { dark::ACCENT } else { dark::TEXT },
     );
 
     let injuries = if condition.injuries.is_empty() {

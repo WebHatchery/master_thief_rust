@@ -162,8 +162,12 @@ pub struct Progression {
     pub experience_to_next: i32,
     pub attribute_points: i32,
     pub skill_points: i32,
-    /// 0-10 mastery of the member's specialisation.
+    /// 0-10 mastery of the member's specialisation. Earned at the doors of
+    /// that trade, not handed out — see [`crate::rules::attributes::work_the_trade`].
     pub mastery_level: i32,
+    /// Doors of their own trade cleared since the last rank. Resets on promotion.
+    #[serde(default)]
+    pub specialty_doors: u32,
     pub jobs_completed: u32,
     pub jobs_succeeded: u32,
 }
@@ -177,6 +181,7 @@ impl Default for Progression {
             attribute_points: 0,
             skill_points: 0,
             mastery_level: 0,
+            specialty_doors: 0,
             jobs_completed: 0,
             jobs_succeeded: 0,
         }

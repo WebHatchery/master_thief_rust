@@ -82,6 +82,8 @@ pub struct GameConfig {
     pub law: LawConfig,
     /// How fatigue and loyalty grade into modifiers on the die.
     pub condition: crate::rules::ConditionTuning,
+    /// How long it takes a hand to get good at their own trade.
+    pub mastery: crate::rules::MasteryTuning,
 }
 
 /// Treating an injury rather than waiting it out (GDD 3, 4). The bill scales

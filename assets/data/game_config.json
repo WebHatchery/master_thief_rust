@@ -101,6 +101,12 @@
     "bail_return_loyalty": 45
   },
 
+  "mastery": {
+    "doors_for_first": 3,
+    "doors_step": 2,
+    "max_level": 10
+  },
+
   "condition": {
     "fatigue_free_threshold": 50,
     "fatigue_step": 10,

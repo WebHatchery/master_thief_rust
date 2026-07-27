@@ -11,6 +11,6 @@ pub mod encounter;
 pub mod environment;
 pub mod outcome;
 
-pub use attributes::attribute_modifier;
+pub use attributes::{attribute_modifier, MasteryTuning};
 pub use condition::ConditionTuning;
 pub use outcome::Outcome;

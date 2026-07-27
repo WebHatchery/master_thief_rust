@@ -4,6 +4,7 @@
 //! consumed pruned away (GDD 0, mechanic carry-over table).
 
 use crate::model::{Attributes, CrewMember, DerivedStats, Loadout, Progression, Skill, Skills};
+use serde::{Deserialize, Serialize};
 
 /// The standard `(score - 10) / 2`, rounded *down* — including for negatives,
 /// which is why this uses Euclidean division rather than Rust's truncation.
@@ -89,6 +90,64 @@ pub fn total_experience(level: i32) -> i32 {
 /// The D&D-style proficiency bonus every check gets for free.
 pub fn proficiency_bonus(level: i32) -> i32 {
     (level - 1) / 4 + 2
+}
+
+/// How long it takes to get good at the one thing you are for. Authored in
+/// `game_config.json`: the shape is a rule, the numbers are balance.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MasteryTuning {
+    /// Doors of your own trade needed for the first rank.
+    pub doors_for_first: u32,
+    /// Added to that requirement at every rank after.
+    pub doors_step: u32,
+    pub max_level: i32,
+}
+
+impl Default for MasteryTuning {
+    fn default() -> Self {
+        Self {
+            doors_for_first: 3,
+            doors_step: 2,
+            max_level: 10,
+        }
+    }
+}
+
+impl MasteryTuning {
+    /// Doors still owed before the next rank, at the rank they hold now.
+    pub fn doors_for_next(&self, level: i32) -> u32 {
+        self.doors_for_first + self.doors_step * level.max(0) as u32
+    }
+
+    pub fn is_capped(&self, level: i32) -> bool {
+        level >= self.max_level
+    }
+}
+
+/// One door of the member's own trade, cleared. Mastery was declared on every
+/// dossier, read by [`effective_skills`], and written by nothing at all — a
+/// hand's specialisation could never actually deepen. It advances here, and
+/// only here: you get good at a trade by practising it successfully, so a
+/// failed door teaches nothing and somebody else's door teaches nothing.
+///
+/// Returns true when that door earned a rank, so the run can say so.
+pub fn work_the_trade(progression: &mut Progression, tuning: &MasteryTuning) -> bool {
+    if tuning.is_capped(progression.mastery_level) {
+        return false;
+    }
+
+    progression.specialty_doors += 1;
+    let needed = tuning.doors_for_next(progression.mastery_level);
+    if progression.specialty_doors < needed {
+        return false;
+    }
+
+    progression.specialty_doors -= needed;
+    progression.mastery_level += 1;
+    if tuning.is_capped(progression.mastery_level) {
+        progression.specialty_doors = 0;
+    }
+    true
 }
 
 /// Award experience, levelling as many times as it covers. Returns how many
@@ -202,6 +261,87 @@ mod tests {
         assert_eq!(skills.stealth, 11);
         // Lockpicking: 4 + DEX(+3) + INT(+2) + 2 = 11
         assert_eq!(skills.lockpicking, 11);
+    }
+
+    #[test]
+    fn a_trade_is_learned_at_its_own_doors() {
+        // Mastery was declared, read by `effective_skills`, and written by
+        // nothing — every dossier in the game read 0/10 forever.
+        let tuning = MasteryTuning::default();
+        let mut progression = Progression::default();
+
+        for _ in 0..tuning.doors_for_first - 1 {
+            assert!(!work_the_trade(&mut progression, &tuning));
+        }
+        assert_eq!(progression.mastery_level, 0);
+
+        assert!(
+            work_the_trade(&mut progression, &tuning),
+            "the rank never came"
+        );
+        assert_eq!(progression.mastery_level, 1);
+        assert_eq!(progression.specialty_doors, 0);
+    }
+
+    #[test]
+    fn every_rank_costs_more_doors_than_the_one_before() {
+        let tuning = MasteryTuning::default();
+        let mut progression = Progression::default();
+        let mut costs = Vec::new();
+
+        for _ in 0..4 {
+            let mut doors = 0;
+            while !work_the_trade(&mut progression, &tuning) {
+                doors += 1;
+                assert!(doors < 500, "a rank that never arrives");
+            }
+            costs.push(doors + 1);
+        }
+
+        for pair in costs.windows(2) {
+            assert!(pair[1] > pair[0], "the ladder is flat: {:?}", costs);
+        }
+    }
+
+    #[test]
+    fn mastery_stops_at_the_cap_and_stays_there() {
+        let tuning = MasteryTuning::default();
+        let mut progression = Progression::default();
+
+        for _ in 0..5_000 {
+            work_the_trade(&mut progression, &tuning);
+        }
+
+        assert_eq!(progression.mastery_level, tuning.max_level);
+        assert_eq!(progression.specialty_doors, 0);
+        assert!(!work_the_trade(&mut progression, &tuning));
+    }
+
+    #[test]
+    fn a_rank_of_mastery_is_worth_a_point_of_the_trade() {
+        // The reason it matters: mastery feeds straight into the specialty
+        // skill, so ranks compound with the planning decision that earned them.
+        let tuning = MasteryTuning::default();
+        let attributes = attrs(10, 10, 10, 10, 10, 10);
+        let mut progression = Progression::default();
+        let before = effective_skills(
+            &attributes,
+            &Skills::default(),
+            &progression,
+            Skill::Stealth,
+        )
+        .get(Skill::Stealth);
+
+        while !work_the_trade(&mut progression, &tuning) {}
+        let after = effective_skills(
+            &attributes,
+            &Skills::default(),
+            &progression,
+            Skill::Stealth,
+        )
+        .get(Skill::Stealth);
+
+        assert_eq!(after - before, 1);
     }
 
     #[test]

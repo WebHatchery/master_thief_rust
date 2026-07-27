@@ -3,7 +3,7 @@
 use crate::data::GameData;
 use crate::model::crew::Injury;
 use crate::model::{Encounter, HeistTarget, RunEffect};
-use crate::rules::attributes::award_experience;
+use crate::rules::attributes::{award_experience, work_the_trade};
 use crate::rules::encounter::{build_check, resolve_with_effects, CheckInputs, EncounterResult};
 use crate::rules::outcome::Outcome;
 use crate::sim::plan::situational_modifiers;
@@ -320,6 +320,11 @@ fn resolve_door(
         if result.passed() {
             member.progression.jobs_succeeded += 1;
             member.condition.adjust_loyalty(1);
+            // A trade is learned at its own doors, cleared. Somebody else's
+            // door teaches nothing, and neither does a failed one.
+            if encounter.primary_skill == member.specialty_skill {
+                work_the_trade(&mut member.progression, &data.config.mastery);
+            }
         } else {
             member.condition.adjust_loyalty(-2);
         }

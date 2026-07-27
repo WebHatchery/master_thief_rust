@@ -325,6 +325,32 @@ mod tests {
     }
 
     #[test]
+    fn specialists_get_better_at_the_thing_they_are_for() {
+        // Mastery read 0/10 on every dossier in the game because nothing ever
+        // wrote it. A campaign should now visibly deepen somebody's trade.
+        let (_, session, _) = campaign(20_260_726, 20);
+
+        let best = session
+            .crew
+            .iter()
+            .map(|member| member.progression.mastery_level)
+            .max()
+            .unwrap_or(0);
+        assert!(
+            best > 0,
+            "twenty weeks and nobody got better at their trade"
+        );
+        assert!(best < 10, "twenty weeks should not master a trade outright");
+        assert!(
+            session
+                .crew
+                .iter()
+                .any(|m| m.progression.mastery_level == 0),
+            "mastery arrived for everybody, so it is not an investment"
+        );
+    }
+
+    #[test]
     fn the_city_notices_a_working_outfit() {
         let (data, session, log) = campaign(4_242, 20);
 

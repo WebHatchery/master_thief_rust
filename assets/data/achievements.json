@@ -62,5 +62,7 @@
   { "id": "beaten_to_it", "name": "Beaten To It", "description": "Let another outfit take a mark you were sitting on.", "stat": "marks_lost_to_rivals", "at_least": 1 },
   { "id": "always_a_step_behind", "name": "Always a Step Behind", "description": "Lose five marks to the competition.", "stat": "marks_lost_to_rivals", "at_least": 5 },
   { "id": "on_their_feet", "name": "Back On Their Feet", "description": "Pay a doctor rather than waiting an injury out.", "stat": "injuries_treated", "at_least": 1 },
-  { "id": "the_house_doctor", "name": "The House Doctor", "description": "Treat twenty injuries.", "stat": "injuries_treated", "at_least": 20 }
+  { "id": "the_house_doctor", "name": "The House Doctor", "description": "Treat twenty injuries.", "stat": "injuries_treated", "at_least": 20 },
+  { "id": "knows_the_trade", "name": "Knows the Trade", "description": "Get somebody to the third rank of their specialisation.", "stat": "best_mastery", "at_least": 3 },
+  { "id": "the_best_in_the_city", "name": "The Best in the City", "description": "Get somebody to the seventh rank of their specialisation.", "stat": "best_mastery", "at_least": 7 }
 ]
