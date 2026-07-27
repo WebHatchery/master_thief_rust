@@ -71,6 +71,24 @@ pub fn weeks_of_runway(session: &GameSession, config: &PayrollConfig) -> i64 {
     session.budget.max(0) / due
 }
 
+/// Weeks of runway the outfit would have left if it took this hand on: the
+/// hiring fee comes out of the purse and their retainer joins the bill.
+///
+/// The hiring screen only ever showed the fee, which is the smaller half of the
+/// question and the one that stops mattering after week three. A legendary hand
+/// costs more every week, forever, than they cost to sign.
+pub fn runway_after_hiring(
+    session: &GameSession,
+    config: &PayrollConfig,
+    recruit: &CrewMember,
+) -> i64 {
+    let due = weekly_outgoings(session, config) + retainer_for(recruit, config);
+    if due <= 0 {
+        return i64::MAX;
+    }
+    (session.budget - recruit.hire_cost).max(0) / due
+}
+
 /// What talking one hand round costs.
 pub fn bonus_cost(member: &CrewMember, config: &PayrollConfig) -> i64 {
     retainer_for(member, config) * config.bonus_retainer_weeks.max(1)
@@ -450,6 +468,47 @@ mod tests {
 
         assert!(pay_bonus(&mut session, &data.config, &id).is_err());
         assert_eq!(session.budget, 0);
+    }
+
+    #[test]
+    fn taking_somebody_on_shortens_the_runway_twice_over() {
+        // Once for the fee out of the purse, and again for every week of their
+        // retainer after it. The hiring screen used to show only the first.
+        let (data, mut session) = setup(40);
+        let payroll = &data.config.payroll;
+        let recruit = data
+            .crew_pool
+            .get(session.recruits.first().expect("somebody is asking"))
+            .unwrap();
+        session.budget = 400_000;
+
+        let before = weeks_of_runway(&session, payroll);
+        let after = runway_after_hiring(&session, payroll, recruit);
+        assert!(after < before, "a new hand paid for themselves");
+
+        // And the fee alone does not explain it: the retainer is the larger
+        // half of the cost over any campaign worth playing.
+        let fee_only = (session.budget - recruit.hire_cost) / weekly_outgoings(&session, payroll);
+        assert!(
+            after < fee_only,
+            "the weekly cost of keeping them was not counted"
+        );
+    }
+
+    #[test]
+    fn a_hand_the_outfit_cannot_keep_shows_a_runway_of_nothing() {
+        let (data, mut session) = setup(41);
+        let recruit = data
+            .crew_pool
+            .get(session.recruits.first().unwrap())
+            .unwrap();
+        session.budget = recruit.hire_cost;
+
+        assert_eq!(
+            runway_after_hiring(&session, &data.config.payroll, recruit),
+            0,
+            "signing them emptied the purse and the screen should say so"
+        );
     }
 
     #[test]

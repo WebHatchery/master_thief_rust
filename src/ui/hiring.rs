@@ -30,7 +30,7 @@ pub fn draw(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) {
 
         let affordable = ctx.session.budget >= recruit.hire_cost;
         list_card(rect, false, rarity_color(recruit.rarity), mouse);
-        draw_recruit(rect, recruit, affordable);
+        draw_recruit(ctx, rect, recruit, affordable);
 
         if button_rect_tone_at(
             Rect::new(rect.right() - 96.0, rect.bottom() - 32.0, 84.0, 26.0),
@@ -44,7 +44,7 @@ pub fn draw(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) {
     }
 }
 
-fn draw_recruit(rect: Rect, recruit: &CrewMember, affordable: bool) {
+fn draw_recruit(ctx: &UiContext<'_>, rect: Rect, recruit: &CrewMember, affordable: bool) {
     draw_ui_text_ex(
         &recruit.name,
         rect.x + 14.0,
@@ -69,7 +69,7 @@ fn draw_recruit(rect: Rect, recruit: &CrewMember, affordable: bool) {
         TextStyle::new(13.0, rarity_color(recruit.rarity)).params(),
     );
     draw_text_right(
-        &format_compact_money(recruit.hire_cost),
+        &format!("{} to sign", format_compact_money(recruit.hire_cost)),
         rect.right() - 14.0,
         rect.y + 24.0,
         TextStyle::new(
@@ -78,6 +78,35 @@ fn draw_recruit(rect: Rect, recruit: &CrewMember, affordable: bool) {
                 Color::new(0.56, 0.82, 0.58, 1.0)
             } else {
                 Color::new(0.86, 0.46, 0.42, 1.0)
+            },
+        ),
+    );
+
+    // The half of the question the screen never asked. Signing them is one
+    // payment; keeping them is every week from here.
+    let payroll = &ctx.data.config.payroll;
+    draw_text_right(
+        &format!(
+            "{}/wk to keep",
+            format_compact_money(crate::sim::retainer_for(recruit, payroll))
+        ),
+        rect.right() - 14.0,
+        rect.y + 46.0,
+        TextStyle::new(14.0, Color::new(0.88, 0.72, 0.44, 1.0)),
+    );
+
+    let after = crate::sim::runway_after_hiring(ctx.session, payroll, recruit);
+    // Left of the Hire button, which owns the bottom-right corner of the row.
+    draw_text_right(
+        &format!("leaves {}wk runway", after.min(99)),
+        rect.right() - 106.0,
+        rect.y + 70.0,
+        TextStyle::new(
+            13.0,
+            match after {
+                0..=1 => Color::new(0.90, 0.42, 0.38, 1.0),
+                2..=4 => Color::new(0.90, 0.66, 0.30, 1.0),
+                _ => dark::TEXT_DIM,
             },
         ),
     );
