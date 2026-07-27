@@ -242,6 +242,21 @@ fn draw_lockup(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         content.y + 264.0,
         TextStyle::new(17.0, dark::TEXT_BRIGHT).params(),
     );
+    let share = crate::sim::fence::share_at(ctx.session.heat, &ctx.data.config.fence);
+    draw_text_right(
+        &format!(
+            "The fence pays {:.0}% of list{}",
+            share * 100.0,
+            if share <= ctx.data.config.fence.min_share {
+                " — too hot for better"
+            } else {
+                ""
+            }
+        ),
+        content.right(),
+        content.y + 264.0,
+        TextStyle::new(13.0, Color::new(0.88, 0.72, 0.44, 1.0)),
+    );
 
     let shelf = ctx.session.unassigned_inventory(ctx.data);
     let list = Rect::new(
@@ -300,6 +315,19 @@ fn draw_lockup(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
                 member_id: member.id.clone(),
                 item_id: item.id.clone(),
             });
+        }
+
+        // The one way money comes in that is not a job — priced so the player
+        // can see how much the city's attention is costing them (pillar 2).
+        let offer = crate::sim::fence_quote(ctx.session, item, &ctx.data.config.fence);
+        if button_rect_tone_at(
+            Rect::new(rect.right() - 190.0, rect.y + 18.0, 88.0, 26.0),
+            &format!("Sell {}", format_compact_money(offer.price)),
+            true,
+            ButtonTone::Secondary,
+            mouse,
+        ) {
+            actions.push(UiAction::SellItem(item.id.clone()));
         }
     }
 }

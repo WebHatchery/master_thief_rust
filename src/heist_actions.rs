@@ -178,6 +178,10 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
             report(notifications, sim::refit(session, &data.config, &id));
             check_awards(data, session, notifications);
         }
+        UiAction::SellItem(id) => {
+            report(notifications, sim::sell(session, data, &data.config, &id));
+            check_awards(data, session, notifications);
+        }
     }
 
     None

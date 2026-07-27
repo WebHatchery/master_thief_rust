@@ -71,6 +71,11 @@ pub struct CampaignTally {
     /// Spent keeping the outfit's tools in working order.
     #[serde(default)]
     pub refits_paid: i64,
+    /// Taken in selling kit back out rather than working for it.
+    #[serde(default)]
+    pub fenced_total: i64,
+    #[serde(default)]
+    pub items_fenced: i64,
 }
 
 /// The statistics an achievement can be written against.
@@ -109,6 +114,8 @@ pub enum TallyStat {
     TreatmentPaid,
     InjuriesTreated,
     RefitsPaid,
+    FencedTotal,
+    ItemsFenced,
     /// Live campaign state rather than a running total.
     Week,
     Reputation,
@@ -160,6 +167,8 @@ impl TallyStat {
             TallyStat::TreatmentPaid => tally.treatment_paid,
             TallyStat::InjuriesTreated => tally.injuries_treated,
             TallyStat::RefitsPaid => tally.refits_paid,
+            TallyStat::FencedTotal => tally.fenced_total,
+            TallyStat::ItemsFenced => tally.items_fenced,
 
             TallyStat::Week => session.week as i64,
             TallyStat::Reputation => session.reputation as i64,

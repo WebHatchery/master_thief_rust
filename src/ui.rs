@@ -136,6 +136,8 @@ pub enum UiAction {
     TreatInjuries(String),
     /// Put a hand's tools back in order (GDD 3, "repair equipment").
     RefitKit(String),
+    /// Sell a spare out of the lockup.
+    SellItem(String),
 }
 
 /// The three things the crew screen's left panel can be showing.

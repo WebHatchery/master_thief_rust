@@ -123,7 +123,14 @@ Sources: `game_apps/master_thief/` (React 19 + Zustand original),
    price that scales with the wait it saves and leaves the hand tired rather than fresh.
    With a payroll running, a ripening board, and rivals on it, weeks are the expensive
    thing — so the doctor is the same money-for-time trade the rest of the week is made of.
-3. **Outfit** — buy, assign, and repair equipment. Kit takes a job's worth of wear every
+3. **Outfit** — buy, sell, assign, and repair equipment. Spare kit can be moved on
+   through a fence at a fraction of list, and the fraction falls as heat rises: nobody
+   wants to be seen dealing with an outfit the city is watching. Every sale adds a point
+   of heat of its own. It is the week's only inflow that is not a job, deliberately priced
+   so it never becomes a better one — a lever for the fixer who cannot make payroll and
+   will not take work they have already decided against.
+
+   Kit takes a job's worth of wear every
    time it goes through a door, and worn tools read as a named `Worn kit` penalty on every
    check the hand makes. Refitting is a bill that grows with neglect, so the good tool is
    something the outfit keeps paying to keep good — the ordinary decision every working

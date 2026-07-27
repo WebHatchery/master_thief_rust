@@ -78,6 +78,8 @@ pub struct GameConfig {
     pub treatment: TreatmentConfig,
     /// How fast kit wears out, and what putting it right costs.
     pub kit: KitConfig,
+    /// What spare kit fetches, and what selling it costs in anonymity.
+    pub fence: FenceConfig,
     /// What the outfit costs to keep standing, week in, week out.
     pub payroll: PayrollConfig,
     /// What the city does about an outfit it has started to notice.
@@ -86,6 +88,24 @@ pub struct GameConfig {
     pub condition: crate::rules::ConditionTuning,
     /// How long it takes a hand to get good at their own trade.
     pub mastery: crate::rules::MasteryTuning,
+}
+
+/// Selling kit back out. The only inflow the week has that is not a job, and
+/// priced so it never becomes a better one.
+///
+/// Not `Eq`: these are shares, and pretending two floats compare exactly would
+/// be a lie about what comparing them means.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct FenceConfig {
+    /// Share of list price a fence pays an outfit nobody is watching.
+    pub share_base: f32,
+    /// Taken off that share per point of heat.
+    pub share_heat_penalty: f32,
+    /// However hot the outfit gets, a fence still pays this much.
+    pub min_share: f32,
+    /// Heat one sale adds. Selling your way out of a bad week makes the next
+    /// one worse.
+    pub heat_per_sale: i32,
 }
 
 /// Kit wearing out and being refitted (GDD 3, 9). Without this the Outfitter

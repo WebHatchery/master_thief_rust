@@ -6,6 +6,7 @@
 pub mod awards;
 pub mod campaign;
 pub mod delegation;
+pub mod fence;
 pub mod infirmary;
 pub mod job;
 pub mod kit;
@@ -19,6 +20,7 @@ pub mod week;
 pub use awards::{award, AwardDef, CampaignTally};
 pub use campaign::{play, CampaignLog};
 pub use delegation::DelegationMiss;
+pub use fence::{quote as fence_quote, sell, Offer};
 pub use infirmary::{quote as treatment_quote, treat, Treatment};
 pub use job::{auto_assign, run_job, DoorOutcome, JobPlan, JobReport};
 pub use kit::{refit, refit_quote, wear_penalty};

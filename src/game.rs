@@ -107,7 +107,13 @@ impl Game {
                 self.selection.settings_open = true;
                 Screen::Crew
             }
-            "shop" | "outfitter" => Screen::Shop,
+            "shop" | "outfitter" => {
+                // A few weeks of loot, so the shelf has spares on it and the
+                // fence has something to quote against. An empty lockup shows
+                // half the screen.
+                crate::sim::play(&mut self.session, &self.data, 8);
+                Screen::Shop
+            }
             "records" => {
                 crate::sim::play(&mut self.session, &self.data, 12);
                 crate::sim::award(&mut self.session, &self.data.awards);

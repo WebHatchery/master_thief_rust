@@ -68,6 +68,13 @@
     "refit_per_job": 450
   },
 
+  "fence": {
+    "share_base": 0.45,
+    "share_heat_penalty": 0.0025,
+    "min_share": 0.15,
+    "heat_per_sale": 1
+  },
+
   "treatment": {
     "base_cost": 5000,
     "cost_per_week": 7000,
