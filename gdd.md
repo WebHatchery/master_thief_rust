@@ -523,7 +523,13 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
 - **Port the tests first.** The original's `characterCalculations.test.ts` (802 lines) and
   `heistExecution.test.ts` (631 lines) are the specification. Translating them in M1
   before writing new rules code is the single highest-value step in this port.
-- **Determinism test** — same seed + same plan → identical job history.
+- **Determinism test** — same seed + same plan → identical job history, *and* the same
+  seed replayed against separately loaded content. The second half is the one with teeth:
+  `DataRegistry` is backed by a `HashMap`, so every load iterates in a different order, and
+  any draw taken from an unsorted registry would make a seed stop reproducing its campaign
+  between runs while every single-load determinism test stayed green. The guard was
+  validated by deliberately unsorting one draw and confirming it fails — and confirming the
+  older tests do not. Every site that sorts a registry before drawing from it says why.
 - **Distribution soak** — a headless run of thousands of jobs asserting success rates by
   difficulty band stay inside designed windows; guards against DC drift as content lands.
 - **No-dead-content test** — every encounter template reachable from some target, every

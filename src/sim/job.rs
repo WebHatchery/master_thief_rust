@@ -273,6 +273,10 @@ fn draw_complication(session: &mut GameSession, data: &GameData) -> Option<Strin
         .filter(|(_, encounter)| encounter.complication_only)
         .map(|(id, _)| id)
         .collect();
+    // Load-bearing, not tidiness: `DataRegistry` is a `HashMap`, so `iter()`
+    // yields a different order for every load of the content. Drawing from it
+    // unsorted would make the next line's RNG draw depend on hash order, and a
+    // seed would stop reproducing a campaign between runs (GDD 5.7).
     pool.sort();
 
     if pool.is_empty() {

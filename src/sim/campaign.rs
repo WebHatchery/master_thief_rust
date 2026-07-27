@@ -404,6 +404,47 @@ mod tests {
     }
 
     #[test]
+    fn the_same_seed_replays_across_separate_loads_of_the_content() {
+        // GDD 5.7 says a seed reproduces a campaign exactly. Every existing
+        // determinism test shares one `GameData`, so all of them would stay
+        // green if a draw depended on the order a registry happened to iterate
+        // in — and `DataRegistry` is backed by a `HashMap`, so that order is
+        // different for every load. This is the test that can actually fail.
+        let loads: Vec<GameData> = (0..4).map(|_| GameData::load().unwrap()).collect();
+
+        let orders: Vec<Vec<&String>> = loads
+            .iter()
+            .map(|data| data.equipment.ids().collect())
+            .collect();
+        assert!(
+            orders.iter().any(|order| *order != orders[0]),
+            "every load iterated identically, so this guard proves nothing — \
+             if DataRegistry became an ordered map it can be deleted"
+        );
+
+        let mut logs = Vec::new();
+        let mut ledgers = Vec::new();
+        for data in &loads {
+            let mut session = GameSession::new(&data.config, data, 4_242);
+            logs.push(play(&mut session, data, 15));
+            ledgers.push((
+                session.budget,
+                session.reputation,
+                session.notoriety,
+                session.heat,
+                session.crew.len(),
+                session.inventory.clone(),
+                session.custody.len(),
+            ));
+        }
+
+        for (index, log) in logs.iter().enumerate() {
+            assert_eq!(log, &logs[0], "load {} played a different campaign", index);
+            assert_eq!(ledgers[index], ledgers[0], "load {} ended elsewhere", index);
+        }
+    }
+
+    #[test]
     fn a_campaign_still_round_trips_through_a_save_afterwards() {
         let (data, session, _) = campaign(909, 20);
 

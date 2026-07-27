@@ -214,6 +214,9 @@ impl GameSession {
             .filter(|id| !self.is_held(id))
             .cloned()
             .collect();
+        // Load-bearing: `DataRegistry` is a `HashMap` and `ids()` has no
+        // defined order, so the draw below would otherwise depend on hash
+        // order rather than on the seed (GDD 5.7).
         pool.sort();
 
         self.recruits.clear();
@@ -419,6 +422,8 @@ impl GameSession {
             .map(|(_, target)| target)
             .filter(|target| target.required_reputation <= self.reputation)
             .collect();
+        // Sorted for the same reason the recruit pool is: the board draws from
+        // this list with the run's RNG, and registry order is not stable.
         targets.sort_by_key(|target| (target.required_reputation, target.id.clone()));
         targets
     }
