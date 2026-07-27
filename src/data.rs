@@ -18,6 +18,7 @@ const TARGETS_JSON: &str = include_str!("../assets/data/targets.json");
 const ENVIRONMENT_JSON: &str = include_str!("../assets/data/environment.json");
 const OUTCOMES_JSON: &str = include_str!("../assets/data/outcomes.json");
 const ACHIEVEMENTS_JSON: &str = include_str!("../assets/data/achievements.json");
+const TRAITS_JSON: &str = include_str!("../assets/data/traits.json");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameConfig {
@@ -320,6 +321,8 @@ pub struct GameData {
     pub outcomes: OutcomeTables,
     /// Achievement definitions, in the order they are shown.
     pub awards: Vec<crate::sim::AwardDef>,
+    /// How hard each personality takes what it watches (GDD 5.5).
+    pub trait_rates: crate::rules::chemistry::TraitRates,
 }
 
 impl GameData {
@@ -332,6 +335,7 @@ impl GameData {
         let environment = registry("environment", ENVIRONMENT_JSON)?;
         let outcomes = load_embedded_json_labeled("outcomes", OUTCOMES_JSON)?;
         let awards = load_embedded_json_labeled("achievements", ACHIEVEMENTS_JSON)?;
+        let trait_rates = load_embedded_json_labeled("traits", TRAITS_JSON)?;
 
         Ok(Self {
             config,
@@ -342,6 +346,7 @@ impl GameData {
             environment,
             outcomes,
             awards,
+            trait_rates,
         })
     }
 

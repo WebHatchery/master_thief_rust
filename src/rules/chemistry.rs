@@ -166,22 +166,30 @@ impl Chemistry {
     }
 }
 
-/// How hard a personality takes what it just watched. Steady hands barely move;
-/// reckless ones swing.
-pub fn reaction_rate(traits: &[String]) -> f32 {
+/// How hard each personality takes what it just watched, keyed by trait.
+///
+/// Authored in `assets/data/traits.json` rather than matched in Rust. It began
+/// as a `match` on trait names, which drifted from the roster the moment either
+/// side changed: six of the thirty traits the characters actually carry —
+/// blunt, curious, ruthless, stubborn, superstitious, unpredictable — matched
+/// no arm and fell through to 1.0, so those hands reacted to nothing in
+/// particular while appearing to have a personality. A table the content test
+/// can check against cannot drift that way.
+///
+/// The bands are: hands who work to a method barely re-read a bad night (0.7);
+/// hands who take everything personally take this personally too (1.4);
+/// expecting the worst blunts it when it arrives (0.85); warm people warm
+/// faster and cool faster (1.15).
+pub type TraitRates = std::collections::BTreeMap<String, f32>;
+
+/// The rate a watcher reacts at, given everything they are. Traits multiply, so
+/// a steady cynic moves less than either alone.
+pub fn reaction_rate(traits: &[String], rates: &TraitRates) -> f32 {
     let mut rate: f32 = 1.0;
     for name in traits {
-        rate *= match name.to_ascii_lowercase().as_str() {
-            // Hands who work to a method do not re-read a bad night.
-            "steady" | "patient" | "methodical" | "meticulous" | "punctual" | "quiet" => 0.7,
-            // Hands who take everything personally take this personally too.
-            "reckless" | "impulsive" | "vain" | "hot-headed" | "greedy" | "proud" => 1.4,
-            // Expecting the worst blunts it when it arrives.
-            "cynical" | "guarded" | "private" | "suspicious" | "fatalistic" | "nervous" => 0.85,
-            // Warm people warm faster, and cool faster too.
-            "optimistic" | "charming" | "loyal" | "generous" | "gregarious" | "sentimental" => 1.15,
-            _ => 1.0,
-        };
+        if let Some(found) = rates.get(&name.to_ascii_lowercase()) {
+            rate *= found;
+        }
     }
     rate.clamp(0.4, 2.0)
 }
@@ -204,6 +212,7 @@ pub fn record_outcome(
     actor: &str,
     watchers: &[(String, Vec<String>)],
     outcome: Outcome,
+    rates: &TraitRates,
 ) {
     let base = shared_outcome_delta(outcome);
     if base == 0 {
@@ -214,7 +223,7 @@ pub fn record_outcome(
         if watcher == actor {
             continue;
         }
-        let delta = (base as f32 * reaction_rate(traits)).round() as i32;
+        let delta = (base as f32 * reaction_rate(traits, rates)).round() as i32;
         chemistry.adjust(actor, watcher, delta);
     }
 }
@@ -321,6 +330,42 @@ mod tests {
         assert_eq!(chemistry.get("otis", "vera"), 12);
     }
 
+    /// The table the game actually ships, so these tests cannot pass against
+    /// numbers the content does not use.
+    fn rates() -> TraitRates {
+        crate::data::GameData::load().unwrap().trait_rates
+    }
+
+    #[test]
+    fn every_authored_trait_moves_somebody() {
+        // Six traits used to match nothing and silently mean "no reaction".
+        // A hand with a personality that does not reach the rules has a
+        // decorative personality, which GDD 0 says this port does not ship.
+        let data = crate::data::GameData::load().unwrap();
+        for (_, member) in data.crew_pool.iter() {
+            for trait_name in &member.personality_traits {
+                assert!(
+                    data.trait_rates
+                        .contains_key(&trait_name.to_ascii_lowercase()),
+                    "{} carries \"{}\", which the reaction table has never heard of",
+                    member.name,
+                    trait_name
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn a_trait_the_table_knows_actually_changes_the_rate() {
+        let rates = rates();
+        assert_ne!(reaction_rate(&["Steady".to_owned()], &rates), 1.0);
+        assert_ne!(reaction_rate(&["Stubborn".to_owned()], &rates), 1.0);
+        assert_ne!(reaction_rate(&["Superstitious".to_owned()], &rates), 1.0);
+        // Unknown names are ignored rather than panicking: content can be
+        // added before its rate is authored, and the test above catches that.
+        assert_eq!(reaction_rate(&["Nonesuch".to_owned()], &rates), 1.0);
+    }
+
     #[test]
     fn nobody_has_chemistry_with_themselves() {
         let mut chemistry = Chemistry::default();
@@ -342,10 +387,16 @@ mod tests {
         let mut chemistry = Chemistry::default();
         let crew = watchers(&[("vera", &[]), ("otis", &[])]);
 
-        record_outcome(&mut chemistry, "vera", &crew, Outcome::Success);
+        record_outcome(&mut chemistry, "vera", &crew, Outcome::Success, &rates());
         assert!(chemistry.get("vera", "otis") > 0);
 
-        record_outcome(&mut chemistry, "vera", &crew, Outcome::CriticalFailure);
+        record_outcome(
+            &mut chemistry,
+            "vera",
+            &crew,
+            Outcome::CriticalFailure,
+            &rates(),
+        );
         assert!(chemistry.get("vera", "otis") < 0);
     }
 
@@ -359,12 +410,14 @@ mod tests {
             "vera",
             &watchers(&[("otis", &["Steady"])]),
             Outcome::CriticalFailure,
+            &rates(),
         );
         record_outcome(
             &mut reckless,
             "vera",
             &watchers(&[("otis", &["Reckless"])]),
             Outcome::CriticalFailure,
+            &rates(),
         );
 
         assert!(
@@ -381,6 +434,7 @@ mod tests {
             "vera",
             &watchers(&[("otis", &[])]),
             Outcome::Neutral,
+            &rates(),
         );
         assert_eq!(chemistry.get("vera", "otis"), 0);
     }
@@ -393,6 +447,7 @@ mod tests {
             "vera",
             &watchers(&[("vera", &[]), ("otis", &[])]),
             Outcome::Success,
+            &rates(),
         );
         assert_eq!(chemistry.get("vera", "vera"), 0);
         assert!(chemistry.get("vera", "otis") > 0);

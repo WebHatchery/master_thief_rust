@@ -223,6 +223,7 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
             &outcome.result.check.member_id,
             &crew_on_job,
             outcome.result.outcome,
+            &data.trait_rates,
         );
         doors.push(outcome);
     }
@@ -237,6 +238,7 @@ fn record_chemistry(
     actor: &str,
     crew_on_job: &[String],
     outcome: Outcome,
+    rates: &crate::rules::chemistry::TraitRates,
 ) {
     let watchers: Vec<(String, Vec<String>)> = crew_on_job
         .iter()
@@ -248,7 +250,13 @@ fn record_chemistry(
         })
         .collect();
 
-    crate::rules::chemistry::record_outcome(&mut session.chemistry, actor, &watchers, outcome);
+    crate::rules::chemistry::record_outcome(
+        &mut session.chemistry,
+        actor,
+        &watchers,
+        outcome,
+        rates,
+    );
 }
 
 fn assigned_member(plan: &JobPlan, encounter_id: &str, session: &GameSession) -> Option<String> {
