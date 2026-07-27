@@ -271,6 +271,60 @@ mod tests {
     }
 
     #[test]
+    fn a_partnership_is_reachable_but_never_automatic() {
+        // The tier has to be something play actually produces, or the premium
+        // it carries is a rule nobody ever meets. It also must not be the
+        // default state of every roster, or it is just a tax.
+        let data = GameData::load().unwrap();
+        let mut formed = 0;
+        let mut campaigns = 0;
+
+        for seed in [20_260_726u64, 4_242, 777, 5_150, 31_337, 909] {
+            let mut session = GameSession::new(&data.config, &data, seed);
+            play(&mut session, &data, 20);
+            campaigns += 1;
+            formed += usize::from(
+                !session
+                    .chemistry
+                    .partnerships_among(&session.crew_ids())
+                    .is_empty(),
+            );
+        }
+
+        assert!(formed > 0, "no campaign in {} grew a pair", campaigns);
+        assert!(
+            formed < campaigns,
+            "every single campaign formed one, so it is not a decision"
+        );
+    }
+
+    #[test]
+    fn chemistry_reaches_the_die_at_the_scale_play_produces() {
+        // The modifier is the reason the system exists. If a campaign's warmest
+        // pair still reads zero on a check, chemistry is decoration.
+        let data = GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data, 4_242);
+        play(&mut session, &data, 20);
+
+        // Read it the way a job does: over the handful of hands actually on
+        // one, not averaged across a roster of strangers.
+        let (a, b, value) = session
+            .chemistry
+            .known_pairs()
+            .max_by_key(|(_, _, value)| value.abs())
+            .expect("twenty weeks and nobody formed a view");
+
+        let pair = vec![a.to_owned(), b.to_owned()];
+        let entry = session
+            .chemistry
+            .modifier(&pair[0], &pair)
+            .unwrap_or_else(|| {
+                panic!("the campaign's strongest opinion ({value}) still reads zero on a check")
+            });
+        assert_ne!(entry.value, 0);
+    }
+
+    #[test]
     fn the_city_notices_a_working_outfit() {
         let (data, session, log) = campaign(4_242, 20);
 

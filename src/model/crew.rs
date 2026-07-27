@@ -122,6 +122,10 @@ pub struct Condition {
     /// take their kit and go.
     #[serde(default)]
     pub notice_given: bool,
+    /// Did this hand actually stand in a building this week? Chemistry cools
+    /// between pairs who did not (GDD 5.5). Cleared when the week turns over.
+    #[serde(default)]
+    pub worked_this_week: bool,
 }
 
 impl Default for Condition {
@@ -132,6 +136,7 @@ impl Default for Condition {
             injuries: Vec::new(),
             weeks_unpaid: 0,
             notice_given: false,
+            worked_this_week: false,
         }
     }
 }

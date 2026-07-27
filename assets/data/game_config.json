@@ -17,6 +17,7 @@
   "rest_recovery": 25,
   "fatigue_work_threshold": 80,
   "idle_loyalty_drift": 3,
+  "chemistry_cooling": 1,
 
   "heat_decay_per_week": 8,
   "heat_safe_threshold": 20,
@@ -32,6 +33,7 @@
     "holdout_premium": 0.06,
     "steady_loyalty": 80,
     "steady_discount": 0.02,
+    "partnership_premium": 0.05,
     "min_share": 0.10,
     "max_share": 0.55
   },

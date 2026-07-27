@@ -52,6 +52,9 @@ pub struct GameConfig {
     pub fatigue_work_threshold: i32,
     /// Loyalty a week of idleness costs, and rest restores.
     pub idle_loyalty_drift: i32,
+    /// Chemistry a pair loses each week they do not work the same job. Applies
+    /// to warmth and grudges alike — both fade toward indifference.
+    pub chemistry_cooling: i32,
 
     /// Heat shed each week the crew stays quiet.
     pub heat_decay_per_week: i32,
@@ -97,6 +100,9 @@ pub struct CutConfig {
     /// Loyalty at or above which a hand does not haggle at all.
     pub steady_loyalty: i32,
     pub steady_discount: f32,
+    /// Added per established partnership on the job. A pair who work as one
+    /// negotiate as one.
+    pub partnership_premium: f32,
     /// The share can never fall below or climb above these, whatever the
     /// roster looks like.
     pub min_share: f32,

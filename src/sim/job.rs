@@ -314,6 +314,7 @@ fn resolve_door(
 
     if let Some(member) = session.member_mut(member_id) {
         member.condition.add_fatigue(result.stress_inflicted);
+        member.condition.worked_this_week = true;
         award_experience(&mut member.progression, result.experience_gained);
         member.progression.jobs_completed += 1;
         if result.passed() {

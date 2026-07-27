@@ -17,8 +17,17 @@ pub const MAX: i32 = 100;
 pub const MIN: i32 = -100;
 /// At or below this, the pair refuses to work together.
 pub const REFUSAL: i32 = -60;
-/// How many points of chemistry buy one point on a check.
-const POINTS_PER_MODIFIER: i32 = 25;
+/// At or above this, a pair has become a unit — they read each other on a job,
+/// and they know it when the cut is discussed (GDD 5.5).
+///
+/// Set against what play actually produces, not against the nominal ±100
+/// scale: a campaign's warmest pair lands in the teens or twenties, because
+/// every week apart cools them. A threshold of forty was one no crew ever
+/// reached, which made the whole tier decoration.
+pub const PARTNERSHIP: i32 = 20;
+/// How many points of chemistry buy one point on a check. Same reasoning: at
+/// twenty-five, the modifier this system exists to produce almost never fired.
+const POINTS_PER_MODIFIER: i32 = 12;
 /// The most chemistry can swing a single check, either way.
 const MODIFIER_CAP: i32 = 3;
 
@@ -95,6 +104,49 @@ impl Chemistry {
         })
     }
 
+    /// Have these two become a unit?
+    pub fn is_partnership(&self, a: &str, b: &str) -> bool {
+        self.get(a, b) >= PARTNERSHIP
+    }
+
+    /// Established pairs among the hands down for one job, each counted once.
+    /// This is what the cut is negotiated against: a pair who work as one know
+    /// what a pair is worth.
+    pub fn partnerships_among(&self, crew: &[String]) -> Vec<(String, String)> {
+        let mut pairs = Vec::new();
+        for (index, a) in crew.iter().enumerate() {
+            for b in crew.iter().skip(index + 1) {
+                if self.is_partnership(a, b) {
+                    pairs.push((a.clone(), b.clone()));
+                }
+            }
+        }
+        pairs
+    }
+
+    /// A week apart. Warmth and grudges both fade toward indifference when a
+    /// pair is not put in the same building — chemistry the fixer wants has to
+    /// be kept up, and a grudge they can wait out will cool on its own.
+    pub fn cool_off(&mut self, worked_together: &[String], amount: i32) {
+        if amount <= 0 {
+            return;
+        }
+        let mut worked: Vec<String> = Vec::new();
+        for (index, a) in worked_together.iter().enumerate() {
+            for b in worked_together.iter().skip(index + 1) {
+                worked.push(key(a, b));
+            }
+        }
+
+        for (pair, value) in self.pairs.iter_mut() {
+            if worked.contains(pair) {
+                continue;
+            }
+            *value -= value.signum() * amount.min(value.abs());
+        }
+        self.pairs.retain(|_, value| *value != 0);
+    }
+
     /// Every pair the table has an opinion about, for the crew screen.
     pub fn known_pairs(&self) -> impl Iterator<Item = (&str, &str, i32)> {
         self.pairs.iter().filter_map(|(pair, value)| {
@@ -164,6 +216,77 @@ pub fn record_outcome(
         }
         let delta = (base as f32 * reaction_rate(traits)).round() as i32;
         chemistry.adjust(actor, watcher, delta);
+    }
+}
+
+#[cfg(test)]
+mod partnership_tests {
+    use super::*;
+
+    fn ids(names: &[&str]) -> Vec<String> {
+        names.iter().map(|name| (*name).to_owned()).collect()
+    }
+
+    #[test]
+    fn a_warm_enough_pair_counts_as_a_partnership() {
+        let mut chemistry = Chemistry::default();
+        chemistry.set("vera", "otis", PARTNERSHIP - 1);
+        assert!(!chemistry.is_partnership("vera", "otis"));
+
+        chemistry.set("vera", "otis", PARTNERSHIP);
+        assert!(chemistry.is_partnership("vera", "otis"));
+    }
+
+    #[test]
+    fn partnerships_on_a_job_are_each_counted_once() {
+        let mut chemistry = Chemistry::default();
+        chemistry.set("vera", "otis", 70);
+        chemistry.set("otis", "birdie", 80);
+        chemistry.set("vera", "birdie", 10);
+
+        let pairs = chemistry.partnerships_among(&ids(&["vera", "otis", "birdie"]));
+        assert_eq!(pairs.len(), 2, "{:?}", pairs);
+        assert!(!pairs.contains(&("vera".to_owned(), "birdie".to_owned())));
+    }
+
+    #[test]
+    fn a_pair_kept_apart_drifts_back_toward_indifference() {
+        // The other half of what makes a good pair a decision: warmth is not a
+        // permanent acquisition, it is something the fixer keeps paying for.
+        let mut chemistry = Chemistry::default();
+        chemistry.set("vera", "otis", 50);
+        chemistry.set("vera", "birdie", -50);
+
+        chemistry.cool_off(&[], 5);
+        assert_eq!(chemistry.get("vera", "otis"), 45);
+        assert_eq!(chemistry.get("vera", "birdie"), -45, "grudges cool too");
+    }
+
+    #[test]
+    fn a_pair_who_worked_the_same_job_do_not_cool() {
+        let mut chemistry = Chemistry::default();
+        chemistry.set("vera", "otis", 50);
+        chemistry.set("vera", "birdie", 50);
+
+        chemistry.cool_off(&ids(&["vera", "otis"]), 5);
+        assert_eq!(chemistry.get("vera", "otis"), 50);
+        assert_eq!(chemistry.get("vera", "birdie"), 45);
+    }
+
+    #[test]
+    fn cooling_settles_at_indifference_rather_than_overshooting() {
+        let mut chemistry = Chemistry::default();
+        chemistry.set("vera", "otis", 3);
+        chemistry.set("vera", "birdie", -2);
+
+        chemistry.cool_off(&[], 10);
+        assert_eq!(chemistry.get("vera", "otis"), 0);
+        assert_eq!(chemistry.get("vera", "birdie"), 0);
+        assert_eq!(
+            chemistry.known_pairs().count(),
+            0,
+            "dead opinions are dropped"
+        );
     }
 }
 

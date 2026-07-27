@@ -156,6 +156,34 @@ pub fn crew_cut(session: &GameSession, config: &GameConfig, crew_on_job: &[Strin
         });
     }
 
+    // A pair who have learned to read each other are worth more together than
+    // apart, and they have noticed. This is what makes a good partnership
+    // expensive to keep together rather than free (GDD 5.5).
+    let partnerships = session.chemistry.partnerships_among(crew_on_job);
+    if !partnerships.is_empty() {
+        let premium = partnerships.len() as f32 * cut.partnership_premium;
+        share += premium;
+        let named = partnerships
+            .iter()
+            .filter_map(|(a, b)| {
+                Some(format!(
+                    "{} & {}",
+                    session.member(a)?.name.split(' ').next()?,
+                    session.member(b)?.name.split(' ').next()?
+                ))
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+        reasons.push(CutReason {
+            label: if named.is_empty() {
+                "Working as a unit".to_owned()
+            } else {
+                format!("{} work as a pair", named)
+            },
+            points: premium * 100.0,
+        });
+    }
+
     let steady = members
         .iter()
         .filter(|member| member.condition.loyalty >= cut.steady_loyalty)
@@ -436,6 +464,39 @@ mod tests {
         }
         let steady = crew_cut(&session, &data.config, &ids);
         assert!(steady.share < base, "goodwill bought nothing");
+    }
+
+    #[test]
+    fn a_pair_who_work_as_one_charge_as_one() {
+        // GDD 5.5's missing half: a good partnership improves the odds at every
+        // door, and now it has a price, so keeping it together is a decision.
+        let (data, mut session) = setup(25);
+        let ids = session.crew_ids();
+        let base = crew_cut(&session, &data.config, &ids).share;
+
+        session.chemistry.set(&ids[0], &ids[1], 80);
+        let paired = crew_cut(&session, &data.config, &ids);
+
+        assert!(paired.share > base, "a partnership cost nothing extra");
+        assert!(paired
+            .reasons
+            .iter()
+            .any(|reason| reason.label.contains("work as a pair")));
+    }
+
+    #[test]
+    fn splitting_the_pair_up_is_the_cheaper_roster() {
+        let (data, mut session) = setup(26);
+        let ids = session.crew_ids();
+        session.chemistry.set(&ids[0], &ids[1], 90);
+
+        let together = crew_cut(&session, &data.config, &ids[..2]);
+        let apart = crew_cut(&session, &data.config, &ids[..1]);
+
+        assert!(
+            apart.share < together.share,
+            "the pair was free to keep together"
+        );
     }
 
     #[test]

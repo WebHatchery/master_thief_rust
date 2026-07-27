@@ -136,6 +136,14 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
     let crew = session.crew_ids();
     session.chemistry.retain_crew(&crew);
 
+    // A pair who did not stand in the same building this week drift back toward
+    // indifference. Warmth has to be kept up, and a grudge can be waited out
+    // (GDD 5.5).
+    let worked_together = crew_on_last_job(session);
+    session
+        .chemistry
+        .cool_off(&worked_together, config.chemistry_cooling);
+
     // A week that ran nothing is a week spent lying low, which is a real
     // strategy and worth counting (GDD 5.6).
     let ran_a_job = session
@@ -144,6 +152,9 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
         .is_some_and(|record| record.week == session.week);
     if !ran_a_job {
         session.tally.quiet_weeks += 1;
+    }
+    for member in &mut session.crew {
+        member.condition.worked_this_week = false;
     }
     session.week += 1;
 
@@ -157,6 +168,25 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
         law,
         surveillance_weeks: session.surveillance_weeks,
     }
+}
+
+/// Whoever stood in a building together this week. Read off the crew's own
+/// job records rather than tracked separately, so it cannot drift from what
+/// actually happened.
+fn crew_on_last_job(session: &GameSession) -> Vec<String> {
+    let ran_this_week = session
+        .history
+        .last()
+        .is_some_and(|record| record.week == session.week);
+    if !ran_this_week {
+        return Vec::new();
+    }
+    session
+        .crew
+        .iter()
+        .filter(|member| member.condition.worked_this_week)
+        .map(|member| member.id.clone())
+        .collect()
 }
 
 #[cfg(test)]
@@ -311,6 +341,59 @@ mod tests {
             .custody
             .first()
             .is_some_and(|record| record.bail > 0));
+    }
+
+    #[test]
+    fn a_pair_the_fixer_stops_using_goes_off_the_boil() {
+        let (data, mut session) = setup(12);
+        let ids = session.crew_ids();
+        session.chemistry.set(&ids[0], &ids[1], 60);
+
+        // A quiet week is a week nobody stood in a building together.
+        advance_week(&mut session, &data);
+
+        assert_eq!(
+            session.chemistry.get(&ids[0], &ids[1]),
+            60 - data.config.chemistry_cooling,
+            "warmth survived a week of nobody working"
+        );
+    }
+
+    #[test]
+    fn a_pair_who_worked_together_keep_what_they_built() {
+        let (data, mut session) = setup(13);
+        let ids = session.crew_ids();
+        session.chemistry.set(&ids[0], &ids[1], 60);
+        session.chemistry.set(&ids[0], &ids[2], 60);
+
+        // Mark two of them as having worked, and file a job for this week so
+        // the week knows the outfit was out.
+        session.crew[0].condition.worked_this_week = true;
+        session.crew[1].condition.worked_this_week = true;
+        session.history.push(crate::state::JobRecord {
+            week: session.week,
+            target_name: "Somewhere".to_owned(),
+            difficulty: crate::model::DifficultyBand::Easy,
+            success: true,
+            doors_passed: 1,
+            doors_total: 1,
+            payout: 0,
+            delegated: false,
+            reputation: 0,
+            notoriety: 0,
+        });
+
+        advance_week(&mut session, &data);
+
+        assert_eq!(session.chemistry.get(&ids[0], &ids[1]), 60);
+        assert_eq!(
+            session.chemistry.get(&ids[0], &ids[2]),
+            60 - data.config.chemistry_cooling
+        );
+        assert!(
+            session.crew.iter().all(|m| !m.condition.worked_this_week),
+            "the week did not reset who worked"
+        );
     }
 
     #[test]

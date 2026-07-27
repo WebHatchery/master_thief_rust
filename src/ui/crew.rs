@@ -511,8 +511,12 @@ fn draw_chemistry(rect: Rect, ctx: &UiContext<'_>, member: &CrewMember) {
         .iter()
         .take(4)
         .map(|(name, value)| {
+            // A partnership is the one worth calling out: it buys dice at every
+            // door and costs a premium on the cut (GDD 5.5).
             let mood = if ctx.session.chemistry.refuses(&member.id, name) {
-                "refuses"
+                "refuses "
+            } else if *value >= crate::rules::chemistry::PARTNERSHIP {
+                "pair +"
             } else if *value > 0 {
                 "+"
             } else {

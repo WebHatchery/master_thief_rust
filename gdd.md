@@ -223,6 +223,15 @@ negative pair refuses to work together. This makes the roster a *composition* pr
 rather than a sum of individual power ratings, and it gives personality traits — currently
 decorative — a mechanical job.
 
+**A partnership is an asset with a running cost.** Past a threshold a pair stops being two
+hands who get on and becomes a *unit*: they read each other at every door, and they know
+what a unit is worth when the cut is discussed, so putting them on the same job adds a
+named premium. And chemistry is not a permanent acquisition — every week a pair does not
+stand in the same building, warmth and grudges alike fade toward indifference. Keeping a
+good pair sharp means keeping them together, which is exactly the thing that costs money;
+letting them lapse is free and undoes them. A grudge, by the same rule, can be waited out
+instead of solved. That is the roster decision chemistry never used to force.
+
 **The crew's cut is negotiated, not fixed.** The retainer buys their week (§5.6); the cut
 is what they want for *this* job, and it is read off the roster the plan puts on it. A
 base share, plus a step for every hand beyond the first, plus a premium for standing — a
@@ -434,9 +443,12 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
    position the player chooses, not one poverty forces on them.
 3. How much should critical results restructure a run? Skipping an encounter is a strong,
    readable payoff; adding one may feel unfair unless well telegraphed.
-4. Does chemistry (§5.5) earn its complexity, or is it feature creep on a system the
-   original never built? Prototype it in M4 and cut it if the planning screen gets
-   illegible.
+4. **Settled: it earns it, now that it costs something.** As a modifier alone chemistry was
+   decoration — free upside for a roster the player was picking anyway. It earns its place
+   once a partnership carries a premium on the cut and decays when it is not used, because
+   those two together turn "who works with whom" into a standing decision with a bill
+   attached. The planning screen stayed legible: the pair shows up as one named line among
+   the cut's reasons, not as a new panel.
 5. **Settled: split the axis.** *Notoriety* is the ledger and never moves down — the
    campaign is finite by design, which is the stronger game. *Heat* is the reducible half:
    it decays on its own, and it can be bought down by greasing palms at a price that rises
