@@ -28,9 +28,10 @@ pub fn draw(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) {
             break;
         }
 
-        let affordable = ctx.session.budget >= recruit.hire_cost;
+        let fee = ctx.session.hire_fee(recruit, &ctx.data.config);
+        let affordable = ctx.session.budget >= fee;
         list_card(rect, false, rarity_color(recruit.rarity), mouse);
-        draw_recruit(ctx, rect, recruit, affordable);
+        draw_recruit(ctx, rect, recruit, fee, affordable);
 
         if button_rect_tone_at(
             Rect::new(rect.right() - 96.0, rect.bottom() - 32.0, 84.0, 26.0),
@@ -44,7 +45,7 @@ pub fn draw(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) {
     }
 }
 
-fn draw_recruit(ctx: &UiContext<'_>, rect: Rect, recruit: &CrewMember, affordable: bool) {
+fn draw_recruit(ctx: &UiContext<'_>, rect: Rect, recruit: &CrewMember, fee: i64, affordable: bool) {
     draw_ui_text_ex(
         &recruit.name,
         rect.x + 14.0,
@@ -69,7 +70,16 @@ fn draw_recruit(ctx: &UiContext<'_>, rect: Rect, recruit: &CrewMember, affordabl
         TextStyle::new(13.0, rarity_color(recruit.rarity)).params(),
     );
     draw_text_right(
-        &format!("{} to sign", format_compact_money(recruit.hire_cost)),
+        &if fee > recruit.hire_cost {
+            // Say so, rather than quietly charging more than the dossier says.
+            format!(
+                "{} to sign (+{}% known)",
+                format_compact_money(fee),
+                ((fee - recruit.hire_cost) * 100 / recruit.hire_cost.max(1))
+            )
+        } else {
+            format!("{} to sign", format_compact_money(fee))
+        },
         rect.right() - 14.0,
         rect.y + 24.0,
         TextStyle::new(
@@ -95,7 +105,7 @@ fn draw_recruit(ctx: &UiContext<'_>, rect: Rect, recruit: &CrewMember, affordabl
         TextStyle::new(14.0, Color::new(0.88, 0.72, 0.44, 1.0)),
     );
 
-    let after = crate::sim::runway_after_hiring(ctx.session, payroll, recruit);
+    let after = crate::sim::runway_after_hiring(ctx.session, payroll, recruit, fee);
     // Left of the Hire button, which owns the bottom-right corner of the row.
     draw_text_right(
         &format!("leaves {}wk runway", after.min(99)),

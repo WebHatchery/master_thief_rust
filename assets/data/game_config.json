@@ -45,6 +45,13 @@
     "ripeness_max": 3
   },
 
+  "recruiting": {
+    "fee_per_notoriety": 0.003,
+    "max_fee_premium": 2.0,
+    "pool_shrink_per_notoriety": 150,
+    "min_pool": 2
+  },
+
   "leads": {
     "loyalty_threshold": 75,
     "chance_per_hand": 0.05,

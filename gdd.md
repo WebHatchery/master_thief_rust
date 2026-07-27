@@ -317,7 +317,12 @@ third consequence after the die and the walkout.
   recruits, and better equipment. It is also what the safehouse costs: upkeep scales with
   reputation, so the outfit's own name is the largest line on its weekly bill.
 - **Notoriety** rises with every job and spikes on failures, alarms, and violence. It is
-  **monotonic** — see open question 5, settled.
+  **monotonic** — see open question 5, settled. It prices bribes and bail, and it closes
+  off *people*: a widely known outfit pays danger money to sign anybody, and fewer of them
+  bother turning up at all. That is what makes pillar 4 an actual opposition rather than a
+  slogan — reputation opens marks, which is a strong pull, so notoriety has to cost the
+  other half of the same thing. Before this it only made two rare purchases dearer, which
+  meant maximising reputation was very nearly free.
 - **Heat** is notoriety's short-term component. It decays weekly, can be bought down, and
   above a threshold it stops being only a difficulty modifier: each week rolls once for
   the city's attention, and a hit is a **tail** (a named penalty on every check for a

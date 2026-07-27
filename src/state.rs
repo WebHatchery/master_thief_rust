@@ -189,6 +189,29 @@ impl GameSession {
         self.crew.iter().map(|member| member.id.clone()).collect()
     }
 
+    /// What this recruit actually asks for. A widely known outfit pays danger
+    /// money: signing on with people everyone is watching is worth extra, and
+    /// notoriety is what makes it so (GDD 2, pillar 4).
+    pub fn hire_fee(&self, recruit: &CrewMember, config: &GameConfig) -> i64 {
+        let premium = (self.notoriety.max(0) as f32 * config.recruiting.fee_per_notoriety)
+            .min(config.recruiting.max_fee_premium);
+        recruit.hire_cost + (recruit.hire_cost as f32 * premium) as i64
+    }
+
+    /// How many people bother turning up this week. Fewer, the better known the
+    /// outfit gets — though somebody is always desperate enough.
+    pub fn applicants_this_week(&self, config: &GameConfig) -> usize {
+        let shrink = if config.recruiting.pool_shrink_per_notoriety > 0 {
+            (self.notoriety.max(0) / config.recruiting.pool_shrink_per_notoriety) as usize
+        } else {
+            0
+        };
+        config
+            .recruit_pool_size
+            .saturating_sub(shrink)
+            .max(config.recruiting.min_pool)
+    }
+
     /// Doors the crew still has the attention to scout this week.
     pub fn casing_left_this_week(&self, config: &GameConfig) -> u32 {
         config
@@ -220,7 +243,8 @@ impl GameSession {
         pool.sort();
 
         self.recruits.clear();
-        while self.recruits.len() < config.recruit_pool_size && !pool.is_empty() {
+        let wanted = self.applicants_this_week(config);
+        while self.recruits.len() < wanted && !pool.is_empty() {
             let index = self.rng.below(pool.len());
             self.recruits.push(pool.remove(index));
         }
@@ -234,11 +258,12 @@ impl GameSession {
         if self.crew.iter().any(|member| member.id == recruit.id) {
             return Err(format!("{} already works for you", recruit.name));
         }
-        if self.budget < recruit.hire_cost {
+        let fee = self.hire_fee(recruit, &data.config);
+        if self.budget < fee {
             return Err(format!("{} wants more than the outfit has", recruit.name));
         }
 
-        self.budget -= recruit.hire_cost;
+        self.budget -= fee;
         self.crew.push(recruit.clone());
         self.recruits.retain(|id| id != recruit_id);
         Ok(recruit.name.clone())
@@ -640,6 +665,71 @@ mod tests {
             past.door_penalty(board),
             board.ripeness_max as i32 * board.ripeness_door_penalty
         );
+    }
+
+    #[test]
+    fn a_known_outfit_pays_danger_money_to_sign_anybody() {
+        // Pillar 4: the two axes pull opposite ways. Reputation opened marks
+        // and notoriety priced two rare purchases, which is not opposition —
+        // being known now costs the outfit the thing reputation buys most of.
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 60);
+        let recruit = data
+            .crew_pool
+            .get(session.recruits.first().expect("somebody is asking"))
+            .unwrap();
+
+        let quiet = session.hire_fee(recruit, &data.config);
+        assert_eq!(quiet, recruit.hire_cost, "an unknown outfit pays list");
+
+        session.notoriety = 120;
+        let known = session.hire_fee(recruit, &data.config);
+        assert!(known > quiet, "infamy was free at the hiring table");
+
+        session.notoriety = 100_000;
+        let infamous = session.hire_fee(recruit, &data.config);
+        assert_eq!(
+            infamous,
+            recruit.hire_cost
+                + (recruit.hire_cost as f32 * data.config.recruiting.max_fee_premium) as i64,
+            "the premium has to stop somewhere"
+        );
+    }
+
+    #[test]
+    fn fewer_people_turn_up_for_an_outfit_everyone_is_watching() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 61);
+        assert_eq!(
+            session.applicants_this_week(&data.config),
+            data.config.recruit_pool_size
+        );
+
+        session.notoriety = data.config.recruiting.pool_shrink_per_notoriety;
+        assert_eq!(
+            session.applicants_this_week(&data.config),
+            data.config.recruit_pool_size - 1
+        );
+
+        // Somebody is always desperate enough.
+        session.notoriety = 100_000;
+        assert_eq!(
+            session.applicants_this_week(&data.config),
+            data.config.recruiting.min_pool
+        );
+    }
+
+    #[test]
+    fn the_premium_is_actually_charged_and_not_merely_displayed() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 62);
+        session.notoriety = 150;
+        session.budget = 10_000_000;
+        let id = session.recruits[0].clone();
+        let fee = session.hire_fee(data.crew_pool.get(&id).unwrap(), &data.config);
+
+        session.hire(&data, &id).unwrap();
+        assert_eq!(session.budget, 10_000_000 - fee);
     }
 
     #[test]

@@ -81,12 +81,13 @@ pub fn runway_after_hiring(
     session: &GameSession,
     config: &PayrollConfig,
     recruit: &CrewMember,
+    fee: i64,
 ) -> i64 {
     let due = weekly_outgoings(session, config) + retainer_for(recruit, config);
     if due <= 0 {
         return i64::MAX;
     }
-    (session.budget - recruit.hire_cost).max(0) / due
+    (session.budget - fee).max(0) / due
 }
 
 /// What talking one hand round costs.
@@ -619,12 +620,13 @@ mod tests {
         session.budget = 400_000;
 
         let before = weeks_of_runway(&session, payroll);
-        let after = runway_after_hiring(&session, payroll, recruit);
+        let fee = session.hire_fee(recruit, &data.config);
+        let after = runway_after_hiring(&session, payroll, recruit, fee);
         assert!(after < before, "a new hand paid for themselves");
 
         // And the fee alone does not explain it: the retainer is the larger
         // half of the cost over any campaign worth playing.
-        let fee_only = (session.budget - recruit.hire_cost) / weekly_outgoings(&session, payroll);
+        let fee_only = (session.budget - fee) / weekly_outgoings(&session, payroll);
         assert!(
             after < fee_only,
             "the weekly cost of keeping them was not counted"
@@ -639,9 +641,10 @@ mod tests {
             .get(session.recruits.first().unwrap())
             .unwrap();
         session.budget = recruit.hire_cost;
+        let fee = session.hire_fee(recruit, &data.config);
 
         assert_eq!(
-            runway_after_hiring(&session, &data.config.payroll, recruit),
+            runway_after_hiring(&session, &data.config.payroll, recruit, fee),
             0,
             "signing them emptied the purse and the screen should say so"
         );

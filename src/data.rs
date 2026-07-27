@@ -76,6 +76,8 @@ pub struct GameConfig {
     pub rivals: RivalConfig,
     /// Work the crew bring in themselves when they are content.
     pub leads: LeadConfig,
+    /// What being widely known costs the outfit at the hiring table.
+    pub recruiting: RecruitingConfig,
     /// What a doctor charges to buy back the weeks an injury would have cost.
     pub treatment: TreatmentConfig,
     /// How fast kit wears out, and what putting it right costs.
@@ -138,6 +140,27 @@ pub struct TreatmentConfig {
     pub major_multiplier: i64,
     /// Fatigue a patched-up hand carries out of the surgery.
     pub fatigue_cost: i32,
+}
+
+/// What notoriety does to recruiting. Pillar 4 says reputation and notoriety
+/// pull in opposite directions, but reputation *opened marks* while notoriety
+/// only priced two rare purchases — so the pull was strong and the push was
+/// barely there. Being known now costs the outfit access to people, which is
+/// the thing reputation buys most of.
+///
+/// Not `Eq`: these are rates, and pretending two floats compare exactly would
+/// be a lie about what comparing them means.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct RecruitingConfig {
+    /// Added to a recruit's asking price per point of notoriety, as a share of
+    /// their base fee. Danger money for signing on with a known outfit.
+    pub fee_per_notoriety: f32,
+    /// However infamous, nobody asks for more than this much on top.
+    pub max_fee_premium: f32,
+    /// Every this much notoriety, one fewer person bothers turning up.
+    pub pool_shrink_per_notoriety: i32,
+    /// Somebody is always desperate enough.
+    pub min_pool: usize,
 }
 
 /// Tip-offs from a contented crew — the one thing in the week a good roster

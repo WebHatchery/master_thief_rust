@@ -120,6 +120,9 @@ impl Game {
                 Screen::Records
             }
             "hiring" => {
+                // A few weeks in, so the notoriety premium is on the asking
+                // prices rather than an unknown outfit paying list.
+                crate::sim::play(&mut self.session, &self.data, 10);
                 self.selection.crew_tab = ui::CrewTab::ForHire;
                 Screen::Crew
             }
