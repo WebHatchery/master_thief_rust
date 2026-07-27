@@ -202,6 +202,5 @@ impl Skills {
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct DerivedStats {
     pub health: i32,
-    pub stamina: i32,
     pub initiative: i32,
 }

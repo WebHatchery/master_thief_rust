@@ -12,17 +12,17 @@ pub fn attribute_modifier(score: i32) -> i32 {
     (score - 10).div_euclid(2)
 }
 
-/// Health, stamina, and initiative. The original also computed carrying
-/// capacity and a critical chance/multiplier that no rule ever read.
+/// Health and initiative. The original also computed stamina, carrying capacity
+/// and a critical chance/multiplier that no rule ever read; GDD 0 says to keep
+/// only what a rule consumes, and stamina turned out to be consumed by nothing
+/// but its own assertion.
 pub fn derived_stats(attributes: &Attributes, level: i32) -> DerivedStats {
     let con = attribute_modifier(attributes.constitution);
-    let str_mod = attribute_modifier(attributes.strength);
     let dex = attribute_modifier(attributes.dexterity);
     let wis = attribute_modifier(attributes.wisdom);
 
     DerivedStats {
         health: 10 + con + level * (2 + con),
-        stamina: 10 + con + str_mod,
         initiative: dex + wis,
     }
 }
@@ -231,7 +231,6 @@ mod tests {
         let stats = derived_stats(&a, 1);
         // CON 15 -> +2, STR 14 -> +2, DEX 16 -> +3, WIS 13 -> +1
         assert_eq!(stats.health, 10 + 2 + (2 + 2));
-        assert_eq!(stats.stamina, 10 + 2 + 2);
         assert_eq!(stats.initiative, 3 + 1);
     }
 

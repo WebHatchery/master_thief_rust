@@ -112,6 +112,17 @@ pub struct EquipmentDef {
     #[serde(default)]
     pub skill_bonuses: Skills,
     #[serde(default)]
+    /// Prose describing a rule that does not exist. Thirteen items carry one,
+    /// each a different bespoke mechanic — "downgrades one major injury per
+    /// job", "a failed lockpicking check does not raise the alarm" — and
+    /// nothing implements any of them.
+    ///
+    /// Deliberately **not displayed**. Showing a player a sentence that
+    /// describes a mechanic the game does not have is worse than showing them
+    /// nothing: it is the screen lying about the dice, which is the one thing
+    /// pillar 2 exists to prevent. The field is kept rather than deleted
+    /// because the writing is good and thirteen implementations is a feature,
+    /// not a tidy-up. Implement them or drop them; do not print them.
     pub special_effects: Vec<String>,
     pub cost: i64,
     #[serde(default)]

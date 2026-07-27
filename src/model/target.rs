@@ -120,14 +120,10 @@ pub struct Encounter {
     pub primary_skill: Skill,
     #[serde(default)]
     pub primary_attribute: Option<AttributeKind>,
-    #[serde(default)]
-    pub secondary_skill: Option<Skill>,
     /// Difficulty class, 5-25.
     pub difficulty: i32,
     pub complexity: Complexity,
     pub failure_consequence: String,
-    #[serde(default)]
-    pub success_bonus: Option<String>,
     #[serde(default)]
     pub critical_failure_effect: Option<String>,
     #[serde(default)]

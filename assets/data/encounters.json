@@ -7,7 +7,6 @@
     "difficulty": 16,
     "complexity": "simple",
     "failure_consequence": "The door staff start remembering faces.",
-    "success_bonus": "The crew walks in as guests.",
     "critical_success_reward": "He waves the whole crew through without a look.",
     "critical_failure_effect": "He calls it in, and the room gets watchful.",
     "critical_success_run_effect": "skip_next",
