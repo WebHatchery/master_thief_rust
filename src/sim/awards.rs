@@ -60,6 +60,9 @@ pub struct CampaignTally {
     pub heat_bought_down: i64,
     #[serde(default)]
     pub bails_paid: i64,
+    /// Marks another outfit took while the crew were still thinking about it.
+    #[serde(default)]
+    pub marks_lost_to_rivals: i64,
 }
 
 /// The statistics an achievement can be written against.
@@ -94,6 +97,7 @@ pub enum TallyStat {
     BribesPaid,
     HeatBoughtDown,
     BailsPaid,
+    MarksLostToRivals,
     /// Live campaign state rather than a running total.
     Week,
     Reputation,
@@ -141,6 +145,7 @@ impl TallyStat {
             TallyStat::BribesPaid => tally.bribes_paid,
             TallyStat::HeatBoughtDown => tally.heat_bought_down,
             TallyStat::BailsPaid => tally.bails_paid,
+            TallyStat::MarksLostToRivals => tally.marks_lost_to_rivals,
 
             TallyStat::Week => session.week as i64,
             TallyStat::Reputation => session.reputation as i64,

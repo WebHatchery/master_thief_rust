@@ -72,12 +72,33 @@ pub struct GameConfig {
 
     /// How a mark left sitting on the board changes.
     pub board: BoardConfig,
+    /// The other outfits working the same city.
+    pub rivals: RivalConfig,
     /// What the outfit costs to keep standing, week in, week out.
     pub payroll: PayrollConfig,
     /// What the city does about an outfit it has started to notice.
     pub law: LawConfig,
     /// How fatigue and loyalty grade into modifiers on the die.
     pub condition: crate::rules::ConditionTuning,
+}
+
+/// The competition. A rival is a name and a weekly roll — not a faction, not a
+/// content axis — and what it buys is a reason to take a job now that has
+/// nothing to do with the payroll (GDD 5.4).
+///
+/// Not `Eq`: these are chances, and pretending two floats compare exactly would
+/// be a lie about what comparing them means.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RivalConfig {
+    /// Outfits who might get there first. Flavour, drawn from the run's RNG.
+    pub names: Vec<String>,
+    /// Ripeness below which a mark is not worth anybody else's attention.
+    pub min_ripeness: u32,
+    /// Chance a mark at exactly `min_ripeness` is taken this week.
+    pub base_chance: f32,
+    /// Added per week of ripeness beyond that.
+    pub chance_per_ripeness: f32,
+    pub max_chance: f32,
 }
 
 /// What the crew wants for a job, on top of the retainer that bought their

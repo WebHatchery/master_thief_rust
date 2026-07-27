@@ -58,5 +58,7 @@
   { "id": "one_of_ours", "name": "One of Ours", "description": "Have somebody taken into custody.", "stat": "arrests", "at_least": 1 },
   { "id": "nobody_left_behind", "name": "Nobody Left Behind", "description": "Post bail and get somebody back.", "stat": "bails_paid", "at_least": 1 },
   { "id": "the_right_palms", "name": "The Right Palms", "description": "Buy the city's silence once.", "stat": "bribes_paid", "at_least": 1 },
-  { "id": "quietly_arranged", "name": "Quietly Arranged", "description": "Buy a hundred points of heat away.", "stat": "heat_bought_down", "at_least": 100 }
+  { "id": "quietly_arranged", "name": "Quietly Arranged", "description": "Buy a hundred points of heat away.", "stat": "heat_bought_down", "at_least": 100 },
+  { "id": "beaten_to_it", "name": "Beaten To It", "description": "Let another outfit take a mark you were sitting on.", "stat": "marks_lost_to_rivals", "at_least": 1 },
+  { "id": "always_a_step_behind", "name": "Always a Step Behind", "description": "Lose five marks to the competition.", "stat": "marks_lost_to_rivals", "at_least": 5 }
 ]

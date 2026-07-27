@@ -257,6 +257,19 @@ fn draw_summary(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &B
         ),
     ];
 
+    // The competition is the half of waiting the player cannot compute, so it
+    // has to be on the screen where they decide to wait (pillar 2).
+    let rival_risk = crate::sim::rival_interest(entry, &ctx.data.config.rivals);
+    if rival_risk > 0.0 {
+        stat_row(
+            Rect::new(rect.x, rect.y + 5.0 * 24.0, rect.w, 20.0),
+            "Somebody else wants it",
+            &format!("{:.0}%/wk", rival_risk * 100.0),
+            16.0,
+            Color::new(0.92, 0.62, 0.36, 1.0),
+        );
+    }
+
     for (index, (label, value)) in rows.iter().enumerate() {
         stat_row(
             Rect::new(rect.x, rect.y + index as f32 * 24.0, rect.w, 20.0),
@@ -270,7 +283,7 @@ fn draw_summary(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &B
     draw_ui_text_ex(
         "Conditions",
         rect.x,
-        rect.y + 142.0,
+        rect.y + 170.0,
         TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
     );
 
@@ -288,7 +301,7 @@ fn draw_summary(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &B
     draw_text_block(
         &conditions.join(", "),
         rect.x,
-        rect.y + 150.0,
+        rect.y + 178.0,
         rect.w,
         60.0,
         14.0,

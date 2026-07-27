@@ -213,6 +213,16 @@ and the penalty appears by name in the planning breakdown as `Mark has ripened`.
 leaving a job for later is a bet the player places knowingly, played against the payroll
 clock: the take is bigger, the doors are worse, and the weeks spent waiting cost wages.
 
+**And the crew are not the only people who can see it.** Rivals are other outfits working
+the same city — a name and a weekly roll, not a faction and not a content axis. A mark
+nobody has touched interests nobody; the longer one sits ripening, the likelier somebody
+else takes it, and at most one goes in a week. The board shows the odds per mark, so the
+risk is accepted rather than sprung, and the week summary names who got there first and
+how many doors of file work went with it. This is the part of waiting that cannot be
+calculated: ripening and the closing window are both clocks the player can read exactly,
+which made the bet arithmetic. Rivals are the reason to take a job *now* that has nothing
+to do with the payroll.
+
 ### 5.5 Crew Chemistry (replacing the stubbed relationship system)
 
 Either build this properly or delete the field. Proposed: each pair of crew members holds

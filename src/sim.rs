@@ -11,6 +11,7 @@ pub mod law;
 pub mod loot;
 pub mod payroll;
 pub mod plan;
+pub mod rivals;
 pub mod week;
 
 pub use awards::{award, AwardDef, CampaignTally};
@@ -23,4 +24,5 @@ pub use payroll::{
     weeks_of_runway, CrewCut,
 };
 pub use plan::{candidates, Candidate, PlanDraft};
+pub use rivals::{interest_in as rival_interest, RivalJob};
 pub use week::{advance_week, WeekSummary};

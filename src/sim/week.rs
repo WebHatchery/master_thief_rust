@@ -28,6 +28,8 @@ pub struct WeekSummary {
     pub payroll: PayrollOutcome,
     /// The city's move, if it made one.
     pub law: Option<LawEvent>,
+    /// A mark another outfit got to first, if one went.
+    pub rival: Option<super::rivals::RivalJob>,
     /// Weeks of a tail still to run after this one.
     pub surveillance_weeks: u32,
 }
@@ -59,6 +61,9 @@ impl WeekSummary {
 
         if let Some(event) = &self.law {
             warnings.push(event.headline.clone());
+        }
+        if let Some(job) = &self.rival {
+            warnings.push(job.headline());
         }
         for name in &self.payroll.walkouts {
             warnings.push(format!("{} took their kit and left", name));
@@ -126,6 +131,10 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
     // A new week is a fresh set of eyes: the attention spent scouting resets.
     session.casing_this_week = 0;
 
+    // The competition moves before the board ages, so a mark somebody else took
+    // never gets to ripen one more week on the way out (GDD 5.4).
+    let rival = super::rivals::roll_rivals(session, data);
+
     session.age_board();
     let marks_before = session.board.len();
     session.refresh_board(config, data);
@@ -166,6 +175,7 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
         new_marks,
         payroll,
         law,
+        rival,
         surveillance_weeks: session.surveillance_weeks,
     }
 }
@@ -394,6 +404,44 @@ mod tests {
             session.crew.iter().all(|m| !m.condition.worked_this_week),
             "the week did not reset who worked"
         );
+    }
+
+    #[test]
+    fn a_mark_left_to_ripen_can_be_taken_by_somebody_else() {
+        // The whole reason rivals exist: ripening made waiting profitable and
+        // perfectly calculable. This is the part that cannot be calculated.
+        let (data, mut session) = setup(14);
+        session.budget = 50_000_000;
+        let mut lost = 0;
+
+        for _ in 0..60 {
+            for entry in &mut session.board {
+                entry.ripeness = data.config.board.ripeness_max;
+                entry.weeks_remaining = 9;
+            }
+            if advance_week(&mut session, &data).rival.is_some() {
+                lost += 1;
+            }
+        }
+
+        assert!(lost > 0, "sixty ripe weeks and nobody else took anything");
+        assert_eq!(session.tally.marks_lost_to_rivals, lost as i64);
+    }
+
+    #[test]
+    fn a_board_nobody_is_sitting_on_is_never_poached() {
+        // Rivals answer hesitation, not existence. A crew who take their work
+        // promptly should never meet one.
+        let (data, mut session) = setup(15);
+        session.budget = 50_000_000;
+
+        for _ in 0..40 {
+            for entry in &mut session.board {
+                entry.ripeness = 0;
+            }
+            assert!(advance_week(&mut session, &data).rival.is_none());
+        }
+        assert_eq!(session.tally.marks_lost_to_rivals, 0);
     }
 
     #[test]
