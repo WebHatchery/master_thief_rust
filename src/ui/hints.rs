@@ -46,8 +46,8 @@ pub fn hint_for(ctx: &UiContext<'_>) -> Option<&'static str> {
         Screen::Crew => {
             "Fatigue above 50 costs dice, and injuries cost more. Advance the week to rest them."
         }
-        Screen::Board if !session.board.iter().any(|entry| entry.cased) => {
-            "Casing a mark reveals every door's difficulty. Running one blind is allowed, and it is a real disadvantage."
+        Screen::Board if session.board.iter().all(|entry| entry.is_blind()) => {
+            "Casing buys one door at a time, and the crew has only so many looks a week. Spread them thin or scout one building properly."
         }
         Screen::Board => {
             "Plan the job to choose who takes which door. Delegate if you are in a hurry — it uses the same engine, worse."

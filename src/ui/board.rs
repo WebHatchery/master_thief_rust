@@ -62,10 +62,17 @@ fn draw_board(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         );
         draw_ui_text_ex(
             &format!(
-                "{} · {} doors · {}",
+                "{} · {}",
                 target.difficulty.label(),
-                target.encounters.len(),
-                if entry.cased { "cased" } else { "blind" }
+                if entry.is_blind() {
+                    format!("{} doors, none scouted", target.encounters.len())
+                } else {
+                    format!(
+                        "{}/{} doors on file",
+                        entry.casing.min(target.encounters.len() as u32),
+                        target.encounters.len()
+                    )
+                }
             ),
             rect.x + 14.0,
             rect.y + 46.0,
@@ -146,12 +153,24 @@ fn draw_detail(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         entry,
     );
 
-    let cost = ctx.data.config.casing_cost;
-    let can_case = !entry.cased && ctx.session.budget >= cost;
-    let label = if entry.cased {
-        "Cased".to_owned()
+    // Casing is bought a door at a time against cash *and* the week's
+    // attention, so the button has to show both (GDD 12, open question 2).
+    let doors = target.encounters.len();
+    let cost = entry.next_casing_cost(&ctx.data.config);
+    let looks = ctx.session.casing_left_this_week(&ctx.data.config);
+    let done = entry.is_fully_cased(doors);
+    let can_case = !done && looks > 0 && ctx.session.budget >= cost;
+    let label = if done {
+        "Every door on file".to_owned()
+    } else if looks == 0 {
+        "No looks left this week".to_owned()
     } else {
-        format!("Case the mark ({})", format_compact_money(cost))
+        format!(
+            "Scout door {} ({}) · {} left",
+            entry.casing + 1,
+            format_compact_money(cost),
+            looks
+        )
     };
     if button_rect_tone_at(
         Rect::new(
@@ -320,7 +339,8 @@ fn draw_doors(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &Boa
             TextStyle::new(14.0, dark::TEXT_DIM).params(),
         );
 
-        let dc_label = if entry.cased {
+        let known = entry.knows_door(index);
+        let dc_label = if known {
             format!("DC {}", encounter.difficulty)
         } else {
             "DC ??".to_owned()
@@ -331,14 +351,14 @@ fn draw_doors(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &Boa
             door.y + 23.0,
             TextStyle::new(
                 16.0,
-                if entry.cased {
+                if known {
                     dark::TEXT_BRIGHT
                 } else {
                     dark::TEXT_DIM
                 },
             ),
         );
-        if entry.cased && heat > 0 {
+        if known && heat > 0 {
             draw_text_right(
                 &format!("heat +{}", heat),
                 door.right() - 12.0,

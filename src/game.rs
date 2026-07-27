@@ -90,6 +90,12 @@ impl Game {
                 for _ in 0..2 {
                     self.session.age_board();
                 }
+                // And put part of the first mark on the file, so the shot shows
+                // what half-scouted looks like rather than all-or-nothing.
+                if let Some(entry) = self.session.board.first_mut() {
+                    entry.casing = 2;
+                }
+                self.session.casing_this_week = 2;
                 self.selection.target = self
                     .session
                     .board
@@ -148,8 +154,8 @@ impl Game {
         let Some(entry) = self.session.board.first_mut() else {
             return;
         };
-        entry.cased = true;
         let target_id = entry.target_id.clone();
+        entry.casing = 99;
 
         let Some(target) = self.data.targets.get(&target_id).cloned() else {
             return;

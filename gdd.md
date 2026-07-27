@@ -115,9 +115,9 @@ Sources: `game_apps/master_thief/` (React 19 + Zustand original),
 
 **The week** is the unit of play.
 
-1. **Case** — review available targets. Casing spends the week's attention to reveal
-   encounter DCs, required skills, and environmental factors. Uncased targets can be run
-   blind, at a real disadvantage.
+1. **Case** — review available targets. Casing puts one door at a time on a mark's file,
+   front to back, spending both cash and one of the week's limited looks. A mark can be
+   half known, and a partly-scouted run is a position rather than a punishment.
 2. **Crew** — recruit, rest, treat injuries, spend level-up points, manage chemistry.
 3. **Outfit** — buy, assign, and repair equipment.
 4. **Plan** — pick a target and assign a specialist to each encounter node. **This is the
@@ -424,8 +424,14 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
    rather than a fixed one. Crew are also lost to *money*: a hand who goes unpaid long
    enough gives notice and walks, and that loss is permanent. Breaking a captured member
    out as a generated target remains unbuilt and is out of scope for now.
-2. Should casing cost the week's action, or a resource? Costing the week makes casing a
-   real trade-off but may make blind runs strictly bad early.
+2. **Settled: both, and a door at a time.** Casing is bought per door, front to back, so
+   a mark can be half known — the way in scouted and the vault still a rumour. Each door
+   costs cash (rising with every door already on that mark's file: the front hall is cheap,
+   the vault is not) *and* one of a small fixed number of looks the crew has in a week,
+   across the whole board. Money alone can never finish a file, so scouting one building
+   properly is scouting every other one not at all. That is what makes blind runs
+   interesting rather than merely poor: going in half-lit on a mark you understand is a
+   position the player chooses, not one poverty forces on them.
 3. How much should critical results restructure a run? Skipping an encounter is a strong,
    readable payoff; adding one may feel unfair unless well telegraphed.
 4. Does chemistry (§5.5) earn its complexity, or is it feature creep on a system the

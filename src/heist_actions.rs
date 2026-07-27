@@ -185,43 +185,71 @@ fn report(notifications: &mut NotificationManager, outcome: Result<String, Strin
     }
 }
 
-/// Spend the week's attention on a mark: its DCs and conditions become visible
-/// on the board and, later, on the planning screen.
+/// Put one more of a mark's doors on the file. Casing is bought a door at a
+/// time against two budgets — cash, and the week's attention — so scouting one
+/// building deeply is scouting every other one not at all
+/// (GDD 12, open question 2).
 fn case_target(
     data: &GameData,
     session: &mut GameSession,
     notifications: &mut NotificationManager,
     target_id: &str,
 ) {
-    let cost = data.config.casing_cost;
-    let name = data
-        .targets
-        .get(target_id)
-        .map(|target| target.name.clone())
-        .unwrap_or_else(|| target_id.to_owned());
+    let Some(target) = data.targets.get(target_id) else {
+        notifications.warning("That mark is no longer on the board");
+        return;
+    };
+    let name = target.name.clone();
+    let doors = target.encounters.len();
+    let left = session.casing_left_this_week(&data.config);
 
+    let Some(entry) = session.board_entry(target_id) else {
+        notifications.warning(format!("{} is no longer on the board", name));
+        return;
+    };
+
+    if entry.is_fully_cased(doors) {
+        notifications.info(format!("{} is on the file, door to door", name));
+        return;
+    }
+    if left == 0 {
+        notifications.warning("The crew has done all the looking it can this week");
+        return;
+    }
+
+    let cost = entry.next_casing_cost(&data.config);
+    if session.budget < cost {
+        notifications.warning(format!(
+            "The next door of {} costs {}",
+            name,
+            format_money(cost)
+        ));
+        return;
+    }
+
+    session.budget -= cost;
+    session.casing_this_week += 1;
     let Some(entry) = session
         .board
         .iter_mut()
         .find(|entry| entry.target_id == target_id)
     else {
-        notifications.warning(format!("{} is no longer on the board", name));
         return;
     };
+    entry.casing += 1;
+    let known = entry.casing as usize;
 
-    if entry.cased {
-        notifications.info(format!("{} is already cased", name));
-        return;
+    if known >= doors {
+        notifications.success(format!("{} is on the file, door to door", name));
+    } else {
+        notifications.success(format!(
+            "{} — {}/{} doors on the file, {} more looks this week",
+            name,
+            known,
+            doors,
+            left - 1
+        ));
     }
-
-    if session.budget < cost {
-        notifications.warning(format!("Casing {} costs {}", name, format_money(cost)));
-        return;
-    }
-
-    entry.cased = true;
-    session.budget -= cost;
-    notifications.success(format!("{} cased — every door is now on the file", name));
 }
 
 /// Open the planning table on a mark. The draft starts empty: the point of the
@@ -247,14 +275,19 @@ fn open_plan(
     selection.target = Some(target_id.to_owned());
     selection.screen = Screen::Planning;
 
-    if session
-        .board_entry(target_id)
-        .is_some_and(|entry| !entry.cased)
-    {
-        notifications.info(format!(
-            "{} is uncased — the crew goes in without the difficulties",
-            target.name
-        ));
+    let doors = target.encounters.len();
+    if let Some(entry) = session.board_entry(target_id) {
+        if entry.is_blind() {
+            notifications.info(format!(
+                "{} is unscouted — the crew goes in without a single difficulty",
+                target.name
+            ));
+        } else if !entry.is_fully_cased(doors) {
+            notifications.info(format!(
+                "{} — {} of {} doors on the file; the rest is guesswork",
+                target.name, entry.casing, doors
+            ));
+        }
     }
 }
 
@@ -418,7 +451,7 @@ mod tests {
     }
 
     #[test]
-    fn casing_a_mark_costs_the_fee_and_opens_the_file() {
+    fn casing_buys_one_door_at_a_time() {
         let (data, mut session) = setup();
         let mut selection = Selection::default();
         let mut notifications = NotificationManager::new();
@@ -430,27 +463,77 @@ mod tests {
             dispatch(&data, &mut session, &mut selection, &mut notifications),
         );
 
-        assert!(session.board_entry(&target_id).unwrap().cased);
+        let entry = session.board_entry(&target_id).unwrap();
+        assert_eq!(entry.casing, 1, "one look bought the whole building");
+        assert!(entry.knows_door(0) && !entry.knows_door(1));
         assert_eq!(session.budget, budget - data.config.casing_cost);
+        assert_eq!(session.casing_this_week, 1);
     }
 
     #[test]
-    fn casing_twice_does_not_charge_twice() {
+    fn each_door_deeper_into_a_building_costs_more_than_the_last() {
         let (data, mut session) = setup();
         let mut selection = Selection::default();
         let mut notifications = NotificationManager::new();
         let target_id = session.board[0].target_id.clone();
 
-        for _ in 0..2 {
+        let first = session
+            .board_entry(&target_id)
+            .unwrap()
+            .next_casing_cost(&data.config);
+        apply(
+            UiAction::CaseTarget(target_id.clone()),
+            dispatch(&data, &mut session, &mut selection, &mut notifications),
+        );
+        let second = session
+            .board_entry(&target_id)
+            .unwrap()
+            .next_casing_cost(&data.config);
+
+        assert!(
+            second > first,
+            "the vault scouted as cheap as the front door"
+        );
+    }
+
+    #[test]
+    fn the_crew_only_has_so_many_looks_in_a_week() {
+        // The half of casing money cannot buy. Attention spent on one mark is
+        // attention not spent on any other (GDD 12, open question 2).
+        let (data, mut session) = setup();
+        let mut selection = Selection::default();
+        let mut notifications = NotificationManager::new();
+        let target_id = session.board[0].target_id.clone();
+        session.budget = 10_000_000;
+
+        for _ in 0..(data.config.casing_steps_per_week + 3) {
             apply(
                 UiAction::CaseTarget(target_id.clone()),
                 dispatch(&data, &mut session, &mut selection, &mut notifications),
             );
         }
 
+        let doors = data.targets.get(&target_id).unwrap().encounters.len() as u32;
+        let spent = session.casing_this_week;
+        assert!(
+            spent <= data.config.casing_steps_per_week,
+            "{} looks in a week of {}",
+            spent,
+            data.config.casing_steps_per_week
+        );
+        assert!(session.board_entry(&target_id).unwrap().casing <= doors);
+    }
+
+    #[test]
+    fn a_new_week_gives_the_crew_their_eyes_back() {
+        let (data, mut session) = setup();
+        session.casing_this_week = data.config.casing_steps_per_week;
+        assert_eq!(session.casing_left_this_week(&data.config), 0);
+
+        crate::sim::advance_week(&mut session, &data);
         assert_eq!(
-            session.budget,
-            data.config.starting_budget - data.config.casing_cost
+            session.casing_left_this_week(&data.config),
+            data.config.casing_steps_per_week
         );
     }
 
@@ -467,7 +550,7 @@ mod tests {
             dispatch(&data, &mut session, &mut selection, &mut notifications),
         );
 
-        assert!(!session.board_entry(&target_id).unwrap().cased);
+        assert!(session.board_entry(&target_id).unwrap().is_blind());
         assert_eq!(session.budget, 0);
     }
 

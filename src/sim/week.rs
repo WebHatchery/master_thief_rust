@@ -123,6 +123,9 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
     let law = super::law::roll_attention(session, config);
     let heat_shed = heat_before - session.heat;
 
+    // A new week is a fresh set of eyes: the attention spent scouting resets.
+    session.casing_this_week = 0;
+
     session.age_board();
     let marks_before = session.board.len();
     session.refresh_board(config, data);

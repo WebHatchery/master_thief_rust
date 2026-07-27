@@ -415,7 +415,7 @@ fn settle(
 
     let was_cased = session
         .board_entry(&target.id)
-        .map(|entry| entry.cased)
+        .map(|entry| !entry.is_blind())
         .unwrap_or(false);
 
     session.budget += net;

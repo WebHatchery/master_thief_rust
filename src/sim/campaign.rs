@@ -71,15 +71,30 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
         }
 
         if let Some(target_id) = richest_openable_mark(session, data) {
-            if session.budget >= data.config.casing_cost {
-                if let Some(entry) = session
+            // Scout the mark it means to run, a door at a time, for as long as
+            // the week's attention and the money both hold out.
+            let doors = data
+                .targets
+                .get(&target_id)
+                .map(|target| target.encounters.len())
+                .unwrap_or(0);
+            while session.casing_left_this_week(&data.config) > 0 {
+                let Some(index) = session
                     .board
-                    .iter_mut()
-                    .find(|entry| entry.target_id == target_id)
+                    .iter()
+                    .position(|entry| entry.target_id == target_id)
+                else {
+                    break;
+                };
+                let entry = &session.board[index];
+                if entry.is_fully_cased(doors)
+                    || session.budget < entry.next_casing_cost(&data.config)
                 {
-                    entry.cased = true;
-                    session.budget -= data.config.casing_cost;
+                    break;
                 }
+                session.budget -= entry.next_casing_cost(&data.config);
+                session.board[index].casing += 1;
+                session.casing_this_week += 1;
             }
 
             if session.available_crew().count() > 0 {

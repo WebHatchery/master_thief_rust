@@ -49,10 +49,12 @@ fn candidates_rect() -> Rect {
     )
 }
 
-fn is_cased(ctx: &UiContext<'_>, target_id: &str) -> bool {
+/// Is *this* door on the file? Casing is bought a door at a time, so knowledge
+/// is per-door rather than per-mark (GDD 12, open question 2).
+fn knows_door(ctx: &UiContext<'_>, target_id: &str, index: usize) -> bool {
     ctx.session
         .board_entry(target_id)
-        .map(|entry| entry.cased)
+        .map(|entry| entry.knows_door(index))
         .unwrap_or(false)
 }
 
@@ -66,7 +68,6 @@ fn draw_route(
     actions: &mut Vec<UiAction>,
 ) {
     let content = draw_panel(doors_rect(), &format!("{} — the floor", target.name));
-    let cased = is_cased(ctx, &target.id);
     let mouse = ctx.mouse();
 
     // The buttons and the crew's-cut line both sit below the building.
@@ -91,7 +92,8 @@ fn draw_route(
         let Some(encounter) = ctx.data.encounters.get(&draft.doors[index]) else {
             continue;
         };
-        draw_room_label(ctx, *room, draft, index, encounter, cased);
+        let known = knows_door(ctx, &target.id, index);
+        draw_room_label(ctx, *room, draft, index, encounter, known);
     }
 
     if is_mouse_button_released(MouseButton::Left) {
@@ -311,7 +313,7 @@ fn draw_candidates(
     };
 
     let content = draw_panel(candidates_rect(), &format!("Who takes {}?", encounter.name));
-    let cased = is_cased(ctx, &target.id);
+    let cased = knows_door(ctx, &target.id, draft.focus);
 
     draw_text_block(
         &if cased {
@@ -321,7 +323,7 @@ fn draw_candidates(
             )
         } else {
             format!(
-                "{} Uncased — the file has no difficulty on it, and the crew goes in blind.",
+                "{} This door is not on the file — nobody has scouted this far in.",
                 encounter.description
             )
         },

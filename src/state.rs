@@ -13,8 +13,10 @@ use serde_json::Value;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BoardEntry {
     pub target_id: String,
-    /// Cased targets show their DCs and environment on the planning screen.
-    pub cased: bool,
+    /// How many of this mark's doors the crew has actually put on the file,
+    /// front to back. Casing is bought a door at a time, so a mark can be half
+    /// known — the front hall scouted and the vault still a rumour.
+    pub casing: u32,
     /// Weeks this mark stays on the board before the window closes.
     pub weeks_remaining: u32,
     /// Weeks the crew has left this one sitting. A mark nobody takes ripens:
@@ -27,10 +29,31 @@ impl BoardEntry {
     pub fn new(target_id: impl Into<String>) -> Self {
         Self {
             target_id: target_id.into(),
-            cased: false,
+            casing: 0,
             weeks_remaining: 4,
             ripeness: 0,
         }
+    }
+
+    /// Is this door's difficulty on the file? Doors are scouted front to back:
+    /// the crew learn the way in before they learn the way to the vault.
+    pub fn knows_door(&self, index: usize) -> bool {
+        index < self.casing as usize
+    }
+
+    pub fn is_fully_cased(&self, doors: usize) -> bool {
+        self.casing as usize >= doors
+    }
+
+    /// Nobody has looked at this one at all.
+    pub fn is_blind(&self) -> bool {
+        self.casing == 0
+    }
+
+    /// What the next door on the file costs. The front hall is cheap; every
+    /// door after it is deeper into a building somebody is watching.
+    pub fn next_casing_cost(&self, config: &GameConfig) -> i64 {
+        config.casing_cost + config.casing_cost_step * self.casing as i64
     }
 
     /// What sitting on this mark has added to its payout, as a percentage.
@@ -69,6 +92,11 @@ pub struct GameSession {
     /// Weeks a tail stays on the crew, costing every door.
     #[serde(default)]
     pub surveillance_weeks: u32,
+    /// Doors put on a file this week. The crew only has so much attention, and
+    /// spending it on one mark is spending it away from every other
+    /// (GDD 12, open question 2).
+    #[serde(default)]
+    pub casing_this_week: u32,
     /// Equipment ids in the lockup, including items currently assigned.
     pub inventory: Vec<String>,
     pub board: Vec<BoardEntry>,
@@ -132,6 +160,7 @@ impl GameSession {
             crew,
             custody: Vec::new(),
             surveillance_weeks: 0,
+            casing_this_week: 0,
             inventory: config.starting_inventory.clone(),
             board: Vec::new(),
             chemistry: Chemistry::default(),
@@ -151,6 +180,13 @@ impl GameSession {
 
     pub fn crew_ids(&self) -> Vec<String> {
         self.crew.iter().map(|member| member.id.clone()).collect()
+    }
+
+    /// Doors the crew still has the attention to scout this week.
+    pub fn casing_left_this_week(&self, config: &GameConfig) -> u32 {
+        config
+            .casing_steps_per_week
+            .saturating_sub(self.casing_this_week)
     }
 
     /// Is the city holding this hand?
