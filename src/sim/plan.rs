@@ -34,6 +34,16 @@ pub fn situational_modifiers(
         extras.push(ModifierEntry::new("City heat", -heat));
     }
 
+    // A mark nobody took has had time to notice it is worth taking. What the
+    // waiting bought in payout, it charges back at every door (GDD 5.4).
+    let ripe = session
+        .board_entry(&target.id)
+        .map(|entry| entry.door_penalty(&data.config.board))
+        .unwrap_or(0);
+    if ripe > 0 {
+        extras.push(ModifierEntry::new("Mark has ripened", -ripe));
+    }
+
     // A tail is heat the crew can see out of the window, and it costs the same
     // on every door until it gets bored (GDD 5.6).
     if session.surveillance_weeks > 0 {
@@ -425,6 +435,38 @@ mod tests {
                 best
             );
         }
+    }
+
+    #[test]
+    fn a_ripened_mark_charges_for_itself_on_the_planning_screen() {
+        // The payout the board advertises and the doors the crew will meet have
+        // to move together, and both before commit (pillar 2).
+        let (data, mut session, target) = setup(23);
+        let draft = PlanDraft::new(&target, &data);
+        let encounter = data.encounters.get(&draft.doors[0]).unwrap();
+
+        let fresh = candidate_check(&session, &data, &target, encounter, &session.crew[0], &[]);
+        assert!(!fresh
+            .entries
+            .iter()
+            .any(|entry| entry.label == "Mark has ripened"));
+
+        if let Some(entry) = session
+            .board
+            .iter_mut()
+            .find(|entry| entry.target_id == target.id)
+        {
+            entry.ripeness = 2;
+        }
+        let ripe = candidate_check(&session, &data, &target, encounter, &session.crew[0], &[]);
+
+        let named = ripe
+            .entries
+            .iter()
+            .find(|entry| entry.label == "Mark has ripened")
+            .expect("the waiting is charged by name");
+        assert_eq!(named.value, -2 * data.config.board.ripeness_door_penalty);
+        assert!(ripe.bonus() < fresh.bonus());
     }
 
     #[test]

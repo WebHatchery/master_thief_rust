@@ -373,11 +373,18 @@ fn settle(
     };
     let success = rate >= 0.5;
 
+    // What the mark is worth today, not what it was worth when it appeared:
+    // every week the crew left it sitting added to the take (GDD 5.4).
+    let worth = session
+        .board_entry(&target.id)
+        .map(|entry| entry.ripened_payout(target.potential_payout, &data.config.board))
+        .unwrap_or(target.potential_payout);
+
     let payout = if success {
         let bonus = if rate > 0.8 { 1.2 } else { 1.0 };
-        (target.potential_payout as f32 * rate * bonus) as i64
+        (worth as f32 * rate * bonus) as i64
     } else {
-        (target.potential_payout as f32 * 0.15) as i64
+        (worth as f32 * 0.15) as i64
     };
     let crew_cut = (payout as f32 * data.config.crew_cut) as i64;
     let net = payout - crew_cut;
@@ -607,6 +614,47 @@ mod tests {
         assert!(
             tired > 0 || flawless,
             "a whole job and nobody broke a sweat"
+        );
+    }
+
+    #[test]
+    fn waiting_on_a_mark_pays_more_than_taking_it_fresh() {
+        // The bet the ripening creates: the same job, the same seed, the same
+        // plan — worth measurably more for having been left alone.
+        let data = GameData::load().unwrap();
+        let target = data.targets.get("velvet_room").unwrap().clone();
+
+        let payout_at = |ripeness: u32| {
+            let mut session = GameSession::new(&data.config, &data, 8_080);
+            session.board.retain(|entry| entry.target_id == target.id);
+            if session.board.is_empty() {
+                session
+                    .board
+                    .push(crate::state::BoardEntry::new(&target.id));
+            }
+            session.board[0].ripeness = ripeness;
+            // The doors are harder, so hold the dice still and read the money.
+            for member in &mut session.crew {
+                member.training = crate::model::Skills {
+                    stealth: 40,
+                    athletics: 40,
+                    combat: 40,
+                    lockpicking: 40,
+                    hacking: 40,
+                    social: 40,
+                };
+            }
+            let plan = auto_assign(&session, &data, &target);
+            run_job(&mut session, &data, &plan).payout
+        };
+
+        let fresh = payout_at(0);
+        let ripe = payout_at(data.config.board.ripeness_max);
+        assert!(
+            ripe > fresh,
+            "a mark left three weeks paid {} against {} taken fresh",
+            ripe,
+            fresh
         );
     }
 

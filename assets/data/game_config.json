@@ -24,6 +24,12 @@
   "reputation_per_job": 4,
   "crew_cut": 0.25,
 
+  "board": {
+    "ripeness_payout_pct": 18,
+    "ripeness_door_penalty": 1,
+    "ripeness_max": 3
+  },
+
   "payroll": {
     "safehouse_upkeep_base": 4000,
     "safehouse_upkeep_per_reputation": 1400,

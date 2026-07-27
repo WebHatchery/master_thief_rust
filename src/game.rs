@@ -83,6 +83,13 @@ impl Game {
 
         self.selection.screen = match scene {
             "board" | "targets" => {
+                // Age the board without working it, so the capture shows marks
+                // that have ripened rather than five identical fresh ones. Done
+                // directly rather than by advancing weeks: a screenshot has no
+                // business running the payroll.
+                for _ in 0..2 {
+                    self.session.age_board();
+                }
                 self.selection.target = self
                     .session
                     .board

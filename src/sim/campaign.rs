@@ -161,15 +161,23 @@ fn keep_the_outfit_standing(session: &mut GameSession, data: &GameData, log: &mu
     }
 }
 
-/// The best-paying mark the crew's name currently opens.
+/// The best-paying mark the crew's name currently opens, judged on what it is
+/// worth today rather than what it was advertised at — a mark left sitting has
+/// been ripening (GDD 5.4).
 fn richest_openable_mark(session: &GameSession, data: &GameData) -> Option<String> {
     session
         .board
         .iter()
-        .filter_map(|entry| data.targets.get(&entry.target_id))
-        .filter(|target| target.required_reputation <= session.reputation)
-        .max_by_key(|target| target.potential_payout)
-        .map(|target| target.id.clone())
+        .filter_map(|entry| {
+            data.targets
+                .get(&entry.target_id)
+                .map(|target| (entry, target))
+        })
+        .filter(|(_, target)| target.required_reputation <= session.reputation)
+        .max_by_key(|(entry, target)| {
+            entry.ripened_payout(target.potential_payout, &data.config.board)
+        })
+        .map(|(_, target)| target.id.clone())
 }
 
 #[cfg(test)]

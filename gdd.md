@@ -205,6 +205,14 @@ resolve in order and light up green/amber/red with the roll shown.
 This is the game's one piece of real visual design, and being data-driven it stays
 correct as targets are authored.
 
+**The board is not a stock list.** A mark nobody takes *ripens*: each week it sits, the
+score grows by a percentage and every one of its doors gets harder by a fixed step, up to
+a cap the closing window arrives before. Both halves are shown on the board — the payout
+reads at today's value with the bonus beside it, the difficulty carries its door penalty —
+and the penalty appears by name in the planning breakdown as `Mark has ripened`. So
+leaving a job for later is a bet the player places knowingly, played against the payroll
+clock: the take is bigger, the doors are worse, and the weeks spent waiting cost wages.
+
 ### 5.5 Crew Chemistry (replacing the stubbed relationship system)
 
 Either build this properly or delete the field. Proposed: each pair of crew members holds

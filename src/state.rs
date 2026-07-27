@@ -1,6 +1,6 @@
 //! The safehouse ledger: everything a campaign remembers between weeks.
 
-use crate::data::{GameConfig, GameData};
+use crate::data::{BoardConfig, GameConfig, GameData};
 use crate::model::{CrewMember, EquipmentDef, EquipmentSlot, HeistTarget, Loadout};
 use crate::rules::chemistry::Chemistry;
 use crate::sim::CampaignTally;
@@ -17,6 +17,10 @@ pub struct BoardEntry {
     pub cased: bool,
     /// Weeks this mark stays on the board before the window closes.
     pub weeks_remaining: u32,
+    /// Weeks the crew has left this one sitting. A mark nobody takes ripens:
+    /// the score grows and so does what is standing between them and it.
+    #[serde(default)]
+    pub ripeness: u32,
 }
 
 impl BoardEntry {
@@ -25,7 +29,23 @@ impl BoardEntry {
             target_id: target_id.into(),
             cased: false,
             weeks_remaining: 4,
+            ripeness: 0,
         }
+    }
+
+    /// What sitting on this mark has added to its payout, as a percentage.
+    pub fn payout_bonus_pct(&self, config: &BoardConfig) -> i64 {
+        self.ripeness.min(config.ripeness_max) as i64 * config.ripeness_payout_pct
+    }
+
+    /// What sitting on it has added to every door, as a penalty on the check.
+    pub fn door_penalty(&self, config: &BoardConfig) -> i32 {
+        self.ripeness.min(config.ripeness_max) as i32 * config.ripeness_door_penalty
+    }
+
+    /// The payout this mark is currently worth, ripening included.
+    pub fn ripened_payout(&self, base: i64, config: &BoardConfig) -> i64 {
+        base + base * self.payout_bonus_pct(config) / 100
     }
 }
 
@@ -377,10 +397,12 @@ impl GameSession {
         }
     }
 
-    /// Age the board by a week, dropping marks whose window has closed.
+    /// Age the board by a week: every mark left sitting ripens by one step and
+    /// loses a week of its window. Marks whose window has closed come off.
     pub fn age_board(&mut self) {
         for entry in &mut self.board {
             entry.weeks_remaining = entry.weeks_remaining.saturating_sub(1);
+            entry.ripeness += 1;
         }
         self.board.retain(|entry| entry.weeks_remaining > 0);
     }
@@ -519,6 +541,57 @@ mod tests {
 
         session.heat = data.config.heat_safe_threshold + data.config.heat_dc_step * 2;
         assert_eq!(session.heat_dc_penalty(&data.config), 2);
+    }
+
+    #[test]
+    fn a_mark_left_sitting_is_worth_more_and_costs_more() {
+        // The board used to be a stock list: waiting changed nothing, so there
+        // was no reason not to take the best mark the moment it appeared.
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 31);
+        let board = &data.config.board;
+        let entry = session.board[0].clone();
+        let base = data.targets.get(&entry.target_id).unwrap().potential_payout;
+
+        assert_eq!(entry.payout_bonus_pct(board), 0);
+        assert_eq!(entry.door_penalty(board), 0);
+        assert_eq!(entry.ripened_payout(base, board), base);
+
+        session.age_board();
+        session.age_board();
+        let ripened = &session.board[0];
+
+        assert_eq!(ripened.ripeness, 2);
+        assert_eq!(
+            ripened.payout_bonus_pct(board),
+            2 * board.ripeness_payout_pct
+        );
+        assert_eq!(ripened.door_penalty(board), 2 * board.ripeness_door_penalty);
+        assert!(ripened.ripened_payout(base, board) > base);
+    }
+
+    #[test]
+    fn ripening_stops_before_a_mark_becomes_the_whole_campaign() {
+        let data = data();
+        let mut session = GameSession::new(&data.config, &data, 32);
+        let board = &data.config.board;
+
+        // Ripeness keeps counting, but neither number does past the cap.
+        for _ in 0..3 {
+            session.age_board();
+        }
+        let capped = session.board[0].clone();
+        let mut past = capped.clone();
+        past.ripeness = 50;
+
+        assert_eq!(
+            past.payout_bonus_pct(board),
+            board.ripeness_max as i64 * board.ripeness_payout_pct
+        );
+        assert_eq!(
+            past.door_penalty(board),
+            board.ripeness_max as i32 * board.ripeness_door_penalty
+        );
     }
 
     #[test]

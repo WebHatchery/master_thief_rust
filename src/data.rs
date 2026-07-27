@@ -62,12 +62,28 @@ pub struct GameConfig {
     /// Share of the payout the crew takes before the fixer sees any.
     pub crew_cut: f32,
 
+    /// How a mark left sitting on the board changes.
+    pub board: BoardConfig,
     /// What the outfit costs to keep standing, week in, week out.
     pub payroll: PayrollConfig,
     /// What the city does about an outfit it has started to notice.
     pub law: LawConfig,
     /// How fatigue and loyalty grade into modifiers on the die.
     pub condition: crate::rules::ConditionTuning,
+}
+
+/// What a week of nobody touching a mark does to it. A board that is only a
+/// stock list makes waiting free; ripening puts a price and a prize on it, so
+/// leaving a job for later is a bet rather than an oversight (GDD 5.4).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BoardConfig {
+    /// Percent added to the payout for each week the mark sat untaken.
+    pub ripeness_payout_pct: i64,
+    /// Penalty added to every door for each of those weeks.
+    pub ripeness_door_penalty: i32,
+    /// Weeks after which a mark stops ripening — the window closes before a
+    /// mark can become worth more than the whole campaign.
+    pub ripeness_max: u32,
 }
 
 /// The standing weekly bill. Nothing here is optional: an outfit that stops

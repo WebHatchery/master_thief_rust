@@ -71,17 +71,30 @@ fn draw_board(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
             rect.y + 46.0,
             TextStyle::new(14.0, dark::TEXT_DIM).params(),
         );
+        let board = &ctx.data.config.board;
         draw_text_right(
-            &format_compact_money(target.potential_payout),
+            &format_compact_money(entry.ripened_payout(target.potential_payout, board)),
             rect.right() - 14.0,
             rect.y + 25.0,
             TextStyle::new(16.0, Color::new(0.56, 0.82, 0.58, 1.0)),
         );
+        let bonus = entry.payout_bonus_pct(board);
         draw_text_right(
-            &format!("{} wk left", entry.weeks_remaining),
+            &if bonus > 0 {
+                format!("{} wk left · ripe +{}%", entry.weeks_remaining, bonus)
+            } else {
+                format!("{} wk left", entry.weeks_remaining)
+            },
             rect.right() - 14.0,
             rect.y + 46.0,
-            TextStyle::new(14.0, dark::TEXT_DIM),
+            TextStyle::new(
+                14.0,
+                if bonus > 0 {
+                    Color::new(0.90, 0.72, 0.36, 1.0)
+                } else {
+                    dark::TEXT_DIM
+                },
+            ),
         );
     }
 }
@@ -187,11 +200,32 @@ fn draw_detail(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
 }
 
 fn draw_summary(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &BoardEntry) {
+    let board = &ctx.data.config.board;
+    let ripe = entry.payout_bonus_pct(board);
     let rows: [(String, String); 5] = [
-        ("Payout".to_owned(), format_money(target.potential_payout)),
+        (
+            "Payout".to_owned(),
+            if ripe > 0 {
+                format!(
+                    "{} (+{}%)",
+                    format_money(entry.ripened_payout(target.potential_payout, board)),
+                    ripe
+                )
+            } else {
+                format_money(target.potential_payout)
+            },
+        ),
         (
             "Difficulty".to_owned(),
-            target.difficulty.label().to_owned(),
+            if entry.door_penalty(board) > 0 {
+                format!(
+                    "{} · doors +{}",
+                    target.difficulty.label(),
+                    entry.door_penalty(board)
+                )
+            } else {
+                target.difficulty.label().to_owned()
+            },
         ),
         ("Notoriety".to_owned(), format!("+{}", target.notoriety)),
         (
