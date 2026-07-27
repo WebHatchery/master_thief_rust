@@ -48,6 +48,24 @@ pub struct DoorOutcome {
     pub injury: Option<Injury>,
     /// A door the run inserted after a critical failure.
     pub was_complication: bool,
+    /// What the critical actually did, in the encounter's own words. GDD 5.2
+    /// says a critical "fires the encounter's `critical_failure_effect` /
+    /// `critical_success_reward`" — fifty-six of them are authored, and until
+    /// now none of them reached the player.
+    pub critical_effect: Option<String>,
+}
+
+impl DoorOutcome {
+    /// How the run itself was rewritten, if it was. A skipped door and an extra
+    /// one are the two things a critical can do to a plan, and the player is
+    /// entitled to be told which happened (GDD 5.2, pillar 2).
+    pub fn structural_note(&self) -> Option<&'static str> {
+        match self.result.run_effect {
+            RunEffect::SkipNext => Some("The next door opens with it."),
+            RunEffect::AddComplication => Some("Something else is waiting now."),
+            RunEffect::None => None,
+        }
+    }
 }
 
 /// What the job did to the campaign.
@@ -333,12 +351,21 @@ fn resolve_door(
         }
     }
 
+    // The encounter's own account of what a critical did. Only a critical
+    // fires one, which is what makes it worth reading (GDD 5.2).
+    let critical_effect = match result.outcome {
+        Outcome::CriticalSuccess => encounter.critical_success_reward.clone(),
+        Outcome::CriticalFailure => encounter.critical_failure_effect.clone(),
+        _ => None,
+    };
+
     DoorOutcome {
         encounter_name: encounter.name.clone(),
         result,
         narrative,
         injury,
         was_complication: encounter.complication_only,
+        critical_effect,
     }
 }
 
@@ -364,6 +391,7 @@ fn missed_door(encounter: &Encounter) -> DoorOutcome {
         narrative: format!("Nobody was on the door at {}.", encounter.name),
         injury: None,
         was_complication: false,
+        critical_effect: None,
     }
 }
 
@@ -691,6 +719,86 @@ mod tests {
         assert!(
             !report.cut.reasons.is_empty(),
             "the share moved off the base rate and said nothing about why"
+        );
+    }
+
+    #[test]
+    fn a_critical_reports_what_it_did_and_nothing_else_does() {
+        // Fifty-six critical effects are authored, counted toward the GDD 8
+        // content target, and were read by nothing at all. A door that crits
+        // must now carry its own account of it; a door that does not, must not.
+        let data = GameData::load().unwrap();
+        let mut seen_effect = false;
+        let mut checked = 0;
+
+        for seed in 0..120u64 {
+            let mut session = GameSession::new(&data.config, &data, seed);
+            let Some(entry) = session.board.first().cloned() else {
+                continue;
+            };
+            let Some(target) = data.targets.get(&entry.target_id).cloned() else {
+                continue;
+            };
+            let plan = auto_assign(&session, &data, &target);
+            if plan.assignments.is_empty() {
+                continue;
+            }
+            let report = run_job(&mut session, &data, &plan);
+
+            for door in &report.doors {
+                checked += 1;
+                let crit = matches!(
+                    door.result.outcome,
+                    Outcome::CriticalSuccess | Outcome::CriticalFailure
+                );
+                if !crit {
+                    assert!(
+                        door.critical_effect.is_none(),
+                        "{} reported a critical effect without a critical",
+                        door.encounter_name
+                    );
+                }
+                seen_effect |= door.critical_effect.is_some();
+            }
+        }
+
+        assert!(checked > 0);
+        assert!(
+            seen_effect,
+            "a hundred and twenty jobs and not one critical said what it did"
+        );
+    }
+
+    #[test]
+    fn the_run_says_when_a_critical_rewrote_the_plan() {
+        // Skipping a door and gaining one are the two things a critical can do
+        // to a plan, and both used to happen silently.
+        let data = GameData::load().unwrap();
+        let mut notes = 0;
+
+        for seed in 0..120u64 {
+            let mut session = GameSession::new(&data.config, &data, seed);
+            let Some(entry) = session.board.first().cloned() else {
+                continue;
+            };
+            let Some(target) = data.targets.get(&entry.target_id).cloned() else {
+                continue;
+            };
+            let plan = auto_assign(&session, &data, &target);
+            if plan.assignments.is_empty() {
+                continue;
+            }
+            for door in run_job(&mut session, &data, &plan).doors {
+                if door.structural_note().is_some() {
+                    notes += 1;
+                    assert_ne!(door.result.run_effect, RunEffect::None);
+                }
+            }
+        }
+
+        assert!(
+            notes > 0,
+            "no run was ever rewritten in a hundred and twenty jobs"
         );
     }
 

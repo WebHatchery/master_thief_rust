@@ -53,7 +53,7 @@ fn draw_doors(ctx: &UiContext<'_>, report: &JobReport) {
         doors_rect(),
         &format!("{} — door by door", report.target_name),
     );
-    let layout = GridLayout::new(content.x, content.y, content.w, 8.0, 1, 88.0);
+    let layout = GridLayout::new(content.x, content.y, content.w, 8.0, 1, 92.0);
 
     for (index, door) in report.doors.iter().enumerate() {
         let (x, y, w, h) = layout.get_item_rect(index, 0.0);
@@ -130,6 +130,23 @@ fn draw_door(rect: Rect, door: &DoorOutcome, ordinal: usize) {
             rect.right() - 12.0,
             rect.y + 63.0,
             TextStyle::new(13.0, Color::new(0.90, 0.44, 0.38, 1.0)),
+        );
+    }
+
+    // What the critical did, in the encounter's own words, plus what it did to
+    // the plan. Only criticals have either (GDD 5.2).
+    let consequence: Vec<&str> = door
+        .critical_effect
+        .as_deref()
+        .into_iter()
+        .chain(door.structural_note())
+        .collect();
+    if !consequence.is_empty() {
+        draw_ui_text_ex(
+            &consequence.join(" "),
+            rect.x + 12.0,
+            rect.y + 81.0,
+            TextStyle::new(13.0, tone).params(),
         );
     }
 }

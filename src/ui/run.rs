@@ -310,8 +310,20 @@ fn draw_verdict(rect: Rect, playback: &RunPlayback, door: &crate::sim::DoorOutco
         rect.y + 20.0,
         TextStyle::new(22.0, outcome_color(outcome)).params(),
     );
+    // A critical says what it did, in the encounter's own words, and then what
+    // that did to the rest of the plan (GDD 5.2). Everything else just reads
+    // its narrative line.
+    let mut line = door.narrative.clone();
+    if let Some(effect) = &door.critical_effect {
+        line.push(' ');
+        line.push_str(effect);
+    }
+    if let Some(note) = door.structural_note() {
+        line.push(' ');
+        line.push_str(note);
+    }
     draw_text_block(
-        &door.narrative,
+        &line,
         rect.x,
         rect.y + 30.0,
         rect.w,

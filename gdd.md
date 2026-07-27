@@ -185,6 +185,13 @@ success; natural 20 → critical success. Criticals fire the encounter's
 the run — a critical success on a lock can skip the next encounter entirely; a critical
 failure can add one.
 
+**A critical says what it did.** The authored effect text is carried on the door outcome
+and read out on the run and again in the results, followed by what the critical did to the
+plan — the next door opening with this one, or something new waiting. Both halves used to
+happen silently: fifty-six effect strings were authored and counted toward the §8 content
+target while being read by nothing, and a run that gained or lost a door never said so.
+Nothing but a critical carries either line, which is what makes them worth reading.
+
 **Environmental modifiers must be deterministic.** The original picks day or night with
 `Math.random() > 0.5` *inside* the resolution loop (`heistExecution.ts:459`). In the port,
 time-of-day is a property of the job chosen at planning time, visible before commit.
