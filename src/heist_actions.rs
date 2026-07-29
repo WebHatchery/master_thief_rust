@@ -151,6 +151,11 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
             }
         }
         UiAction::AutoFillPlan => auto_fill_plan(data, session, selection, notifications),
+        UiAction::CycleNerve => {
+            if let Some(draft) = selection.draft.as_mut() {
+                draft.cycle_nerve();
+            }
+        }
         UiAction::CommitPlan => return commit_plan(data, session, selection, notifications),
         UiAction::AbandonPlan => {
             selection.draft = None;

@@ -138,6 +138,10 @@
     "max_level": 10
   },
 
+  "walk_away": {
+    "payout_share": 0.4,
+    "notoriety_share": 0.5
+  },
   "condition": {
     "fatigue_free_threshold": 50,
     "fatigue_step": 10,

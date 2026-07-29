@@ -212,6 +212,30 @@ happen silently: fifty-six effect strings were authored and counted toward the �
 target while being read by nothing, and a run that gained or lost a door never said so.
 Nothing but a critical carries either line, which is what makes them worth reading.
 
+**The run has one decision in it, and it is made before the dice.** Everything else on the
+planning screen is about who stands where; this is about how much has to go wrong before
+the crew are told to leave. The fixer sets a **standing order** — push on regardless, walk
+after one door goes wrong, walk after two — and the run honours it between doors, never
+during one. Deciding in advance rather than mid-run is the point rather than a limitation:
+the plan is the game (§1), and a fixer who could call it off *after* seeing the roll would
+be playing a different one. It also keeps a committed job a single resolved report that the
+run screen replays, rather than a second roll.
+
+Walking is never a win. A job the crew abandon is scored against the *building* — two of
+three cleared and out is two thirds of a job, not a clean sweep of what was attempted — and
+pays a fraction of what those cleared doors were worth, so leaving late beats leaving early
+and both lose badly to finishing. What the forfeited score buys is everything the unopened
+doors would have cost: no more injuries, no botched-job notoriety at all and a discount on
+the mark's own, less heat, and less taught to the city about the outfit's methods (§5.4).
+So a tight order is the cautious, poorer line and no order is the greedy one, which is the
+shape a nerve should have. The two shares live in `game_config.json` under `walk_away`.
+
+Delegation gets no standing order. Knowing when to leave is one more thing a fixer who
+turns up brings, and one the crew are not given (§5.3) — and *giving* one takes the plan
+out of the crew's hands even if they picked every door, so "let them pick, then tell them
+when to walk" cannot collect the delegation discount on the cut as well. The label follows
+the work, not the button.
+
 **Environmental modifiers must be deterministic.** The original picks day or night with
 `Math.random() > 0.5` *inside* the resolution loop (`heistExecution.ts:459`). In the port,
 time-of-day is a property of the job chosen at planning time, visible before commit.

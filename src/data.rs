@@ -83,6 +83,8 @@ pub struct GameConfig {
     pub kit: KitConfig,
     /// What spare kit fetches, and what selling it costs in anonymity.
     pub fence: FenceConfig,
+    /// What a job the crew walked out of is worth, and what it costs.
+    pub walk_away: WalkAwayConfig,
     /// What the outfit costs to keep standing, week in, week out.
     pub payroll: PayrollConfig,
     /// What the city does about an outfit it has started to notice.
@@ -93,6 +95,23 @@ pub struct GameConfig {
     pub scrutiny: crate::rules::ScrutinyTuning,
     /// How long it takes a hand to get good at their own trade.
     pub mastery: crate::rules::MasteryTuning,
+}
+
+/// A job the crew were told to abandon. The standing order is set before the
+/// dice, so this is the price of a nerve the fixer committed to in advance
+/// (GDD 5.2).
+///
+/// Not `Eq`: these are shares, and pretending two floats compare exactly would
+/// be a lie about what comparing them means.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct WalkAwayConfig {
+    /// Share of what the cleared doors were worth that a half-finished job
+    /// actually fetches. Walking late beats walking early, and both lose to
+    /// the score.
+    pub payout_share: f32,
+    /// Share of the mark's notoriety a crew who left still pick up. The rest,
+    /// and the botched-job penalty entirely, is what the forfeited take buys.
+    pub notoriety_share: f32,
 }
 
 /// Selling kit back out. The only inflow the week has that is not a job, and

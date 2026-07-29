@@ -116,6 +116,8 @@ pub enum UiAction {
     ClearDoor(usize),
     /// Fill the draft with the crew's own best guess.
     AutoFillPlan,
+    /// Step the standing order round: push on, walk after one, walk after two.
+    CycleNerve,
     /// Commit the plan and run the job.
     CommitPlan,
     AbandonPlan,

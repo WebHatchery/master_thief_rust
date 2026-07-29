@@ -11,6 +11,7 @@ use crate::rules::outcome::Outcome;
 use crate::state::GameSession;
 
 /// Everything the job owes and is owed, applied in one place.
+#[allow(clippy::too_many_arguments)]
 pub fn settle(
     session: &mut GameSession,
     data: &GameData,
@@ -18,14 +19,26 @@ pub fn settle(
     plan: &JobPlan,
     doors: Vec<DoorOutcome>,
     delegation_misses: Vec<crate::sim::delegation::DelegationMiss>,
+    called_off_with: Option<usize>,
 ) -> JobReport {
     let passed = doors.iter().filter(|door| door.result.passed()).count();
-    let rate = if doors.is_empty() {
+    // A job the crew walked out of is scored against the building, not against
+    // the doors they got as far as. Clearing two of three and leaving is two
+    // thirds of a job; scoring it on what was attempted would make it a clean
+    // sweep, which is the opposite of what happened.
+    let attempted = doors.len();
+    let against = match called_off_with {
+        Some(left) => attempted + left,
+        None => attempted,
+    };
+    let rate = if against == 0 {
         0.0
     } else {
-        passed as f32 / doors.len() as f32
+        passed as f32 / against as f32
     };
-    let success = rate >= 0.5;
+    // Leaving is never a win. The crew are out, whole, and the score is still
+    // in the building.
+    let success = called_off_with.is_none() && rate >= 0.5;
 
     // What the mark is worth today, not what it was worth when it appeared:
     // every week the crew left it sitting added to the take (GDD 5.4).
@@ -34,9 +47,15 @@ pub fn settle(
         .map(|entry| entry.ripened_payout(target.potential_payout, &data.config.board))
         .unwrap_or(target.potential_payout);
 
+    let walk = &data.config.walk_away;
     let payout = if success {
         let bonus = if rate > 0.8 { 1.2 } else { 1.0 };
         (worth as f32 * rate * bonus) as i64
+    } else if called_off_with.is_some() {
+        // Whatever they were carrying when the order came, at a fence's rate
+        // for a half-finished job. Walking early is worth less than walking
+        // late, and both are worth less than the score.
+        (worth as f32 * rate * walk.payout_share) as i64
     } else {
         (worth as f32 * 0.15) as i64
     };
@@ -50,12 +69,20 @@ pub fn settle(
     );
     let net = cut.net_of(payout);
 
-    let notoriety = target.notoriety
-        + if success {
-            0
-        } else {
-            data.config.failure_notoriety
-        };
+    // The whole reason to set a standing order: a crew who leave when it starts
+    // going wrong leave less behind. No botched-job notoriety at all, and the
+    // job's own is discounted — that, and the doors nobody had to open, is what
+    // the forfeited score buys (GDD 5.6).
+    let notoriety = if called_off_with.is_some() {
+        ((target.notoriety as f32 * walk.notoriety_share).round() as i32).max(1)
+    } else {
+        target.notoriety
+            + if success {
+                0
+            } else {
+                data.config.failure_notoriety
+            }
+    };
     let reputation = if success {
         data.config.reputation_per_job * difficulty_weight(target)
     } else {
@@ -88,6 +115,9 @@ pub fn settle(
     record_job(
         session, target, plan, &doors, success, net, &loot, was_cased,
     );
+    if called_off_with.is_some() {
+        session.tally.jobs_called_off += 1;
+    }
 
     JobReport {
         target_id: target.id.clone(),
@@ -103,6 +133,7 @@ pub fn settle(
         reputation_gained: reputation,
         heat_gained: notoriety,
         trades_noticed,
+        called_off_with,
         delegated: plan.delegated,
     }
 }
@@ -228,6 +259,7 @@ pub fn empty_report(plan: &JobPlan) -> JobReport {
         reputation_gained: 0,
         heat_gained: 0,
         trades_noticed: Vec::new(),
+        called_off_with: None,
         delegated: plan.delegated,
     }
 }
@@ -337,6 +369,50 @@ mod tests {
         }
         let doors_by_trade: usize = report.trades_noticed.len();
         assert!(doors_by_trade <= report.doors.len());
+    }
+
+    #[test]
+    fn a_job_walked_out_of_is_scored_against_the_building_not_the_doors_tried() {
+        // Two of three cleared and out is two thirds of a job. Scoring it on
+        // what was attempted would call it a clean sweep, which is the opposite
+        // of what happened — and would have paid like one.
+        let (data, mut session) = setup(9_140);
+        let target = first_target(&data, &session).clone();
+        let mut plan = auto_assign(&session, &data, &target);
+        plan.delegated = false;
+        plan.walk_after = Some(1);
+        let doors = plan.assignments.len();
+
+        let report = run_job(&mut session, &data, &plan);
+
+        assert_eq!(report.doors_total(), doors.max(report.doors.len()));
+        assert!(report.success_rate() <= 1.0);
+        if report.was_called_off() {
+            assert!(
+                report.success_rate() < 1.0,
+                "a job the crew walked out of read as every door cleared"
+            );
+        }
+    }
+
+    #[test]
+    fn walking_late_is_worth_more_than_walking_early() {
+        // The curve that makes the standing order a judgement rather than a
+        // switch: a tighter order is safer and poorer, and the player is
+        // choosing where on that line to sit.
+        let data = GameData::load().unwrap();
+        let target = data.targets.get("velvet_room").unwrap().clone();
+        let worth = target.potential_payout as f32;
+        let walk = &data.config.walk_away;
+
+        let quoted = |cleared: usize, total: usize| {
+            (worth * (cleared as f32 / total as f32) * walk.payout_share) as i64
+        };
+
+        assert!(quoted(2, 3) > quoted(1, 3));
+        assert!(quoted(1, 3) > quoted(0, 3));
+        // And never as much as finishing it: the forfeited score is the price.
+        assert!(quoted(3, 3) < (worth * 1.0) as i64);
     }
 
     #[test]

@@ -155,13 +155,17 @@ fn draw_door(rect: Rect, door: &DoorOutcome, ordinal: usize) {
 fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
     let content = draw_panel(
         ledger_rect(),
-        if report.success { "Paid" } else { "Burned" },
+        match (report.success, report.was_called_off()) {
+            (_, true) => "Walked",
+            (true, _) => "Paid",
+            _ => "Burned",
+        },
     );
 
     let rows: [(String, String); 8] = [
         (
             "Doors cleared".to_owned(),
-            format!("{}/{}", report.doors_passed(), report.doors.len()),
+            format!("{}/{}", report.doors_passed(), report.doors_total()),
         ),
         (
             "Success rate".to_owned(),
@@ -194,10 +198,14 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
         );
     }
 
-    let note = if report.delegated {
-        crate::sim::delegation::summarise(&report.delegation_misses)
-    } else {
-        "Planned by you, door by door.".to_owned()
+    // What the standing order actually did, in the same words the planning
+    // screen used to offer it. A job that ended early has to say why it ended
+    // early, or the ledger reads as a botched one (pillar 2).
+    let note = match report.called_off_with {
+        Some(1) => "Called off on your order — one door left standing.".to_owned(),
+        Some(left) => format!("Called off on your order — {} doors left standing.", left),
+        None if report.delegated => crate::sim::delegation::summarise(&report.delegation_misses),
+        None => "Planned by you, door by door.".to_owned(),
     };
     draw_text_block(
         &note,

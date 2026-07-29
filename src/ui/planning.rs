@@ -210,27 +210,39 @@ fn draw_route_footer(
 ) {
     let mouse = ctx.mouse();
     let y = content.bottom() - 40.0;
-    let width = (content.w - 20.0) / 3.0;
+    let width = (content.w - 30.0) / 4.0;
+    let column = |index: f32| Rect::new(content.x + (width + 10.0) * index, y, width, 38.0);
 
     draw_crew_cut(ctx, content, draft, y - 26.0);
 
-    if button_rect_tone_at(
-        Rect::new(content.x, y, width, 38.0),
-        "Back",
-        true,
-        ButtonTone::Secondary,
-        mouse,
-    ) {
+    if button_rect_tone_at(column(0.0), "Back", true, ButtonTone::Secondary, mouse) {
         actions.push(UiAction::AbandonPlan);
     }
     if button_rect_tone_at(
-        Rect::new(content.x + width + 10.0, y, width, 38.0),
+        column(1.0),
         "Let them pick",
         true,
         ButtonTone::Primary,
         mouse,
     ) {
         actions.push(UiAction::AutoFillPlan);
+    }
+    // The only decision on this screen that is not about who stands where: how
+    // much has to go wrong before the crew are told to leave. It sits beside
+    // Commit because it is committed with everything else — the fixer settles
+    // their nerve before the dice, not after (GDD 5.2).
+    if button_rect_tone_at(
+        column(2.0),
+        &draft.nerve_label(),
+        true,
+        if draft.walk_after.is_some() {
+            ButtonTone::Danger
+        } else {
+            ButtonTone::Secondary
+        },
+        mouse,
+    ) {
+        actions.push(UiAction::CycleNerve);
     }
     let open = draft.unfilled();
     let label = if draft.is_complete() {
@@ -241,7 +253,7 @@ fn draw_route_footer(
         format!("{} doors open", open)
     };
     if button_rect_tone_at(
-        Rect::new(content.x + (width + 10.0) * 2.0, y, width, 38.0),
+        column(3.0),
         &label,
         draft.is_complete(),
         ButtonTone::Positive,

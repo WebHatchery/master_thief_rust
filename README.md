@@ -18,6 +18,14 @@ attention — a tail, a raid, or an arrest that puts somebody in a cell until ba
 is posted. The three answers are all purchases, and all of them are shown with
 their price on the Crew screen's **Outfit** tab.
 
+**The run has a decision in it, made before the dice.** Alongside who stands
+where, the plan carries a *standing order*: push on regardless, or pull the crew
+out after one or two doors go wrong. Walking forfeits the score — a job the crew
+abandon is scored against the whole building and pays a fraction of the cleared
+doors — and buys back everything the unopened doors would have cost: injuries,
+notoriety, heat, and what the city learns about your methods. Delegated jobs get
+no standing order.
+
 **Being tired is a price, not a locked door.** Past the working threshold a hand
 is *spent*: still assignable, carrying a named `Running on empty` penalty,
 likelier to come back hurt from any door but a flawless one, and losing loyalty

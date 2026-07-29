@@ -31,6 +31,9 @@ pub struct CampaignTally {
     pub delegated_jobs: i64,
     /// Jobs run on a mark nobody had cased.
     pub blind_jobs: i64,
+    /// Jobs the crew walked out of on the fixer's standing order.
+    #[serde(default)]
+    pub jobs_called_off: i64,
     /// Weeks advanced without running anything.
     pub quiet_weeks: i64,
     pub heat_peak: i64,

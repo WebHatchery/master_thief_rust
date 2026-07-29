@@ -226,6 +226,9 @@ impl Game {
         let mut draft = sim::PlanDraft::from_auto(&self.session, &self.data, &target);
         draft.clear(draft.doors.len().saturating_sub(1));
         draft.focus_on(draft.doors.len().saturating_sub(1));
+        // A standing order actually set, so the footer photographs the decision
+        // rather than its default.
+        draft.cycle_nerve();
 
         self.selection.target = Some(target_id);
         self.selection.draft = Some(draft);

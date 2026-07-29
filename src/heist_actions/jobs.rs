@@ -184,12 +184,21 @@ pub(super) fn check_awards(
 }
 
 fn announce(notifications: &mut NotificationManager, report: &JobReport) {
+    if let Some(left) = report.called_off_with {
+        notifications.warning(format!(
+            "{} — pulled out with {} doors to go, {} banked",
+            report.target_name,
+            left,
+            format_money(report.payout)
+        ));
+        return;
+    }
     if report.success {
         notifications.success(format!(
             "{} - {}/{} doors, {} net",
             report.target_name,
             report.doors_passed(),
-            report.doors.len(),
+            report.doors_total(),
             format_money(report.payout)
         ));
         if !report.loot.is_empty() {
@@ -200,7 +209,7 @@ fn announce(notifications: &mut NotificationManager, report: &JobReport) {
             "{} went wrong - {}/{} doors",
             report.target_name,
             report.doors_passed(),
-            report.doors.len()
+            report.doors_total()
         ));
     }
 }
