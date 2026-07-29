@@ -432,22 +432,76 @@ mod tests {
     }
 
     #[test]
-    fn debug_health() {
+    fn an_unattended_campaign_stays_solvent_and_winnable_across_seeds() {
+        // Every balance change this project has made was checked by running a
+        // handful of campaigns and reading the numbers off by eye. That is a
+        // regression guard written down nowhere, so here it is: the economy has
+        // to hold across seeds, not just on the one somebody happened to look
+        // at. The bands are set well outside sixteen measured campaigns, so
+        // this fails when something has genuinely moved rather than drifted.
         let data = GameData::load().unwrap();
-        for seed in [4_242u64, 20_260_726, 31_337] {
+        let mut jobs = 0i64;
+        let mut won = 0i64;
+        let mut winning_campaigns = 0;
+        let mut walkouts = 0;
+        const SEEDS: u64 = 16;
+
+        for seed in 0..SEEDS {
             let mut session = GameSession::new(&data.config, &data, seed);
             let log = play(&mut session, &data, 20);
-            println!(
-                "seed {seed}: jobs {} won {} budget {} crew {} short {} walkouts {} hires {}",
-                log.jobs_run,
-                log.jobs_won,
-                session.budget,
-                session.crew.len(),
-                log.weeks_short,
-                log.walkouts,
-                log.hires
+
+            assert!(
+                log.jobs_run >= 18,
+                "seed {}: only {} jobs in twenty weeks",
+                seed,
+                log.jobs_run
             );
+            assert!(
+                session.budget > 0,
+                "seed {}: an outfit that worked every week went broke ({})",
+                seed,
+                session.budget
+            );
+            assert!(
+                session.crew.len() >= 4,
+                "seed {}: the roster collapsed to {}",
+                seed,
+                session.crew.len()
+            );
+
+            jobs += log.jobs_run as i64;
+            won += log.jobs_won as i64;
+            walkouts += log.walkouts;
+            if log.jobs_won * 2 > log.jobs_run {
+                winning_campaigns += 1;
+            }
         }
+
+        // The single number the whole economy answers to. Too low and the game
+        // is punishing for no reason; too high and none of the week's decisions
+        // are worth making.
+        let rate = won as f32 / jobs as f32;
+        assert!(
+            (0.50..=0.85).contains(&rate),
+            "an unattended fixer wins {:.0}% of jobs across {} campaigns",
+            rate * 100.0,
+            SEEDS
+        );
+        assert!(
+            winning_campaigns * 2 >= SEEDS,
+            "only {} of {} campaigns won more than they lost",
+            winning_campaigns,
+            SEEDS
+        );
+        // `keep_the_outfit_standing` pays bonuses to anybody wavering, so a
+        // campaign that still bleeds people means the money stopped reaching
+        // them — which is a payroll change, not a chemistry one.
+        assert!(
+            walkouts <= 2,
+            "{} hands walked over money across {} campaigns",
+            walkouts,
+            SEEDS
+        );
     }
 
     #[test]
