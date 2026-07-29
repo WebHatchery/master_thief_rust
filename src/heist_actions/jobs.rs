@@ -178,7 +178,7 @@ pub(super) fn check_awards(
     session: &mut GameSession,
     notifications: &mut NotificationManager,
 ) {
-    for name in sim::award(session, &data.awards) {
+    for name in sim::award(session, &data.config, &data.awards) {
         notifications.success(format!("Achievement: {}", name));
     }
 }

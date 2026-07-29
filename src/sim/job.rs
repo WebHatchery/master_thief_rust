@@ -484,6 +484,10 @@ fn resolve_door(
         }
     }
 
+    if spent {
+        session.tally.doors_worked_spent += 1;
+    }
+
     // The encounter's own account of what a critical did. Only a critical
     // fires one, which is what makes it worth reading (GDD 5.2).
     let critical_effect = match result.outcome {

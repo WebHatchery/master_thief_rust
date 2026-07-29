@@ -119,7 +119,7 @@ impl Game {
             }
             "records" => {
                 crate::sim::play(&mut self.session, &self.data, 12);
-                crate::sim::award(&mut self.session, &self.data.awards);
+                crate::sim::award(&mut self.session, &self.data.config, &self.data.awards);
                 Screen::Records
             }
             "hiring" => {

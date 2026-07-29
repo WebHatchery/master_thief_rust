@@ -119,7 +119,7 @@ fn draw_standing(ctx: &UiContext<'_>) {
     } else {
         0.0
     };
-    let rows: [(String, String); 9] = [
+    let rows: [(String, String); 10] = [
         ("Week".to_owned(), session.week.to_string()),
         (
             "Jobs run".to_owned(),
@@ -148,6 +148,16 @@ fn draw_standing(ctx: &UiContext<'_>) {
             "Injuries · quiet weeks".to_owned(),
             format!("{} · {}", tally.injuries_taken, tally.quiet_weeks),
         ),
+        // The two decisions the week turns on that nothing else here counts:
+        // when the fixer lost their nerve, and when they spent somebody who
+        // should have been resting (GDD 5.2, 5.6).
+        (
+            "Called off · worked spent".to_owned(),
+            format!(
+                "{} ({} doors left) · {}",
+                tally.jobs_called_off, tally.doors_left_standing, tally.doors_worked_spent
+            ),
+        ),
         // The other half of the ledger: the outfit is not only what it takes.
         (
             "Paid out in wages".to_owned(),
@@ -174,7 +184,9 @@ fn draw_standing(ctx: &UiContext<'_>) {
 
     for (index, (label, value)) in rows.iter().enumerate() {
         stat_row(
-            Rect::new(content.x, content.y + index as f32 * 21.0, content.w, 20.0),
+            // Ten rows now, not nine: a tighter pitch keeps the block clear of
+            // the chart below without stealing room from the awards list.
+            Rect::new(content.x, content.y + index as f32 * 20.0, content.w, 19.0),
             label,
             value,
             15.0,
@@ -183,15 +195,15 @@ fn draw_standing(ctx: &UiContext<'_>) {
     }
 
     draw_curves(
-        Rect::new(content.x, content.y + 206.0, content.w, 112.0),
+        Rect::new(content.x, content.y + 212.0, content.w, 96.0),
         ctx,
     );
     draw_awards(
         Rect::new(
             content.x,
-            content.y + 336.0,
+            content.y + 320.0,
             content.w,
-            content.bottom() - content.y - 344.0,
+            content.bottom() - content.y - 328.0,
         ),
         ctx,
     );
@@ -354,8 +366,9 @@ fn closest_locked(ctx: &UiContext<'_>) -> Option<(String, String)> {
         .iter()
         .filter(|award| !ctx.session.achievements.is_unlocked(&award.id))
         .max_by(|a, b| {
-            let progress =
-                |award: &crate::sim::AwardDef| award.progress(&ctx.session.tally, ctx.session);
+            let progress = |award: &crate::sim::AwardDef| {
+                award.progress(&ctx.session.tally, ctx.session, &ctx.data.config)
+            };
             progress(a)
                 .partial_cmp(&progress(b))
                 .unwrap_or(std::cmp::Ordering::Equal)

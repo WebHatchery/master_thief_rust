@@ -32,6 +32,14 @@ complication is a hazard you can staff against rather than an ambush, and a
 blind run is trading that away too. Whatever arrives mid-job is answered by the
 best hand already in the building, which makes bringing cover a real hedge.
 
+**Everything the week decides is counted.** The records screen and the
+achievement list read the same tally, and every statistic the sim writes has at
+least one award written against it — including the ones the newer systems
+produce: jobs called off, doors left standing, doors worked by a spent hand, and
+the worst the city is currently charging for one of your habits. A test asserts
+that pairing in both directions, because a counter nobody reads is the same dead
+field this project keeps finding.
+
 **Every job pays for how far the crew got.** Finished, botched and abandoned
 jobs all take the same shape — the mark's worth times the share of its doors
 cleared times a share for which of the three happened. A failed job used to pay
@@ -71,7 +79,7 @@ as `Watched: <Trade>`.
 | Outcome narrative lines | 400 | 400 |
 | Encounter templates | 71 | 70 |
 | Equipment templates | 67 | 60 |
-| Achievements | 60 | 40 |
+| Achievements | 82 | 40 |
 | Heist targets | 45 | 45 |
 | Recruit archetypes | 40 | 40 |
 | Personality traits | 30 | 30 |

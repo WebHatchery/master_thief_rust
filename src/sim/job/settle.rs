@@ -119,8 +119,9 @@ pub fn settle(
     record_job(
         session, target, plan, &doors, success, net, &loot, was_cased,
     );
-    if called_off_with.is_some() {
+    if let Some(left) = called_off_with {
         session.tally.jobs_called_off += 1;
+        session.tally.doors_left_standing += left as i64;
     }
 
     JobReport {

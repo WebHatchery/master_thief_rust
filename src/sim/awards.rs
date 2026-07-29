@@ -4,6 +4,7 @@
 //! threshold, and everything else is one comparison. Adding one is an edit to a
 //! JSON file, which is the same rule the rest of the game's content follows.
 
+use crate::data::GameConfig;
 use crate::state::GameSession;
 use macroquad_toolkit::achievements::Achievement;
 use serde::{Deserialize, Serialize};
@@ -31,9 +32,15 @@ pub struct CampaignTally {
     pub delegated_jobs: i64,
     /// Jobs run on a mark nobody had cased.
     pub blind_jobs: i64,
-    /// Jobs the crew walked out of on the fixer's standing order.
+    /// Jobs the crew walked out of on the fixer's standing order (GDD 5.2).
     #[serde(default)]
     pub jobs_called_off: i64,
+    /// Doors left standing because the order came before them.
+    #[serde(default)]
+    pub doors_left_standing: i64,
+    /// Doors worked by a hand who should have been resting (GDD 5.6).
+    #[serde(default)]
+    pub doors_worked_spent: i64,
     /// Weeks advanced without running anything.
     pub quiet_weeks: i64,
     pub heat_peak: i64,
@@ -112,6 +119,11 @@ pub enum TallyStat {
     PlannedJobs,
     DelegatedJobs,
     BlindJobs,
+    /// Jobs the crew were told to walk out of, and what that left behind.
+    JobsCalledOff,
+    DoorsLeftStanding,
+    /// Doors opened by somebody past the working threshold.
+    DoorsWorkedSpent,
     QuietWeeks,
     HeatPeak,
     WagesPaid,
@@ -148,10 +160,13 @@ pub enum TallyStat {
     WorstGrudge,
     /// Equipment ids in the lockup.
     InventorySize,
+    /// The worst the city is currently charging for one of the outfit's own
+    /// habits (GDD 5.4). Live state, not a running total — a file goes cold.
+    WorstScrutiny,
 }
 
 impl TallyStat {
-    pub fn value(self, tally: &CampaignTally, session: &GameSession) -> i64 {
+    pub fn value(self, tally: &CampaignTally, session: &GameSession, config: &GameConfig) -> i64 {
         match self {
             TallyStat::JobsRun => tally.jobs_run,
             TallyStat::JobsWon => tally.jobs_won,
@@ -169,6 +184,9 @@ impl TallyStat {
             TallyStat::PlannedJobs => tally.planned_jobs,
             TallyStat::DelegatedJobs => tally.delegated_jobs,
             TallyStat::BlindJobs => tally.blind_jobs,
+            TallyStat::JobsCalledOff => tally.jobs_called_off,
+            TallyStat::DoorsLeftStanding => tally.doors_left_standing,
+            TallyStat::DoorsWorkedSpent => tally.doors_worked_spent,
             TallyStat::QuietWeeks => tally.quiet_weeks,
             TallyStat::HeatPeak => tally.heat_peak,
             TallyStat::WagesPaid => tally.wages_paid,
@@ -222,6 +240,12 @@ impl TallyStat {
                 .max()
                 .unwrap_or(0),
             TallyStat::InventorySize => session.inventory.len() as i64,
+            TallyStat::WorstScrutiny => session
+                .scrutiny
+                .watched(&config.scrutiny)
+                .first()
+                .map(|(_, penalty)| *penalty as i64)
+                .unwrap_or(0),
         }
     }
 }
@@ -237,8 +261,13 @@ pub struct AwardDef {
 }
 
 impl AwardDef {
-    pub fn is_earned(&self, tally: &CampaignTally, session: &GameSession) -> bool {
-        self.stat.value(tally, session) >= self.at_least
+    pub fn is_earned(
+        &self,
+        tally: &CampaignTally,
+        session: &GameSession,
+        config: &GameConfig,
+    ) -> bool {
+        self.stat.value(tally, session, config) >= self.at_least
     }
 
     pub fn definition(&self) -> Achievement {
@@ -246,22 +275,27 @@ impl AwardDef {
     }
 
     /// How far along the campaign is, 0..1, for a progress bar.
-    pub fn progress(&self, tally: &CampaignTally, session: &GameSession) -> f32 {
+    pub fn progress(
+        &self,
+        tally: &CampaignTally,
+        session: &GameSession,
+        config: &GameConfig,
+    ) -> f32 {
         if self.at_least <= 0 {
             return 1.0;
         }
-        (self.stat.value(tally, session) as f32 / self.at_least as f32).clamp(0.0, 1.0)
+        (self.stat.value(tally, session, config) as f32 / self.at_least as f32).clamp(0.0, 1.0)
     }
 }
 
 /// Unlock everything the campaign has earned. Returns the names of anything
 /// newly unlocked, so the game can say so.
-pub fn award(session: &mut GameSession, defs: &[AwardDef]) -> Vec<String> {
+pub fn award(session: &mut GameSession, config: &GameConfig, defs: &[AwardDef]) -> Vec<String> {
     let tally = session.tally;
     let mut earned = Vec::new();
 
     for def in defs {
-        if def.is_earned(&tally, session) && session.achievements.unlock(&def.id) {
+        if def.is_earned(&tally, session, config) && session.achievements.unlock(&def.id) {
             earned.push(def.name.clone());
         }
     }
@@ -282,7 +316,7 @@ mod tests {
     #[test]
     fn a_fresh_campaign_has_earned_almost_nothing() {
         let (data, mut session) = setup();
-        award(&mut session, &data.awards);
+        award(&mut session, &data.config, &data.awards);
 
         let (unlocked, total) = session.achievements.progress();
         assert!(total >= 40, "only {} achievements defined", total);
@@ -298,8 +332,8 @@ mod tests {
         let (data, mut session) = setup();
         session.tally.jobs_run = 1;
 
-        let first = award(&mut session, &data.awards);
-        let second = award(&mut session, &data.awards);
+        let first = award(&mut session, &data.config, &data.awards);
+        let second = award(&mut session, &data.config, &data.awards);
 
         assert!(!first.is_empty(), "the first job unlocked nothing");
         assert!(second.is_empty(), "an achievement unlocked twice");
@@ -307,31 +341,81 @@ mod tests {
 
     #[test]
     fn live_session_state_counts_as_well_as_running_totals() {
-        let (_, mut session) = setup();
+        let (data, mut session) = setup();
         let tally = CampaignTally::default();
 
         session.reputation = 40;
-        assert_eq!(TallyStat::Reputation.value(&tally, &session), 40);
         assert_eq!(
-            TallyStat::CrewSize.value(&tally, &session),
+            TallyStat::Reputation.value(&tally, &session, &data.config),
+            40
+        );
+        assert_eq!(
+            TallyStat::CrewSize.value(&tally, &session, &data.config),
             session.crew.len() as i64
         );
     }
 
     #[test]
     fn a_grudge_reads_as_a_positive_depth() {
-        let (_, mut session) = setup();
+        let (data, mut session) = setup();
         let crew = session.crew_ids();
         session.chemistry.set(&crew[0], &crew[1], -45);
 
         let tally = CampaignTally::default();
-        assert_eq!(TallyStat::WorstGrudge.value(&tally, &session), 45);
-        assert_eq!(TallyStat::BestChemistry.value(&tally, &session), -45);
+        assert_eq!(
+            TallyStat::WorstGrudge.value(&tally, &session, &data.config),
+            45
+        );
+        assert_eq!(
+            TallyStat::BestChemistry.value(&tally, &session, &data.config),
+            -45
+        );
+    }
+
+    #[test]
+    fn a_campaign_counts_the_decisions_the_week_is_actually_made_of() {
+        // This is the test that would have caught the thing it was written for.
+        // `jobs_called_off` was added with the standing order, written on every
+        // walked job, and then read by precisely nothing — no achievement, no
+        // records row. A counter nobody reads is the same dead field this
+        // project keeps finding, and adding one is easier than noticing it.
+        let data = GameData::load().unwrap();
+
+        for stat in [
+            TallyStat::JobsCalledOff,
+            TallyStat::DoorsLeftStanding,
+            TallyStat::DoorsWorkedSpent,
+            TallyStat::WorstScrutiny,
+        ] {
+            assert!(
+                data.awards.iter().any(|award| award.stat == stat),
+                "{:?} is counted and nothing ever reads it",
+                stat
+            );
+        }
+    }
+
+    #[test]
+    fn every_achievement_names_a_statistic_that_can_actually_move() {
+        // The other half: an award written against a stat nothing ever writes
+        // is unreachable, and an unreachable achievement is worse than none.
+        let data = GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data, 5_150);
+        super::super::play(&mut session, &data, 20);
+
+        for award in &data.awards {
+            assert!(
+                award.at_least > 0,
+                "{} is earned by doing nothing",
+                award.id
+            );
+            let _ = award.stat.value(&session.tally, &session, &data.config);
+        }
     }
 
     #[test]
     fn progress_reports_the_share_of_the_way_there() {
-        let (_, session) = setup();
+        let (data, session) = setup();
         let mut tally = CampaignTally::default();
         let def = AwardDef {
             id: "test".to_owned(),
@@ -341,11 +425,11 @@ mod tests {
             at_least: 10,
         };
 
-        assert_eq!(def.progress(&tally, &session), 0.0);
+        assert_eq!(def.progress(&tally, &session, &data.config), 0.0);
         tally.jobs_run = 5;
-        assert!((def.progress(&tally, &session) - 0.5).abs() < f32::EPSILON);
+        assert!((def.progress(&tally, &session, &data.config) - 0.5).abs() < f32::EPSILON);
         tally.jobs_run = 40;
-        assert_eq!(def.progress(&tally, &session), 1.0);
+        assert_eq!(def.progress(&tally, &session, &data.config), 1.0);
     }
 
     #[test]
@@ -353,7 +437,7 @@ mod tests {
         let data = GameData::load().unwrap();
         let mut session = GameSession::new(&data.config, &data, 20_260_726);
         super::super::play(&mut session, &data, 20);
-        award(&mut session, &data.awards);
+        award(&mut session, &data.config, &data.awards);
 
         let (unlocked, total) = session.achievements.progress();
         assert!(

@@ -121,7 +121,7 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
         }
 
         let summary = super::advance_week(session, data);
-        super::award(session, &data.awards);
+        super::award(session, &data.config, &data.awards);
 
         log.weeks_short += usize::from(summary.payroll.was_short());
         log.walkouts += summary.payroll.walkouts.len();

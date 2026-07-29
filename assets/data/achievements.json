@@ -1,78 +1,576 @@
 [
-  { "id": "first_job", "name": "Opening Night", "description": "Run your first job.", "stat": "jobs_run", "at_least": 1 },
-  { "id": "first_payday", "name": "Paid", "description": "Finish a job in the black.", "stat": "jobs_won", "at_least": 1 },
-  { "id": "working_outfit", "name": "A Working Outfit", "description": "Run ten jobs.", "stat": "jobs_run", "at_least": 10 },
-  { "id": "established", "name": "Established", "description": "Run thirty jobs.", "stat": "jobs_run", "at_least": 30 },
-  { "id": "institution", "name": "An Institution", "description": "Run seventy-five jobs.", "stat": "jobs_run", "at_least": 75 },
-  { "id": "reliable", "name": "Reliable", "description": "Bring twenty jobs home successfully.", "stat": "jobs_won", "at_least": 20 },
-  { "id": "never_wrong", "name": "Never Wrong Twice", "description": "Bring fifty jobs home successfully.", "stat": "jobs_won", "at_least": 50 },
-  { "id": "clean_once", "name": "Not a Mark on It", "description": "Clear every door on a job.", "stat": "clean_sweeps", "at_least": 1 },
-  { "id": "clean_five", "name": "Professional Standard", "description": "Clear every door on five separate jobs.", "stat": "clean_sweeps", "at_least": 5 },
-  { "id": "clean_twenty", "name": "The Quiet Reputation", "description": "Clear every door on twenty separate jobs.", "stat": "clean_sweeps", "at_least": 20 },
-  { "id": "hundred_doors", "name": "A Hundred Doors", "description": "Get through a hundred doors.", "stat": "doors_cleared", "at_least": 100 },
-  { "id": "three_hundred_doors", "name": "Three Hundred Doors", "description": "Get through three hundred doors.", "stat": "doors_cleared", "at_least": 300 },
-  { "id": "first_twenty", "name": "Natural Twenty", "description": "Take a door with a critical success.", "stat": "critical_successes", "at_least": 1 },
-  { "id": "lucky_hands", "name": "Lucky Hands", "description": "Take twenty-five doors with critical successes.", "stat": "critical_successes", "at_least": 25 },
-  { "id": "blessed", "name": "Somebody Up There", "description": "Take a hundred doors with critical successes.", "stat": "critical_successes", "at_least": 100 },
-  { "id": "first_disaster", "name": "It Happens", "description": "Blow a door with a critical failure.", "stat": "critical_failures", "at_least": 1 },
-  { "id": "cursed", "name": "The Dice Have Opinions", "description": "Blow twenty-five doors with critical failures.", "stat": "critical_failures", "at_least": 25 },
-  { "id": "improviser", "name": "Improviser", "description": "Face ten complications the plan never had.", "stat": "complications_faced", "at_least": 10 },
-  { "id": "unflappable", "name": "Unflappable", "description": "Face forty complications the plan never had.", "stat": "complications_faced", "at_least": 40 },
-  { "id": "first_million", "name": "The First Million", "description": "Take a million out of this city.", "stat": "payout_total", "at_least": 1000000 },
-  { "id": "five_million", "name": "Comfortable", "description": "Take five million out of this city.", "stat": "payout_total", "at_least": 5000000 },
-  { "id": "twenty_million", "name": "Untouchable Money", "description": "Take twenty million out of this city.", "stat": "payout_total", "at_least": 20000000 },
-  { "id": "big_one", "name": "The Big One", "description": "Clear half a million from a single job.", "stat": "payout_best", "at_least": 500000 },
-  { "id": "career_job", "name": "The Career Job", "description": "Clear a million from a single job.", "stat": "payout_best", "at_least": 1000000 },
-  { "id": "war_chest", "name": "War Chest", "description": "Sit on half a million in cash.", "stat": "budget", "at_least": 500000 },
-  { "id": "first_find", "name": "Finders Keepers", "description": "Carry something out that was not the plan.", "stat": "loot_found", "at_least": 1 },
-  { "id": "magpie", "name": "Magpie", "description": "Carry out fifteen unplanned finds.", "stat": "loot_found", "at_least": 15 },
-  { "id": "well_stocked", "name": "Well Stocked", "description": "Hold twenty pieces of kit in the lockup.", "stat": "inventory_size", "at_least": 20 },
-  { "id": "known_name", "name": "A Known Name", "description": "Reach twenty reputation.", "stat": "reputation", "at_least": 20 },
-  { "id": "the_best_crew", "name": "The Best Crew in the City", "description": "Reach fifty reputation.", "stat": "reputation", "at_least": 50 },
-  { "id": "legend", "name": "Spoken Of Carefully", "description": "Reach eighty reputation.", "stat": "reputation", "at_least": 80 },
-  { "id": "wanted", "name": "Wanted", "description": "Reach fifty notoriety.", "stat": "notoriety", "at_least": 50 },
-  { "id": "infamous", "name": "Infamous", "description": "Reach a hundred and fifty notoriety.", "stat": "notoriety", "at_least": 150 },
-  { "id": "too_hot", "name": "Too Hot to Work", "description": "Let the city's attention reach sixty.", "stat": "heat_peak", "at_least": 60 },
-  { "id": "lying_low", "name": "Lying Low", "description": "Advance five weeks without running anything.", "stat": "quiet_weeks", "at_least": 5 },
-  { "id": "a_crew", "name": "A Crew, Not a Pair", "description": "Have six hands on the payroll.", "stat": "crew_size", "at_least": 6 },
-  { "id": "full_house", "name": "Full House", "description": "Have ten hands on the payroll.", "stat": "crew_size", "at_least": 10 },
-  { "id": "recruiter", "name": "Recruiter", "description": "Take fifteen people on.", "stat": "hires", "at_least": 15 },
-  { "id": "veteran", "name": "Veteran", "description": "Get somebody to level five.", "stat": "best_level", "at_least": 5 },
-  { "id": "master_of_the_trade", "name": "Master of the Trade", "description": "Get somebody to level ten.", "stat": "best_level", "at_least": 10 },
-  { "id": "thick_as_thieves", "name": "Thick as Thieves", "description": "Get a pair to sixty chemistry.", "stat": "best_chemistry", "at_least": 60 },
-  { "id": "bad_blood", "name": "Bad Blood", "description": "Let a grudge reach forty.", "stat": "worst_grudge", "at_least": 40 },
-  { "id": "the_plan_is_the_play", "name": "The Plan Is the Play", "description": "Commit twenty jobs from a hand-made plan.", "stat": "planned_jobs", "at_least": 20 },
-  { "id": "hands_off", "name": "Hands Off", "description": "Delegate twenty jobs to the crew's own judgement.", "stat": "delegated_jobs", "at_least": 20 },
-  { "id": "going_in_blind", "name": "Going In Blind", "description": "Run five jobs on marks nobody cased.", "stat": "blind_jobs", "at_least": 5 },
-  { "id": "walking_wounded", "name": "The Walking Wounded", "description": "Have the crew take twenty injuries.", "stat": "injuries_taken", "at_least": 20 },
-  { "id": "a_full_season", "name": "A Full Season", "description": "Reach week twenty.", "stat": "week", "at_least": 20 },
-  { "id": "a_full_year", "name": "A Full Year", "description": "Reach week fifty-two.", "stat": "week", "at_least": 52 },
-  { "id": "the_books_balance", "name": "The Books Balance", "description": "Pay out a million in wages and upkeep.", "stat": "wages_paid", "at_least": 1000000 },
-  { "id": "a_good_employer", "name": "A Good Employer", "description": "Pay out ten million in wages and upkeep.", "stat": "wages_paid", "at_least": 10000000 },
-  { "id": "short_this_week", "name": "Short This Week", "description": "Fail to cover the payroll once.", "stat": "weeks_missed_payroll", "at_least": 1 },
-  { "id": "running_on_fumes", "name": "Running on Fumes", "description": "Fail to cover the payroll five weeks.", "stat": "weeks_missed_payroll", "at_least": 5 },
-  { "id": "squared_away", "name": "Squared Away", "description": "Buy somebody's goodwill back before they walk.", "stat": "bonuses_paid", "at_least": 1 },
-  { "id": "they_walked", "name": "They Walked", "description": "Lose a hand over money.", "stat": "walkouts", "at_least": 1 },
-  { "id": "a_knock_at_the_door", "name": "A Knock at the Door", "description": "Draw the city's attention once.", "stat": "law_incidents", "at_least": 1 },
-  { "id": "known_to_the_law", "name": "Known to the Law", "description": "Draw the city's attention ten times.", "stat": "law_incidents", "at_least": 10 },
-  { "id": "one_of_ours", "name": "One of Ours", "description": "Have somebody taken into custody.", "stat": "arrests", "at_least": 1 },
-  { "id": "nobody_left_behind", "name": "Nobody Left Behind", "description": "Post bail and get somebody back.", "stat": "bails_paid", "at_least": 1 },
-  { "id": "the_right_palms", "name": "The Right Palms", "description": "Buy the city's silence once.", "stat": "bribes_paid", "at_least": 1 },
-  { "id": "quietly_arranged", "name": "Quietly Arranged", "description": "Buy a hundred points of heat away.", "stat": "heat_bought_down", "at_least": 100 },
-  { "id": "beaten_to_it", "name": "Beaten To It", "description": "Let another outfit take a mark you were sitting on.", "stat": "marks_lost_to_rivals", "at_least": 1 },
-  { "id": "always_a_step_behind", "name": "Always a Step Behind", "description": "Lose five marks to the competition.", "stat": "marks_lost_to_rivals", "at_least": 5 },
-  { "id": "on_their_feet", "name": "Back On Their Feet", "description": "Pay a doctor rather than waiting an injury out.", "stat": "injuries_treated", "at_least": 1 },
-  { "id": "the_house_doctor", "name": "The House Doctor", "description": "Treat twenty injuries.", "stat": "injuries_treated", "at_least": 20 },
-  { "id": "knows_the_trade", "name": "Knows the Trade", "description": "Get somebody to the third rank of their specialisation.", "stat": "best_mastery", "at_least": 3 },
-  { "id": "the_best_in_the_city", "name": "The Best in the City", "description": "Get somebody to the seventh rank of their specialisation.", "stat": "best_mastery", "at_least": 7 },
-  { "id": "well_kept_tools", "name": "Well-Kept Tools", "description": "Put a hand's kit back in order.", "stat": "refits_paid", "at_least": 1 },
-  { "id": "the_bench", "name": "The Bench", "description": "Spend a hundred thousand keeping the tools working.", "stat": "refits_paid", "at_least": 100000 },
-  { "id": "moving_it_on", "name": "Moving It On", "description": "Sell something out of the lockup.", "stat": "items_fenced", "at_least": 1 },
-  { "id": "half_a_business", "name": "Half a Business", "description": "Take half a million through the fence.", "stat": "fenced_total", "at_least": 500000 },
-  { "id": "somebody_heard_something", "name": "Somebody Heard Something", "description": "Have a contented hand bring in a mark.", "stat": "leads_brought_in", "at_least": 1 },
-  { "id": "a_crew_worth_keeping", "name": "A Crew Worth Keeping", "description": "Have the crew bring in ten marks of their own.", "stat": "leads_brought_in", "at_least": 10 },
-  { "id": "nothing_personal", "name": "Nothing Personal", "description": "Pay somebody off and take them off the payroll.", "stat": "dismissals", "at_least": 1 },
-  { "id": "a_hard_year", "name": "A Hard Year", "description": "Let five hands go.", "stat": "dismissals", "at_least": 5 },
-  { "id": "out_clean", "name": "Out Clean", "description": "Walk away from the whole thing with a million.", "stat": "final_take", "at_least": 1000000 },
-  { "id": "the_long_con", "name": "The Long Con", "description": "Walk away with ten million.", "stat": "final_take", "at_least": 10000000 }
+  {
+    "id": "first_job",
+    "name": "Opening Night",
+    "description": "Run your first job.",
+    "stat": "jobs_run",
+    "at_least": 1
+  },
+  {
+    "id": "first_payday",
+    "name": "Paid",
+    "description": "Finish a job in the black.",
+    "stat": "jobs_won",
+    "at_least": 1
+  },
+  {
+    "id": "working_outfit",
+    "name": "A Working Outfit",
+    "description": "Run ten jobs.",
+    "stat": "jobs_run",
+    "at_least": 10
+  },
+  {
+    "id": "established",
+    "name": "Established",
+    "description": "Run thirty jobs.",
+    "stat": "jobs_run",
+    "at_least": 30
+  },
+  {
+    "id": "institution",
+    "name": "An Institution",
+    "description": "Run seventy-five jobs.",
+    "stat": "jobs_run",
+    "at_least": 75
+  },
+  {
+    "id": "reliable",
+    "name": "Reliable",
+    "description": "Bring twenty jobs home successfully.",
+    "stat": "jobs_won",
+    "at_least": 20
+  },
+  {
+    "id": "never_wrong",
+    "name": "Never Wrong Twice",
+    "description": "Bring fifty jobs home successfully.",
+    "stat": "jobs_won",
+    "at_least": 50
+  },
+  {
+    "id": "clean_once",
+    "name": "Not a Mark on It",
+    "description": "Clear every door on a job.",
+    "stat": "clean_sweeps",
+    "at_least": 1
+  },
+  {
+    "id": "clean_five",
+    "name": "Professional Standard",
+    "description": "Clear every door on five separate jobs.",
+    "stat": "clean_sweeps",
+    "at_least": 5
+  },
+  {
+    "id": "clean_twenty",
+    "name": "The Quiet Reputation",
+    "description": "Clear every door on twenty separate jobs.",
+    "stat": "clean_sweeps",
+    "at_least": 20
+  },
+  {
+    "id": "hundred_doors",
+    "name": "A Hundred Doors",
+    "description": "Get through a hundred doors.",
+    "stat": "doors_cleared",
+    "at_least": 100
+  },
+  {
+    "id": "three_hundred_doors",
+    "name": "Three Hundred Doors",
+    "description": "Get through three hundred doors.",
+    "stat": "doors_cleared",
+    "at_least": 300
+  },
+  {
+    "id": "first_twenty",
+    "name": "Natural Twenty",
+    "description": "Take a door with a critical success.",
+    "stat": "critical_successes",
+    "at_least": 1
+  },
+  {
+    "id": "lucky_hands",
+    "name": "Lucky Hands",
+    "description": "Take twenty-five doors with critical successes.",
+    "stat": "critical_successes",
+    "at_least": 25
+  },
+  {
+    "id": "blessed",
+    "name": "Somebody Up There",
+    "description": "Take a hundred doors with critical successes.",
+    "stat": "critical_successes",
+    "at_least": 100
+  },
+  {
+    "id": "first_disaster",
+    "name": "It Happens",
+    "description": "Blow a door with a critical failure.",
+    "stat": "critical_failures",
+    "at_least": 1
+  },
+  {
+    "id": "cursed",
+    "name": "The Dice Have Opinions",
+    "description": "Blow twenty-five doors with critical failures.",
+    "stat": "critical_failures",
+    "at_least": 25
+  },
+  {
+    "id": "improviser",
+    "name": "Improviser",
+    "description": "Face ten complications the plan never had.",
+    "stat": "complications_faced",
+    "at_least": 10
+  },
+  {
+    "id": "unflappable",
+    "name": "Unflappable",
+    "description": "Face forty complications the plan never had.",
+    "stat": "complications_faced",
+    "at_least": 40
+  },
+  {
+    "id": "first_million",
+    "name": "The First Million",
+    "description": "Take a million out of this city.",
+    "stat": "payout_total",
+    "at_least": 1000000
+  },
+  {
+    "id": "five_million",
+    "name": "Comfortable",
+    "description": "Take five million out of this city.",
+    "stat": "payout_total",
+    "at_least": 5000000
+  },
+  {
+    "id": "twenty_million",
+    "name": "Untouchable Money",
+    "description": "Take twenty million out of this city.",
+    "stat": "payout_total",
+    "at_least": 20000000
+  },
+  {
+    "id": "big_one",
+    "name": "The Big One",
+    "description": "Clear half a million from a single job.",
+    "stat": "payout_best",
+    "at_least": 500000
+  },
+  {
+    "id": "career_job",
+    "name": "The Career Job",
+    "description": "Clear a million from a single job.",
+    "stat": "payout_best",
+    "at_least": 1000000
+  },
+  {
+    "id": "war_chest",
+    "name": "War Chest",
+    "description": "Sit on half a million in cash.",
+    "stat": "budget",
+    "at_least": 500000
+  },
+  {
+    "id": "first_find",
+    "name": "Finders Keepers",
+    "description": "Carry something out that was not the plan.",
+    "stat": "loot_found",
+    "at_least": 1
+  },
+  {
+    "id": "magpie",
+    "name": "Magpie",
+    "description": "Carry out fifteen unplanned finds.",
+    "stat": "loot_found",
+    "at_least": 15
+  },
+  {
+    "id": "well_stocked",
+    "name": "Well Stocked",
+    "description": "Hold twenty pieces of kit in the lockup.",
+    "stat": "inventory_size",
+    "at_least": 20
+  },
+  {
+    "id": "known_name",
+    "name": "A Known Name",
+    "description": "Reach twenty reputation.",
+    "stat": "reputation",
+    "at_least": 20
+  },
+  {
+    "id": "the_best_crew",
+    "name": "The Best Crew in the City",
+    "description": "Reach fifty reputation.",
+    "stat": "reputation",
+    "at_least": 50
+  },
+  {
+    "id": "legend",
+    "name": "Spoken Of Carefully",
+    "description": "Reach eighty reputation.",
+    "stat": "reputation",
+    "at_least": 80
+  },
+  {
+    "id": "wanted",
+    "name": "Wanted",
+    "description": "Reach fifty notoriety.",
+    "stat": "notoriety",
+    "at_least": 50
+  },
+  {
+    "id": "infamous",
+    "name": "Infamous",
+    "description": "Reach a hundred and fifty notoriety.",
+    "stat": "notoriety",
+    "at_least": 150
+  },
+  {
+    "id": "too_hot",
+    "name": "Too Hot to Work",
+    "description": "Let the city's attention reach sixty.",
+    "stat": "heat_peak",
+    "at_least": 60
+  },
+  {
+    "id": "lying_low",
+    "name": "Lying Low",
+    "description": "Advance five weeks without running anything.",
+    "stat": "quiet_weeks",
+    "at_least": 5
+  },
+  {
+    "id": "a_crew",
+    "name": "A Crew, Not a Pair",
+    "description": "Have six hands on the payroll.",
+    "stat": "crew_size",
+    "at_least": 6
+  },
+  {
+    "id": "full_house",
+    "name": "Full House",
+    "description": "Have ten hands on the payroll.",
+    "stat": "crew_size",
+    "at_least": 10
+  },
+  {
+    "id": "recruiter",
+    "name": "Recruiter",
+    "description": "Take fifteen people on.",
+    "stat": "hires",
+    "at_least": 15
+  },
+  {
+    "id": "veteran",
+    "name": "Veteran",
+    "description": "Get somebody to level five.",
+    "stat": "best_level",
+    "at_least": 5
+  },
+  {
+    "id": "master_of_the_trade",
+    "name": "Master of the Trade",
+    "description": "Get somebody to level ten.",
+    "stat": "best_level",
+    "at_least": 10
+  },
+  {
+    "id": "thick_as_thieves",
+    "name": "Thick as Thieves",
+    "description": "Get a pair to sixty chemistry.",
+    "stat": "best_chemistry",
+    "at_least": 60
+  },
+  {
+    "id": "bad_blood",
+    "name": "Bad Blood",
+    "description": "Let a grudge reach forty.",
+    "stat": "worst_grudge",
+    "at_least": 40
+  },
+  {
+    "id": "the_plan_is_the_play",
+    "name": "The Plan Is the Play",
+    "description": "Commit twenty jobs from a hand-made plan.",
+    "stat": "planned_jobs",
+    "at_least": 20
+  },
+  {
+    "id": "hands_off",
+    "name": "Hands Off",
+    "description": "Delegate twenty jobs to the crew's own judgement.",
+    "stat": "delegated_jobs",
+    "at_least": 20
+  },
+  {
+    "id": "going_in_blind",
+    "name": "Going In Blind",
+    "description": "Run five jobs on marks nobody cased.",
+    "stat": "blind_jobs",
+    "at_least": 5
+  },
+  {
+    "id": "walking_wounded",
+    "name": "The Walking Wounded",
+    "description": "Have the crew take twenty injuries.",
+    "stat": "injuries_taken",
+    "at_least": 20
+  },
+  {
+    "id": "a_full_season",
+    "name": "A Full Season",
+    "description": "Reach week twenty.",
+    "stat": "week",
+    "at_least": 20
+  },
+  {
+    "id": "a_full_year",
+    "name": "A Full Year",
+    "description": "Reach week fifty-two.",
+    "stat": "week",
+    "at_least": 52
+  },
+  {
+    "id": "the_books_balance",
+    "name": "The Books Balance",
+    "description": "Pay out a million in wages and upkeep.",
+    "stat": "wages_paid",
+    "at_least": 1000000
+  },
+  {
+    "id": "a_good_employer",
+    "name": "A Good Employer",
+    "description": "Pay out ten million in wages and upkeep.",
+    "stat": "wages_paid",
+    "at_least": 10000000
+  },
+  {
+    "id": "short_this_week",
+    "name": "Short This Week",
+    "description": "Fail to cover the payroll once.",
+    "stat": "weeks_missed_payroll",
+    "at_least": 1
+  },
+  {
+    "id": "running_on_fumes",
+    "name": "Running on Fumes",
+    "description": "Fail to cover the payroll five weeks.",
+    "stat": "weeks_missed_payroll",
+    "at_least": 5
+  },
+  {
+    "id": "squared_away",
+    "name": "Squared Away",
+    "description": "Buy somebody's goodwill back before they walk.",
+    "stat": "bonuses_paid",
+    "at_least": 1
+  },
+  {
+    "id": "they_walked",
+    "name": "They Walked",
+    "description": "Lose a hand over money.",
+    "stat": "walkouts",
+    "at_least": 1
+  },
+  {
+    "id": "a_knock_at_the_door",
+    "name": "A Knock at the Door",
+    "description": "Draw the city's attention once.",
+    "stat": "law_incidents",
+    "at_least": 1
+  },
+  {
+    "id": "known_to_the_law",
+    "name": "Known to the Law",
+    "description": "Draw the city's attention ten times.",
+    "stat": "law_incidents",
+    "at_least": 10
+  },
+  {
+    "id": "one_of_ours",
+    "name": "One of Ours",
+    "description": "Have somebody taken into custody.",
+    "stat": "arrests",
+    "at_least": 1
+  },
+  {
+    "id": "nobody_left_behind",
+    "name": "Nobody Left Behind",
+    "description": "Post bail and get somebody back.",
+    "stat": "bails_paid",
+    "at_least": 1
+  },
+  {
+    "id": "the_right_palms",
+    "name": "The Right Palms",
+    "description": "Buy the city's silence once.",
+    "stat": "bribes_paid",
+    "at_least": 1
+  },
+  {
+    "id": "quietly_arranged",
+    "name": "Quietly Arranged",
+    "description": "Buy a hundred points of heat away.",
+    "stat": "heat_bought_down",
+    "at_least": 100
+  },
+  {
+    "id": "beaten_to_it",
+    "name": "Beaten To It",
+    "description": "Let another outfit take a mark you were sitting on.",
+    "stat": "marks_lost_to_rivals",
+    "at_least": 1
+  },
+  {
+    "id": "always_a_step_behind",
+    "name": "Always a Step Behind",
+    "description": "Lose five marks to the competition.",
+    "stat": "marks_lost_to_rivals",
+    "at_least": 5
+  },
+  {
+    "id": "on_their_feet",
+    "name": "Back On Their Feet",
+    "description": "Pay a doctor rather than waiting an injury out.",
+    "stat": "injuries_treated",
+    "at_least": 1
+  },
+  {
+    "id": "the_house_doctor",
+    "name": "The House Doctor",
+    "description": "Treat twenty injuries.",
+    "stat": "injuries_treated",
+    "at_least": 20
+  },
+  {
+    "id": "knows_the_trade",
+    "name": "Knows the Trade",
+    "description": "Get somebody to the third rank of their specialisation.",
+    "stat": "best_mastery",
+    "at_least": 3
+  },
+  {
+    "id": "the_best_in_the_city",
+    "name": "The Best in the City",
+    "description": "Get somebody to the seventh rank of their specialisation.",
+    "stat": "best_mastery",
+    "at_least": 7
+  },
+  {
+    "id": "well_kept_tools",
+    "name": "Well-Kept Tools",
+    "description": "Put a hand's kit back in order.",
+    "stat": "refits_paid",
+    "at_least": 1
+  },
+  {
+    "id": "the_bench",
+    "name": "The Bench",
+    "description": "Spend a hundred thousand keeping the tools working.",
+    "stat": "refits_paid",
+    "at_least": 100000
+  },
+  {
+    "id": "moving_it_on",
+    "name": "Moving It On",
+    "description": "Sell something out of the lockup.",
+    "stat": "items_fenced",
+    "at_least": 1
+  },
+  {
+    "id": "half_a_business",
+    "name": "Half a Business",
+    "description": "Take half a million through the fence.",
+    "stat": "fenced_total",
+    "at_least": 500000
+  },
+  {
+    "id": "somebody_heard_something",
+    "name": "Somebody Heard Something",
+    "description": "Have a contented hand bring in a mark.",
+    "stat": "leads_brought_in",
+    "at_least": 1
+  },
+  {
+    "id": "a_crew_worth_keeping",
+    "name": "A Crew Worth Keeping",
+    "description": "Have the crew bring in ten marks of their own.",
+    "stat": "leads_brought_in",
+    "at_least": 10
+  },
+  {
+    "id": "nothing_personal",
+    "name": "Nothing Personal",
+    "description": "Pay somebody off and take them off the payroll.",
+    "stat": "dismissals",
+    "at_least": 1
+  },
+  {
+    "id": "a_hard_year",
+    "name": "A Hard Year",
+    "description": "Let five hands go.",
+    "stat": "dismissals",
+    "at_least": 5
+  },
+  {
+    "id": "out_clean",
+    "name": "Out Clean",
+    "description": "Walk away from the whole thing with a million.",
+    "stat": "final_take",
+    "at_least": 1000000
+  },
+  {
+    "id": "the_long_con",
+    "name": "The Long Con",
+    "description": "Walk away with ten million.",
+    "stat": "final_take",
+    "at_least": 10000000
+  },
+  {
+    "id": "knew_when_to_leave",
+    "name": "Knew When To Leave",
+    "description": "Call a job off on your own standing order.",
+    "stat": "jobs_called_off",
+    "at_least": 1
+  },
+  {
+    "id": "discretion",
+    "name": "Discretion",
+    "description": "Walk out of five jobs rather than push them.",
+    "stat": "jobs_called_off",
+    "at_least": 5
+  },
+  {
+    "id": "doors_never_opened",
+    "name": "Doors Never Opened",
+    "description": "Leave twenty doors standing behind you.",
+    "stat": "doors_left_standing",
+    "at_least": 20
+  },
+  {
+    "id": "running_on_empty",
+    "name": "Running On Empty",
+    "description": "Send somebody through a door they should have slept through.",
+    "stat": "doors_worked_spent",
+    "at_least": 1
+  },
+  {
+    "id": "they_will_sleep_when_its_done",
+    "name": "They'll Sleep When It's Done",
+    "description": "Work spent hands through twenty-five doors.",
+    "stat": "doors_worked_spent",
+    "at_least": 25
+  },
+  {
+    "id": "known_for_it",
+    "name": "Known For It",
+    "description": "Have the city charging you the most it will for one of your own habits.",
+    "stat": "worst_scrutiny",
+    "at_least": 3
+  }
 ]

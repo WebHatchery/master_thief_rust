@@ -201,12 +201,21 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
     // What the standing order actually did, in the same words the planning
     // screen used to offer it. A job that ended early has to say why it ended
     // early, or the ledger reads as a botched one (pillar 2).
-    let note = match report.called_off_with {
+    let mut note = match report.called_off_with {
         Some(1) => "Called off on your order — one door left standing.".to_owned(),
         Some(left) => format!("Called off on your order — {} doors left standing.", left),
         None if report.delegated => crate::sim::delegation::summarise(&report.delegation_misses),
         None => "Planned by you, door by door.".to_owned(),
     };
+    // What the job taught the city about how this outfit gets in. This is the
+    // moment that cost is incurred, so this is where it is owed a sentence —
+    // the board and the week summary both read it back later (GDD 5.4).
+    if let Some((trade, _)) = report.trades_noticed.first() {
+        note.push_str(&format!(
+            " The city watched you work {}.",
+            trade.label().to_lowercase()
+        ));
+    }
     draw_text_block(
         &note,
         content.x,
