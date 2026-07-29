@@ -53,6 +53,16 @@ pub fn situational_modifiers(
         }
     }
 
+    // The city's file on how this outfit works. Charged per trade rather than
+    // per mark: a crew who keep going through the wires find every set of wires
+    // in the city harder, whichever building they are in (GDD 5.4).
+    if let Some(entry) = session
+        .scrutiny
+        .entry(encounter.primary_skill, &data.config.scrutiny)
+    {
+        extras.push(entry);
+    }
+
     // A tail is heat the crew can see out of the window, and it costs the same
     // on every door until it gets bored (GDD 5.6).
     if session.surveillance_weeks > 0 {

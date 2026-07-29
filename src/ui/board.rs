@@ -319,6 +319,7 @@ fn draw_doors(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &Boa
     );
 
     let heat = ctx.session.heat_dc_penalty(&ctx.data.config);
+    let scrutiny = &ctx.data.config.scrutiny;
     let encounters = ctx.data.encounters_for(target);
     let layout = GridLayout::new(rect.x, rect.y + 26.0, rect.w, 8.0, 1, 62.0);
 
@@ -341,6 +342,14 @@ fn draw_doors(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &Boa
             door.y + 23.0,
             TextStyle::new(16.0, dark::TEXT).params(),
         );
+        // The city's file on this trade is charged whether or not the door is
+        // scouted — the outfit knows its own reputation even where it does not
+        // know the building — so it reads on the board, one screen before the
+        // planning breakdown names it (pillar 2).
+        let watched = ctx
+            .session
+            .scrutiny
+            .penalty(encounter.primary_skill, scrutiny);
         draw_ui_text_ex(
             &format!(
                 "{} · {}",
@@ -349,8 +358,28 @@ fn draw_doors(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &Boa
             ),
             door.x + 12.0,
             door.y + 45.0,
-            TextStyle::new(14.0, dark::TEXT_DIM).params(),
+            TextStyle::new(
+                14.0,
+                if watched > 0 {
+                    Color::new(0.90, 0.62, 0.36, 1.0)
+                } else {
+                    dark::TEXT_DIM
+                },
+            )
+            .params(),
         );
+        if watched > 0 {
+            draw_ui_text_ex(
+                &format!(
+                    "· under watch +{}, easing in {} wk",
+                    watched,
+                    scrutiny.weeks_to_relief(ctx.session.scrutiny.get(encounter.primary_skill))
+                ),
+                door.x + 190.0,
+                door.y + 45.0,
+                TextStyle::new(13.0, Color::new(0.90, 0.62, 0.36, 1.0)).params(),
+            );
+        }
 
         let known = entry.knows_door(index);
         let dc_label = if known {

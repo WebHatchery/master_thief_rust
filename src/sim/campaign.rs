@@ -23,6 +23,11 @@ pub struct CampaignLog {
     pub walkouts: usize,
     /// Weeks the city took an interest, of any kind.
     pub law_incidents: usize,
+    /// Weeks that ended with the city charging the outfit for one of its own
+    /// habits (GDD 5.4).
+    pub weeks_under_watch: usize,
+    /// The worst a single trade was ever watched.
+    pub watch_peak: i32,
     pub arrests: usize,
     pub bails_posted: usize,
     /// Every narrative line the campaign printed, in order. GDD 13 calls M6
@@ -123,6 +128,10 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
         if let Some(event) = &summary.law {
             log.law_incidents += 1;
             log.arrests += usize::from(event.taken.is_some());
+        }
+        if let Some((_, worst)) = session.scrutiny.watched(&data.config.scrutiny).first() {
+            log.weeks_under_watch += 1;
+            log.watch_peak = log.watch_peak.max(*worst);
         }
     }
 
@@ -234,6 +243,60 @@ mod tests {
             session.reputation > 0,
             "the outfit's name never got anywhere"
         );
+    }
+
+    #[test]
+    fn an_outfit_that_keeps_working_gets_a_reputation_for_how_it_works() {
+        // The unattended fixer above takes the richest mark every week and
+        // never once considers method. That is exactly the play the city is
+        // supposed to answer, so a campaign run that way has to end up paying
+        // for it (GDD 5.4).
+        let (data, session, log) = campaign(20_260_726, 20);
+
+        assert!(
+            log.weeks_under_watch >= 5,
+            "twenty weeks of the same trades and the city charged for {} of them",
+            log.weeks_under_watch
+        );
+        assert!(log.watch_peak > 0);
+        assert!(
+            log.watch_peak <= data.config.scrutiny.max_penalty,
+            "the watch ran past its own cap at {}",
+            log.watch_peak
+        );
+        assert!(
+            !session.scrutiny.is_empty(),
+            "the file was empty the week after the last job"
+        );
+    }
+
+    #[test]
+    fn a_reputation_for_a_method_can_be_waited_out_but_not_bought_off() {
+        // The counter-play, and the reason this is not simply a second heat
+        // bar: greasing palms buys quiet, and buys nothing here at all.
+        let data = GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data, 20_260_726);
+        play(&mut session, &data, 12);
+        assert!(!session.scrutiny.is_empty(), "nothing to wait out");
+
+        let before = session.scrutiny.watched(&data.config.scrutiny);
+        session.budget = 50_000_000;
+        session.heat = data.config.law.custody_threshold;
+        super::super::grease_palms(&mut session, &data.config).unwrap();
+        assert_eq!(
+            session.scrutiny.watched(&data.config.scrutiny),
+            before,
+            "a bribe bought its way off the city's file"
+        );
+
+        // Quiet weeks are the only answer, and they cost a payroll each.
+        let mut weeks = 0;
+        while !session.scrutiny.is_empty() {
+            super::super::advance_week(&mut session, &data);
+            weeks += 1;
+            assert!(weeks < 60, "a file that never went cold");
+        }
+        assert!(weeks > 1, "one quiet week cleared everything");
     }
 
     #[test]

@@ -91,6 +91,8 @@ pub struct GameConfig {
     pub law: LawConfig,
     /// How fatigue and loyalty grade into modifiers on the die.
     pub condition: crate::rules::ConditionTuning,
+    /// What the city learns from the trades the outfit keeps working.
+    pub scrutiny: crate::rules::ScrutinyTuning,
     /// How long it takes a hand to get good at their own trade.
     pub mastery: crate::rules::MasteryTuning,
 }

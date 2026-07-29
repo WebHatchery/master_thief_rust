@@ -18,6 +18,15 @@ attention — a tail, a raid, or an arrest that puts somebody in a cell until ba
 is posted. The three answers are all purchases, and all of them are shown with
 their price on the Crew screen's **Outfit** tab.
 
+**And the city learns how you work.** Every door the crew open puts its trade on
+a file the city keeps — going through one teaches more than being beaten by it —
+and once a trade's file is thick enough it adds a named penalty to every check of
+that trade, on every mark on the board. It is the one pressure with no purchase
+attached: the answers are weeks of not using that trade, or taking marks whose
+doors need something else. The board flags the watched doors and quotes how many
+quiet weeks would take a point back off them; the planning breakdown carries it
+as `Watched: <Trade>`.
+
 ### Content against GDD §8
 
 | Axis | Authored | Full target |

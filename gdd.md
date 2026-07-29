@@ -266,6 +266,23 @@ calculated: ripening and the closing window are both clocks the player can read 
 which made the bet arithmetic. Rivals are the reason to take a job *now* that has nothing
 to do with the payroll.
 
+**And the city learns how the outfit works.** Ripening and rivals are both things that
+happen *to* a mark; neither of them is the board answering what the crew actually did.
+That third thing is **scrutiny**: a file the city keeps per *trade*. Every door the crew
+work teaches its trade to every building in town — more for a door they got through than
+for one that beat them — and above a threshold the file adds a named penalty to every
+check of that trade, anywhere on the board. So a crew who go through the wires often
+enough find every set of wires in the city harder, on marks they have not touched.
+
+It is deliberately the one pressure that cannot be bought off. Heat has three answers and
+two of them are purchases; a reputation for a method has exactly one, which is weeks of not
+using it — or picking marks whose doors need something else, which is the decision the
+whole thing exists to create. Both halves are quoted before anything is committed: the
+board names the watched doors and says how many quiet weeks would take a point back off
+them, and the planning breakdown carries the penalty by name as `Watched: <Trade>`. The
+week summary says when a trade has come off the list. The numbers live in
+`game_config.json` under `scrutiny`.
+
 ### 5.5 Crew Chemistry (replacing the stubbed relationship system)
 
 Either build this properly or delete the field. Proposed: each pair of crew members holds
@@ -329,6 +346,10 @@ third consequence after the die and the walkout.
   couple of weeks), a **raid** (a share of the outfit's cash seized), or — above a second,
   higher threshold — an **arrest**, which takes the hand the city has seen most of off the
   roster and holds them until somebody posts bail.
+- **Scrutiny** is the third axis and the only one that is not a single number: heat is *how
+  much* attention the outfit has drawn, and scrutiny is *what the attention is about*. It
+  is kept per trade, it is spent down only by not working that trade, and it is described
+  in full under 5.4 because what it actually changes is which mark is worth taking.
 
 **The week has a bill.** The safehouse charges rent and every hand on the payroll draws a
 retainer scaled to their level and standing, whether or not they worked. A week the outfit

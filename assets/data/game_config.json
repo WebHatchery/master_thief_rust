@@ -146,5 +146,13 @@
     "loyalty_step": 20,
     "loyalty_max_bonus": 2,
     "loyalty_max_penalty": 3
+  },
+  "scrutiny": {
+    "per_door_cleared": 6,
+    "per_door_failed": 2,
+    "decay_per_week": 3,
+    "free_threshold": 6,
+    "step": 6,
+    "max_penalty": 3
   }
 }

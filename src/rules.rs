@@ -10,7 +10,9 @@ pub mod condition;
 pub mod encounter;
 pub mod environment;
 pub mod outcome;
+pub mod scrutiny;
 
 pub use attributes::{attribute_modifier, MasteryTuning};
 pub use condition::ConditionTuning;
 pub use outcome::Outcome;
+pub use scrutiny::{Scrutiny, ScrutinyTuning};

@@ -1,0 +1,380 @@
+//! What a finished job does to the campaign: the money, the standing, the
+//! lockup, the wear on the kit, and what the city learned watching it.
+//!
+//! Split out of `job.rs` on its own responsibility — resolving doors and
+//! settling the bill are two jobs, and the file was carrying both.
+
+use super::{DoorOutcome, JobPlan, JobReport};
+use crate::data::GameData;
+use crate::model::{HeistTarget, Skill};
+use crate::rules::outcome::Outcome;
+use crate::state::GameSession;
+
+/// Everything the job owes and is owed, applied in one place.
+pub fn settle(
+    session: &mut GameSession,
+    data: &GameData,
+    target: &HeistTarget,
+    plan: &JobPlan,
+    doors: Vec<DoorOutcome>,
+    delegation_misses: Vec<crate::sim::delegation::DelegationMiss>,
+) -> JobReport {
+    let passed = doors.iter().filter(|door| door.result.passed()).count();
+    let rate = if doors.is_empty() {
+        0.0
+    } else {
+        passed as f32 / doors.len() as f32
+    };
+    let success = rate >= 0.5;
+
+    // What the mark is worth today, not what it was worth when it appeared:
+    // every week the crew left it sitting added to the take (GDD 5.4).
+    let worth = session
+        .board_entry(&target.id)
+        .map(|entry| entry.ripened_payout(target.potential_payout, &data.config.board))
+        .unwrap_or(target.potential_payout);
+
+    let payout = if success {
+        let bonus = if rate > 0.8 { 1.2 } else { 1.0 };
+        (worth as f32 * rate * bonus) as i64
+    } else {
+        (worth as f32 * 0.15) as i64
+    };
+    // What the hands who worked it want for having worked it, negotiated
+    // against who they are and how they feel about the outfit (GDD 5.5).
+    let cut = crate::sim::payroll::crew_cut_for(
+        session,
+        &data.config,
+        &plan.crew_on_job(),
+        plan.delegated,
+    );
+    let net = cut.net_of(payout);
+
+    let notoriety = target.notoriety
+        + if success {
+            0
+        } else {
+            data.config.failure_notoriety
+        };
+    let reputation = if success {
+        data.config.reputation_per_job * difficulty_weight(target)
+    } else {
+        0
+    };
+
+    // What the crew carried out besides the money (GDD 0, "Build").
+    let outcomes: Vec<Outcome> = doors.iter().map(|door| door.result.outcome).collect();
+    let loot = crate::sim::loot::roll_loot(&mut session.rng, data, target, &outcomes, success);
+    session.inventory.extend(loot.iter().cloned());
+
+    // A night out is a night out: every hand who worked wears what they carried
+    // once, not once per door (GDD 3, "repair equipment").
+    for member_id in plan.crew_on_job() {
+        crate::sim::kit::wear_kit(session, &member_id);
+    }
+
+    let was_cased = session
+        .board_entry(&target.id)
+        .map(|entry| !entry.is_blind())
+        .unwrap_or(false);
+
+    session.budget += net;
+    session.notoriety += notoriety;
+    session.heat += notoriety;
+    session.reputation += reputation;
+    let trades_noticed = note_the_method(session, data, &doors);
+    session.board.retain(|entry| entry.target_id != target.id);
+
+    record_job(
+        session, target, plan, &doors, success, net, &loot, was_cased,
+    );
+
+    JobReport {
+        target_id: target.id.clone(),
+        target_name: target.name.clone(),
+        doors,
+        success,
+        loot,
+        delegation_misses,
+        gross: payout,
+        cut,
+        payout: net,
+        notoriety_gained: notoriety,
+        reputation_gained: reputation,
+        heat_gained: notoriety,
+        trades_noticed,
+        delegated: plan.delegated,
+    }
+}
+
+/// Tell the city what it just watched. Every door the crew worked teaches its
+/// trade to every building in town, and getting through one teaches more than
+/// being beaten by it (GDD 5.4).
+///
+/// Counted door by door rather than once per job on purpose: a mark whose three
+/// doors are all wires is exactly the mark that makes the outfit famous for
+/// wires, and the arithmetic has to say so.
+fn note_the_method(
+    session: &mut GameSession,
+    data: &GameData,
+    doors: &[DoorOutcome],
+) -> Vec<(Skill, i32)> {
+    let tuning = &data.config.scrutiny;
+    let mut noticed: Vec<(Skill, i32)> = Vec::new();
+
+    for door in doors {
+        let skill = door.result.check.skill;
+        let attention = if door.result.passed() {
+            tuning.per_door_cleared
+        } else {
+            tuning.per_door_failed
+        };
+        session.scrutiny.note(skill, attention, tuning);
+
+        match noticed.iter_mut().find(|(seen, _)| *seen == skill) {
+            Some((_, total)) => *total += attention,
+            None => noticed.push((skill, attention)),
+        }
+    }
+
+    noticed.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    noticed
+}
+
+/// Everything the records screen and the achievements read afterwards.
+#[allow(clippy::too_many_arguments)]
+fn record_job(
+    session: &mut GameSession,
+    target: &HeistTarget,
+    plan: &JobPlan,
+    doors: &[DoorOutcome],
+    success: bool,
+    payout: i64,
+    loot: &[String],
+    was_cased: bool,
+) {
+    let passed = doors.iter().filter(|door| door.result.passed()).count();
+    let tally = &mut session.tally;
+
+    tally.jobs_run += 1;
+    if success {
+        tally.jobs_won += 1;
+    } else {
+        tally.jobs_lost += 1;
+    }
+    if passed == doors.len() && !doors.is_empty() {
+        tally.clean_sweeps += 1;
+    }
+    tally.doors_cleared += passed as i64;
+    tally.critical_successes += doors
+        .iter()
+        .filter(|d| d.result.outcome == Outcome::CriticalSuccess)
+        .count() as i64;
+    tally.critical_failures += doors
+        .iter()
+        .filter(|d| d.result.outcome == Outcome::CriticalFailure)
+        .count() as i64;
+    tally.complications_faced += doors.iter().filter(|d| d.was_complication).count() as i64;
+    tally.injuries_taken += doors.iter().filter(|d| d.injury.is_some()).count() as i64;
+    tally.payout_total += payout.max(0);
+    tally.payout_best = tally.payout_best.max(payout);
+    tally.loot_found += loot.len() as i64;
+    if plan.delegated {
+        tally.delegated_jobs += 1;
+    } else {
+        tally.planned_jobs += 1;
+    }
+    if !was_cased {
+        tally.blind_jobs += 1;
+    }
+    tally.heat_peak = tally.heat_peak.max(session.heat as i64);
+
+    session.history.push(crate::state::JobRecord {
+        week: session.week,
+        target_name: target.name.clone(),
+        difficulty: target.difficulty,
+        success,
+        doors_passed: passed,
+        doors_total: doors.len(),
+        payout,
+        delegated: plan.delegated,
+        reputation: session.reputation,
+        notoriety: session.notoriety,
+    });
+}
+
+fn difficulty_weight(target: &HeistTarget) -> i32 {
+    use crate::model::DifficultyBand;
+    match target.difficulty {
+        DifficultyBand::Easy => 1,
+        DifficultyBand::Medium => 2,
+        DifficultyBand::Hard => 3,
+        DifficultyBand::Extreme => 5,
+    }
+}
+
+pub fn empty_report(plan: &JobPlan) -> JobReport {
+    JobReport {
+        target_id: plan.target_id.clone(),
+        target_name: plan.target_id.clone(),
+        doors: Vec::new(),
+        success: false,
+        loot: Vec::new(),
+        delegation_misses: Vec::new(),
+        gross: 0,
+        cut: crate::sim::payroll::CrewCut::default(),
+        payout: 0,
+        notoriety_gained: 0,
+        reputation_gained: 0,
+        heat_gained: 0,
+        trades_noticed: Vec::new(),
+        delegated: plan.delegated,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::{auto_assign, run_job};
+    use super::*;
+    use crate::rules::Scrutiny;
+
+    fn setup(seed: u64) -> (GameData, GameSession) {
+        let data = GameData::load().unwrap();
+        let session = GameSession::new(&data.config, &data, seed);
+        (data, session)
+    }
+
+    fn first_target<'a>(data: &'a GameData, session: &GameSession) -> &'a HeistTarget {
+        data.targets.get(&session.board[0].target_id).unwrap()
+    }
+
+    #[test]
+    fn waiting_on_a_mark_pays_more_than_taking_it_fresh() {
+        // The bet the ripening creates: the same job, the same seed, the same
+        // plan — worth measurably more for having been left alone.
+        let data = GameData::load().unwrap();
+        let target = data.targets.get("velvet_room").unwrap().clone();
+
+        let payout_at = |ripeness: u32| {
+            let mut session = GameSession::new(&data.config, &data, 8_080);
+            session.board.retain(|entry| entry.target_id == target.id);
+            if session.board.is_empty() {
+                session
+                    .board
+                    .push(crate::state::BoardEntry::new(&target.id));
+            }
+            session.board[0].ripeness = ripeness;
+            // The doors are harder, so hold the dice still and read the money.
+            for member in &mut session.crew {
+                member.training = crate::model::Skills {
+                    stealth: 40,
+                    athletics: 40,
+                    combat: 40,
+                    lockpicking: 40,
+                    hacking: 40,
+                    social: 40,
+                };
+            }
+            let plan = auto_assign(&session, &data, &target);
+            run_job(&mut session, &data, &plan).payout
+        };
+
+        let fresh = payout_at(0);
+        let ripe = payout_at(data.config.board.ripeness_max);
+        assert!(
+            ripe > fresh,
+            "a mark left three weeks paid {} against {} taken fresh",
+            ripe,
+            fresh
+        );
+    }
+
+    #[test]
+    fn the_report_shows_the_crew_taking_their_share_of_the_gross() {
+        // The results screen reads all three numbers, so the job has to settle
+        // them consistently: gross, what the crew took, what reached the outfit.
+        let (data, mut session) = setup(2_468);
+        let target = first_target(&data, &session).clone();
+        let plan = auto_assign(&session, &data, &target);
+
+        let report = run_job(&mut session, &data, &plan);
+
+        assert!(report.gross > 0);
+        assert_eq!(report.cut.net_of(report.gross), report.payout);
+        assert!(report.payout < report.gross, "the crew worked for nothing");
+        assert!(
+            !report.cut.reasons.is_empty(),
+            "the share moved off the base rate and said nothing about why"
+        );
+    }
+
+    #[test]
+    fn a_finished_mark_leaves_the_board() {
+        let (data, mut session) = setup(606);
+        let target = first_target(&data, &session).clone();
+        let plan = auto_assign(&session, &data, &target);
+
+        run_job(&mut session, &data, &plan);
+        assert!(session.board_entry(&target.id).is_none());
+    }
+
+    #[test]
+    fn every_door_the_crew_worked_teaches_the_city_its_trade() {
+        let (data, mut session) = setup(1_705);
+        let target = first_target(&data, &session).clone();
+        let plan = auto_assign(&session, &data, &target);
+        assert!(session.scrutiny.is_empty());
+
+        let report = run_job(&mut session, &data, &plan);
+
+        assert!(
+            !report.trades_noticed.is_empty(),
+            "a whole job and the city learned nothing"
+        );
+        for (skill, attention) in &report.trades_noticed {
+            assert!(*attention > 0);
+            assert_eq!(session.scrutiny.get(*skill), *attention);
+        }
+        let doors_by_trade: usize = report.trades_noticed.len();
+        assert!(doors_by_trade <= report.doors.len());
+    }
+
+    #[test]
+    fn getting_in_teaches_the_city_more_than_being_beaten_does() {
+        // Otherwise the pressure would land hardest on the crew already having
+        // the worst week, which is the wrong shape for a cost the player is
+        // meant to spend down deliberately.
+        let tuning = &GameData::load().unwrap().config.scrutiny;
+        assert!(tuning.per_door_cleared > tuning.per_door_failed);
+        assert!(tuning.per_door_failed > 0, "a failed door taught nothing");
+    }
+
+    #[test]
+    fn a_file_the_city_already_has_shows_up_on_the_next_job_by_name() {
+        // The whole contract: what the settlement writes has to be readable on
+        // the planning screen before the next commit (pillar 2).
+        let (data, mut session) = setup(1_706);
+        let target = first_target(&data, &session).clone();
+        let door = data.encounters_for(&target)[0].clone();
+        let trade = door.primary_skill;
+
+        session
+            .scrutiny
+            .note(trade, data.config.scrutiny.ceiling(), &data.config.scrutiny);
+        let check = crate::sim::plan::candidate_check(
+            &session,
+            &data,
+            &target,
+            &door,
+            &session.crew[0],
+            &[],
+        );
+
+        let entry = check
+            .entries
+            .iter()
+            .find(|entry| entry.label == Scrutiny::label(trade))
+            .expect("the city's file is charged by name");
+        assert_eq!(entry.value, -data.config.scrutiny.max_penalty);
+    }
+}

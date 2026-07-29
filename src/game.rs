@@ -96,6 +96,9 @@ impl Game {
                     entry.casing = 2;
                 }
                 self.session.casing_this_week = 2;
+                // And a trade already on the city's file, so the shot carries
+                // the watched-door line the board exists to warn with.
+                self.note_capture_method(0);
                 self.selection.target = self
                     .session
                     .board
@@ -165,6 +168,30 @@ impl Game {
         };
     }
 
+    /// Put one of the first mark's trades on the city's file, at the top of the
+    /// curve. Done directly rather than by working twelve weeks of jobs: the
+    /// capture wants the modifier on screen, not a campaign behind it. The door
+    /// index is the caller's, because each scene frames a different one and a
+    /// penalty on a door nobody is looking at photographs as nothing.
+    fn note_capture_method(&mut self, door_index: usize) {
+        let Some(target) = self
+            .session
+            .board
+            .first()
+            .and_then(|entry| self.data.targets.get(&entry.target_id))
+        else {
+            return;
+        };
+        let doors = self.data.encounters_for(target);
+        let Some(door) = doors.get(door_index).copied() else {
+            return;
+        };
+        let tuning = self.data.config.scrutiny;
+        self.session
+            .scrutiny
+            .note(door.primary_skill, tuning.ceiling(), &tuning);
+    }
+
     /// A cased mark with the crew's own picks already in, so the capture shows
     /// difficulties, assignments, and odds rather than an empty draft.
     fn open_capture_plan(&mut self) {
@@ -177,6 +204,9 @@ impl Game {
         let Some(target) = self.data.targets.get(&target_id).cloned() else {
             return;
         };
+        // The candidate list opens on the last door, so that is the trade the
+        // city has to be watching for the breakdown to carry the line.
+        self.note_capture_method(target.encounters.len().saturating_sub(1));
         let mut draft = sim::PlanDraft::from_auto(&self.session, &self.data, &target);
         draft.clear(draft.doors.len().saturating_sub(1));
         draft.focus_on(draft.doors.len().saturating_sub(1));

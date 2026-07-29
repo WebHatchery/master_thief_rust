@@ -89,7 +89,11 @@ impl AttributeKind {
 }
 
 /// The six skills, each fed by a pair of attributes plus training.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+///
+/// Ordered as well as hashed: the city's file on the outfit's methods is a
+/// `BTreeMap` keyed by trade, because everything the save holds has to read
+/// back in a fixed order (GDD 5.7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Skill {
     Stealth,

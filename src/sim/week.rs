@@ -34,6 +34,10 @@ pub struct WeekSummary {
     pub lead: Option<super::leads::Lead>,
     /// Weeks of a tail still to run after this one.
     pub surveillance_weeks: u32,
+    /// Trades the city stopped charging the outfit for this week. Only the ones
+    /// whose penalty actually moved: attention that thinned without changing a
+    /// die is not news (GDD 5.4).
+    pub trades_cooled: Vec<crate::model::Skill>,
 }
 
 impl WeekSummary {
@@ -85,6 +89,12 @@ impl WeekSummary {
         if let Some(lead) = &self.lead {
             notes.push(lead.headline());
         }
+        for skill in &self.trades_cooled {
+            notes.push(format!(
+                "The city has stopped watching {} so closely",
+                skill.label().to_lowercase()
+            ));
+        }
         if self.new_marks > 0 {
             notes.push(format!("{} new marks on the board", self.new_marks));
         }
@@ -128,6 +138,11 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
     let heat_before = session.heat;
     session.heat = (session.heat - config.heat_decay_per_week).max(0);
     session.surveillance_weeks = session.surveillance_weeks.saturating_sub(1);
+
+    // Heat is bought down; a reputation for a method is only waited out. This
+    // is the other thing a quiet week buys, and the one the fixer cannot bribe
+    // their way past (GDD 5.4).
+    let trades_cooled = session.scrutiny.cool(&config.scrutiny);
 
     // The first and only draw of the week from the RNG before the board.
     let law = super::law::roll_attention(session, config);
@@ -188,6 +203,7 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
         rival,
         lead,
         surveillance_weeks: session.surveillance_weeks,
+        trades_cooled,
     }
 }
 
@@ -453,6 +469,67 @@ mod tests {
             assert!(advance_week(&mut session, &data).rival.is_none());
         }
         assert_eq!(session.tally.marks_lost_to_rivals, 0);
+    }
+
+    #[test]
+    fn a_quiet_week_thins_the_citys_file_on_how_the_outfit_works() {
+        // The only thing that answers scrutiny. Heat has three answers and two
+        // of them are purchases; a reputation for a method has one, and it is
+        // the week itself (GDD 5.4).
+        use crate::model::Skill;
+        let (data, mut session) = setup(16);
+        let tuning = &data.config.scrutiny;
+        session
+            .scrutiny
+            .note(Skill::Hacking, tuning.ceiling(), tuning);
+        let before = session.scrutiny.get(Skill::Hacking);
+
+        advance_week(&mut session, &data);
+
+        assert_eq!(
+            session.scrutiny.get(Skill::Hacking),
+            before - tuning.decay_per_week
+        );
+    }
+
+    #[test]
+    fn the_week_says_when_a_trade_has_come_off_the_list() {
+        use crate::model::Skill;
+        let (data, mut session) = setup(17);
+        let tuning = &data.config.scrutiny;
+        // Exactly onto the first band, so a single week's decay clears it.
+        session
+            .scrutiny
+            .note(Skill::Social, tuning.free_threshold + tuning.step, tuning);
+        assert_eq!(session.scrutiny.penalty(Skill::Social, tuning), 1);
+
+        let summary = advance_week(&mut session, &data);
+
+        assert_eq!(summary.trades_cooled, vec![Skill::Social]);
+        assert!(summary
+            .notes()
+            .iter()
+            .any(|note| note.contains("stopped watching social")));
+    }
+
+    #[test]
+    fn a_file_that_only_thinned_is_not_reported_as_relief() {
+        // Attention drains every week; the player only hears about it on the
+        // week it changes a die. Anything else is noise in the notifications.
+        use crate::model::Skill;
+        let (data, mut session) = setup(18);
+        let tuning = &data.config.scrutiny;
+        session
+            .scrutiny
+            .note(Skill::Combat, tuning.ceiling(), tuning);
+
+        let first = advance_week(&mut session, &data);
+        let band = session.scrutiny.penalty(Skill::Combat, tuning);
+        let second = advance_week(&mut session, &data);
+
+        assert_eq!(first.trades_cooled, vec![Skill::Combat]);
+        assert!(second.trades_cooled.is_empty());
+        assert_eq!(session.scrutiny.penalty(Skill::Combat, tuning), band);
     }
 
     #[test]
