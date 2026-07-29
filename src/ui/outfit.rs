@@ -58,13 +58,13 @@ pub fn draw(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) {
     );
 
     let heat_y = content.y + 118.0;
-    draw_heat(Rect::new(content.x, heat_y, content.w, 96.0), ctx, actions);
+    draw_heat(Rect::new(content.x, heat_y, content.w, 118.0), ctx, actions);
     draw_custody(
         Rect::new(
             content.x,
-            heat_y + 104.0,
+            heat_y + 126.0,
             content.w,
-            content.bottom() - heat_y - 164.0,
+            content.bottom() - heat_y - 186.0,
         ),
         ctx,
         actions,
@@ -124,6 +124,33 @@ fn draw_heat(rect: Rect, ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     ) {
         actions.push(UiAction::GreasePalms);
     }
+
+    // Under the bribe button on purpose. The city keeps two files on an outfit —
+    // how much attention it has drawn, and what the attention is about — and
+    // this is the half no amount of money touches (GDD 5.4). A player looking
+    // at the outfit's books for what the city has on them should find both.
+    let scrutiny = &ctx.data.config.scrutiny;
+    let watched = session.scrutiny.watched(scrutiny);
+    let (label, value, tone) = match watched.first() {
+        Some((trade, penalty)) => (
+            "Method on file — no bribe helps",
+            format!(
+                "{} +{} · {} wk",
+                trade.label(),
+                penalty,
+                scrutiny.weeks_to_relief(session.scrutiny.get(*trade))
+            ),
+            CAUTION,
+        ),
+        None => ("Method on file", "nothing yet".to_owned(), CALM),
+    };
+    stat_row(
+        Rect::new(rect.x, rect.y + 98.0, rect.w, 20.0),
+        label,
+        &value,
+        15.0,
+        tone,
+    );
 }
 
 /// The last decision the campaign asks for. Shown with what walking away is

@@ -130,9 +130,12 @@ impl Game {
                 Screen::Crew
             }
             "outfit" | "payroll" => {
-                // Twelve weeks in, the books have something to say: wages
-                // paid, heat carried, and whoever is threatening to walk.
-                crate::sim::play(&mut self.session, &self.data, 12);
+                // Fourteen weeks in, every line of the books has something on
+                // it: wages paid, heat carried, whoever is threatening to walk,
+                // and a trade the city has finally seen enough of. At twelve
+                // the method file is real but still a point under the first
+                // band, so the row it exists to show photographs as empty.
+                crate::sim::play(&mut self.session, &self.data, 14);
                 self.selection.crew_tab = ui::CrewTab::Outfit;
                 // Show a dossier with something on it: whoever is hurt, so the
                 // shot carries the treat quote rather than an idle column.

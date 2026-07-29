@@ -320,7 +320,10 @@ using it — or picking marks whose doors need something else, which is the deci
 whole thing exists to create. Both halves are quoted before anything is committed: the
 board names the watched doors and says how many quiet weeks would take a point back off
 them, and the planning breakdown carries the penalty by name as `Watched: <Trade>`. The
-week summary says when a trade has come off the list. The numbers live in
+week summary says when a trade has come off the list, and the Outfit tab carries it in the
+outfit's own books — directly under the bribe button and labelled as the line no bribe
+helps, because that is where a player goes looking for what the city has on them and both
+halves of the city's file belong in the same place. The numbers live in
 `game_config.json` under `scrutiny`.
 
 ### 5.5 Crew Chemistry (replacing the stubbed relationship system)

@@ -16,7 +16,8 @@ priced decision rather than a free one; unpaid crew lose loyalty, give a week's
 notice, and leave. Heat above a threshold rolls each week for the city's
 attention — a tail, a raid, or an arrest that puts somebody in a cell until bail
 is posted. The three answers are all purchases, and all of them are shown with
-their price on the Crew screen's **Outfit** tab.
+their price on the Crew screen's **Outfit** tab — which also carries the one
+line with no price on it, the city's file on how you work.
 
 **The week's hours are one pool with two claims on it.** Scouting a door costs
 cash *and* an hour of the crew's attention; so does drilling a hand on a point

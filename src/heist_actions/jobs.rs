@@ -43,7 +43,8 @@ pub(super) fn case_target(
         return;
     }
     if left == 0 {
-        notifications.warning("The crew has done all the looking it can this week");
+        notifications
+            .warning("The crew has no hours left this week — scouting and training share them");
         return;
     }
 
@@ -101,7 +102,7 @@ pub(super) fn open_plan(
         return;
     }
     if session.available_crew(&data.config.condition).count() == 0 {
-        notifications.warning("Nobody on the payroll is fit to work");
+        notifications.warning("Everybody on the payroll is too hurt to work");
         return;
     }
 
@@ -140,7 +141,7 @@ pub(super) fn auto_fill_plan(
     };
 
     selection.draft = Some(PlanDraft::from_auto(session, data, target));
-    notifications.info("The crew picked their own doors - argue with it");
+    notifications.info("The crew picked their own doors — argue with it");
 }
 
 /// Commit a hand-made plan. Same engine, same dice, better assignments than
@@ -233,7 +234,7 @@ pub(super) fn delegate_job(
         return None;
     }
     if session.available_crew(&data.config.condition).count() == 0 {
-        notifications.warning("Nobody on the payroll is fit to work");
+        notifications.warning("Everybody on the payroll is too hurt to work");
         return None;
     }
 
