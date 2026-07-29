@@ -18,6 +18,13 @@ attention — a tail, a raid, or an arrest that puts somebody in a cell until ba
 is posted. The three answers are all purchases, and all of them are shown with
 their price on the Crew screen's **Outfit** tab.
 
+**Casing tells you which doors can rewrite the job.** A critical can skip the
+next encounter or add one that was never in the plan. Scouting a door reveals
+whether it is capable of either, alongside its difficulty class — so a
+complication is a hazard you can staff against rather than an ambush, and a
+blind run is trading that away too. Whatever arrives mid-job is answered by the
+best hand already in the building, which makes bringing cover a real hedge.
+
 **The run has a decision in it, made before the dice.** Alongside who stands
 where, the plan carries a *standing order*: push on regardless, or pull the crew
 out after one or two doors go wrong. Walking forfeits the score — a job the crew

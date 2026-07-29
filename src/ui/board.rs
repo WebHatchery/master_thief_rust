@@ -385,11 +385,15 @@ fn draw_doors(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &Boa
             );
         }
 
+        // A door that can rewrite the run is worth knowing about before the
+        // planning screen, and it is worth *scouting for* — so like the
+        // difficulty class, the file has to be paid for first (GDD 12,
+        // questions 2 and 3).
         let known = entry.knows_door(index);
-        let dc_label = if known {
-            format!("DC {}", encounter.difficulty)
-        } else {
-            "DC ??".to_owned()
+        let dc_label = match (known, encounter.can_rewrite_the_run()) {
+            (true, true) => format!("DC {} · rewrites", encounter.difficulty),
+            (true, false) => format!("DC {}", encounter.difficulty),
+            (false, _) => "DC ??".to_owned(),
         };
         draw_text_right(
             &dc_label,

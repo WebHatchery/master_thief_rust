@@ -220,12 +220,20 @@ impl Game {
         let Some(target) = self.data.targets.get(&target_id).cloned() else {
             return;
         };
-        // The candidate list opens on the last door, so that is the trade the
-        // city has to be watching for the breakdown to carry the line.
-        self.note_capture_method(target.encounters.len().saturating_sub(1));
+        // Open on a door that can rewrite the run where the mark has one, so
+        // the capture carries the telegraph rather than a door that is only
+        // ever itself. Its trade is the one the city is watching, for the same
+        // reason: a shot of the breakdown wants the lines actually on it.
+        let focus = self
+            .data
+            .encounters_for(&target)
+            .iter()
+            .position(|encounter| encounter.can_rewrite_the_run())
+            .unwrap_or(target.encounters.len().saturating_sub(1));
+        self.note_capture_method(focus);
         let mut draft = sim::PlanDraft::from_auto(&self.session, &self.data, &target);
-        draft.clear(draft.doors.len().saturating_sub(1));
-        draft.focus_on(draft.doors.len().saturating_sub(1));
+        draft.clear(focus);
+        draft.focus_on(focus);
         // A standing order actually set, so the footer photographs the decision
         // rather than its default.
         draft.cycle_nerve();

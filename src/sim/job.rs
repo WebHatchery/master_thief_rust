@@ -244,12 +244,17 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
         let Some(encounter) = data.encounters.get(&encounter_id).cloned() else {
             continue;
         };
-        let Some(member_id) = assigned_member(plan, &encounter_id, session, &data.config.condition)
+        let Some(member_id) =
+            assigned_member(plan, &encounter, session, data, &target, &crew_on_job)
         else {
             continue;
         };
 
-        let outcome = resolve_door(session, data, &target, &encounter, &member_id, &crew_on_job);
+        let mut outcome =
+            resolve_door(session, data, &target, &encounter, &member_id, &crew_on_job);
+        // Read off the queue rather than off the encounter: it is the run that
+        // knows whether this door was in the plan or arrived during it.
+        outcome.was_complication = was_complication;
 
         match outcome.result.run_effect {
             RunEffect::SkipNext => {
@@ -269,7 +274,6 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
             gone_wrong += 1;
         }
 
-        let _ = was_complication;
         record_chemistry(
             session,
             &outcome.result.check.member_id,
@@ -319,24 +323,63 @@ fn record_chemistry(
     );
 }
 
+/// Who opens this door. Assigned doors go to the hand the fixer put on them;
+/// a complication has no assignment of its own and falls to whoever is best
+/// placed to deal with it **out of the people already in the building**.
+///
+/// It used to fall to the first fit name on the whole payroll, which was both a
+/// fiction break — somebody who was not on the job answering a door in it — and
+/// arbitrary, since roster order is not a measure of anything. Picking the best
+/// hand present is what makes a complication a hazard the fixer can staff
+/// against rather than a dice roll on the roster: a second capable body on the
+/// job is cover, and cover is a roster decision with a price (GDD 12, q3).
 fn assigned_member(
     plan: &JobPlan,
-    encounter_id: &str,
+    encounter: &Encounter,
     session: &GameSession,
-    tuning: &crate::rules::ConditionTuning,
+    data: &GameData,
+    target: &HeistTarget,
+    crew_on_job: &[String],
 ) -> Option<String> {
-    plan.assignments
+    if let Some(assignment) = plan
+        .assignments
         .iter()
-        .find(|assignment| assignment.encounter_id == encounter_id)
-        .map(|assignment| assignment.member_id.clone())
-        // A complication has no assignment of its own; the crew's steadiest
-        // available hand takes it.
-        .or_else(|| {
-            session
-                .available_crew(tuning)
-                .next()
-                .map(|member| member.id.clone())
+        .find(|assignment| assignment.encounter_id == encounter.id)
+    {
+        return Some(assignment.member_id.clone());
+    }
+
+    let best = crew_on_job
+        .iter()
+        .filter_map(|id| session.member(id))
+        .filter(|member| data.config.condition.can_work(&member.condition))
+        .max_by_key(|member| {
+            let loadout = session.loadout(member, data);
+            build_check(CheckInputs {
+                member,
+                loadout: &loadout,
+                encounter,
+                tuning: &data.config.condition,
+                extra: &situational_modifiers(
+                    data,
+                    target,
+                    encounter,
+                    session,
+                    &member.id,
+                    crew_on_job,
+                ),
+            })
+            .bonus()
         })
+        .map(|member| member.id.clone());
+
+    // Only if the job somehow has nobody in it at all.
+    best.or_else(|| {
+        session
+            .available_crew(&data.config.condition)
+            .next()
+            .map(|member| member.id.clone())
+    })
 }
 
 fn draw_complication(session: &mut GameSession, data: &GameData) -> Option<String> {
@@ -454,7 +497,9 @@ fn resolve_door(
         result,
         narrative,
         injury,
-        was_complication: encounter.complication_only,
+        // Overwritten by the run loop, which is the only thing that knows
+        // whether this door was planned or arrived mid-job.
+        was_complication: false,
         critical_effect,
     }
 }

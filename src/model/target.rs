@@ -111,6 +111,28 @@ pub enum RunEffect {
     AddComplication,
 }
 
+impl RunEffect {
+    /// The warning a scouted door carries about what a critical here would do
+    /// to the rest of the run.
+    ///
+    /// GDD 12's third open question was whether *adding* an encounter can ever
+    /// feel fair. It cannot while it arrives unannounced, and it can once the
+    /// file says which doors are capable of it — so the answer is not to soften
+    /// the effect but to put it on the report the crew paid to have made.
+    ///
+    /// The wording is fixed rather than authored per encounter because it is
+    /// describing a *rule*, not content: `SkipNext` only ever hangs off a
+    /// critical success and `AddComplication` only ever off a critical failure,
+    /// across every encounter in the game.
+    pub fn telegraph(self) -> Option<&'static str> {
+        match self {
+            RunEffect::None => None,
+            RunEffect::SkipNext => Some("Do this one perfectly and the next door opens with it."),
+            RunEffect::AddComplication => Some("Botch this one and something else comes running."),
+        }
+    }
+}
+
 /// A single door, guard, camera, or conversation.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Encounter {
@@ -137,6 +159,26 @@ pub struct Encounter {
     /// Complications may only be inserted, never picked as a target's own door.
     #[serde(default)]
     pub complication_only: bool,
+}
+
+impl Encounter {
+    /// The warnings this door carries about rewriting the run, best case first.
+    /// Empty for the sixty-one doors that are only ever themselves.
+    pub fn run_effect_telegraphs(&self) -> Vec<&'static str> {
+        [
+            self.critical_success_run_effect,
+            self.critical_failure_run_effect,
+        ]
+        .into_iter()
+        .filter_map(RunEffect::telegraph)
+        .collect()
+    }
+
+    /// Can anything that happens here change the shape of the rest of the job?
+    pub fn can_rewrite_the_run(&self) -> bool {
+        self.critical_success_run_effect != RunEffect::None
+            || self.critical_failure_run_effect != RunEffect::None
+    }
 }
 
 /// Where the environment stands for one job. Chosen at planning time and

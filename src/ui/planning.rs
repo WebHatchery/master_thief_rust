@@ -329,9 +329,15 @@ fn draw_candidates(
 
     draw_text_block(
         &if cased {
+            // The file says what a critical here would do to the rest of the
+            // job, because a complication nobody was warned about is the one
+            // way this engine can feel unfair (GDD 12, open question 3).
             format!(
-                "{} Difficulty class {}. {}",
-                encounter.description, encounter.difficulty, encounter.failure_consequence
+                "{} Difficulty class {}. {} {}",
+                encounter.description,
+                encounter.difficulty,
+                encounter.failure_consequence,
+                encounter.run_effect_telegraphs().join(" ")
             )
         } else {
             format!(

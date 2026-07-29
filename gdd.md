@@ -205,6 +205,11 @@ success; natural 20 → critical success. Criticals fire the encounter's
 the run — a critical success on a lock can skip the next encounter entirely; a critical
 failure can add one.
 
+**And a scouted door says what a critical there *would* do.** Which doors can rewrite the
+run is part of what casing buys, alongside the difficulty class — see §12, question 3. A
+complication is answered by the best hand already on the job, never by somebody who was not
+in the building.
+
 **A critical says what it did.** The authored effect text is carried on the door outcome
 and read out on the run and again in the results, followed by what the critical did to the
 plan — the next door opening with this one, or something new waiting. Both halves used to
@@ -579,8 +584,23 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
    properly is scouting every other one not at all. That is what makes blind runs
    interesting rather than merely poor: going in half-lit on a mark you understand is a
    position the player chooses, not one poverty forces on them.
-3. How much should critical results restructure a run? Skipping an encounter is a strong,
-   readable payoff; adding one may feel unfair unless well telegraphed.
+3. **Settled: as much as it likes, once the file says which doors can do it.** The worry
+   was the right one and the fix is not to soften the effect — a critical that rewrites the
+   run is the most interesting thing the dice do, and a skipped door and an added one are
+   worth the same amount of drama. What made adding one feel unfair was that it arrived
+   unannounced. So the capability is now part of what casing buys: a door on the file says
+   *"Botch this one and something else comes running"* or *"Do this one perfectly and the
+   next door opens with it"*, and the board flags a scouted door that can rewrite the run at
+   all. Unscouted, the player learns neither — which is one more thing a blind run is
+   trading away, and one more reason to spend a look here rather than there (question 2).
+
+   The other half of fairness was who deals with it. A complication had no assignment of its
+   own and fell to the first fit name on the *whole payroll* — somebody who was not on the
+   job, chosen by roster order, which is not a measure of anything. It now goes to the best
+   hand of the people already in the building. That turns a complication into a hazard the
+   fixer can staff against: a second capable body on a job is cover, cover costs a share of
+   the take and a hand who could have been resting, and it is worth buying exactly on the
+   marks whose file says a door can go loud.
 4. **Settled: it earns it, now that it costs something.** As a modifier alone chemistry was
    decoration — free upside for a roster the player was picking anyway. It earns its place
    once a partnership carries a premium on the cut and decays when it is not used, because
