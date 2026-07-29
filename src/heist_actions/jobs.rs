@@ -31,7 +31,7 @@ pub(super) fn case_target(
     };
     let name = target.name.clone();
     let doors = target.encounters.len();
-    let left = session.casing_left_this_week(&data.config);
+    let left = session.attention_left_this_week(&data.config);
 
     let Some(entry) = session.board_entry(target_id) else {
         notifications.warning(format!("{} is no longer on the board", name));
@@ -58,7 +58,7 @@ pub(super) fn case_target(
     }
 
     session.budget -= cost;
-    session.casing_this_week += 1;
+    session.attention_spent_this_week += 1;
     let Some(entry) = session
         .board
         .iter_mut()

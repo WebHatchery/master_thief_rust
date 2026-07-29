@@ -590,11 +590,20 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
 2. **Settled: both, and a door at a time.** Casing is bought per door, front to back, so
    a mark can be half known — the way in scouted and the vault still a rumour. Each door
    costs cash (rising with every door already on that mark's file: the front hall is cheap,
-   the vault is not) *and* one of a small fixed number of looks the crew has in a week,
+   the vault is not) *and* one of a small fixed number of hours the crew has in a week,
    across the whole board. Money alone can never finish a file, so scouting one building
    properly is scouting every other one not at all. That is what makes blind runs
    interesting rather than merely poor: going in half-lit on a mark you understand is a
    position the player chooses, not one poverty forces on them.
+
+   **And casing is not the only thing the week's hours buy.** Drilling a hand on a banked
+   attribute or skill point costs one of the same hours. Points used to be a button that was
+   always right to press the moment it lit up — earned by levelling, free to spend, strictly
+   good — which is not a decision at all. Now the board and the crew compete for the same
+   rationed thing, and a week where two hands levelled is a week the vault door stays a
+   rumour. Nothing earned is ever lost: the cost is pacing, not forfeiture, and the points
+   wait until there is a week to spare for them. The budget lives in `game_config.json` as
+   `attention_per_week`.
 3. **Settled: as much as it likes, once the file says which doors can do it.** The worry
    was the right one and the fix is not to soften the effect — a critical that rewrites the
    run is the most interesting thing the dice do, and a skipped door and an added one are

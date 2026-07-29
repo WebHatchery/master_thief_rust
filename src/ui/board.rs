@@ -154,19 +154,20 @@ fn draw_detail(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     );
 
     // Casing is bought a door at a time against cash *and* the week's
-    // attention, so the button has to show both (GDD 12, open question 2).
+    // attention — the same hours drilling a hand spends — so the button has to
+    // show both (GDD 12, open question 2).
     let doors = target.encounters.len();
     let cost = entry.next_casing_cost(&ctx.data.config);
-    let looks = ctx.session.casing_left_this_week(&ctx.data.config);
+    let looks = ctx.session.attention_left_this_week(&ctx.data.config);
     let done = entry.is_fully_cased(doors);
     let can_case = !done && looks > 0 && ctx.session.budget >= cost;
     let label = if done {
         "Every door on file".to_owned()
     } else if looks == 0 {
-        "No looks left this week".to_owned()
+        "No hours left this week".to_owned()
     } else {
         format!(
-            "Scout door {} ({}) · {} left",
+            "Scout door {} ({}) · {}h left",
             entry.casing + 1,
             format_compact_money(cost),
             looks

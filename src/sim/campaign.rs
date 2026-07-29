@@ -83,7 +83,7 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
                 .get(&target_id)
                 .map(|target| target.encounters.len())
                 .unwrap_or(0);
-            while session.casing_left_this_week(&data.config) > 0 {
+            while session.attention_left_this_week(&data.config) > 0 {
                 let Some(index) = session
                     .board
                     .iter()
@@ -99,7 +99,7 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
                 }
                 session.budget -= entry.next_casing_cost(&data.config);
                 session.board[index].casing += 1;
-                session.casing_this_week += 1;
+                session.attention_spent_this_week += 1;
             }
 
             if session.available_crew(&data.config.condition).count() > 0 {

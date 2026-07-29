@@ -149,7 +149,7 @@ pub fn advance_week(session: &mut GameSession, data: &GameData) -> WeekSummary {
     let heat_shed = heat_before - session.heat;
 
     // A new week is a fresh set of eyes: the attention spent scouting resets.
-    session.casing_this_week = 0;
+    session.attention_spent_this_week = 0;
 
     // The competition moves before the board ages, so a mark somebody else took
     // never gets to ripen one more week on the way out (GDD 5.4).

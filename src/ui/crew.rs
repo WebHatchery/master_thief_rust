@@ -228,13 +228,28 @@ fn draw_attributes(
     actions: &mut Vec<UiAction>,
 ) {
     let points = member.progression.attribute_points;
+    // Drilling somebody costs an hour of the same weekly attention scouting
+    // spends, so the header quotes both numbers: what they have earned, and
+    // whether the week has time to give them.
+    let hours = ctx.session.attention_left_this_week(&ctx.data.config);
     section_title(rect, "Attributes");
     if points > 0 {
         draw_text_right(
-            &format!("{} to spend", points),
+            &if hours > 0 {
+                format!("{} to spend · {}h left", points, hours)
+            } else {
+                format!("{} to spend · no time", points)
+            },
             rect.right(),
             rect.y + 16.0,
-            TextStyle::new(13.0, dark::ACCENT),
+            TextStyle::new(
+                13.0,
+                if hours > 0 {
+                    dark::ACCENT
+                } else {
+                    dark::TEXT_DIM
+                },
+            ),
         );
     }
 
@@ -242,7 +257,7 @@ fn draw_attributes(
         let score = attributes.get(*kind);
         let modifier = crate::rules::attribute_modifier(score);
         let row = Rect::new(rect.x, rect.y + 26.0 + index as f32 * 24.0, rect.w, 20.0);
-        let spendable = points > 0 && member.attributes.get(*kind) < 20;
+        let spendable = points > 0 && hours > 0 && member.attributes.get(*kind) < 20;
 
         stat_row(
             Rect::new(
@@ -281,13 +296,25 @@ fn draw_skills(
     actions: &mut Vec<UiAction>,
 ) {
     let points = member.progression.skill_points;
+    let hours = ctx.session.attention_left_this_week(&ctx.data.config);
     section_title(rect, "Skills");
     if points > 0 {
         draw_text_right(
-            &format!("{} to spend", points),
+            &if hours > 0 {
+                format!("{} to spend · {}h left", points, hours)
+            } else {
+                format!("{} to spend · no time", points)
+            },
             rect.right(),
             rect.y + 16.0,
-            TextStyle::new(13.0, dark::ACCENT),
+            TextStyle::new(
+                13.0,
+                if hours > 0 {
+                    dark::ACCENT
+                } else {
+                    dark::TEXT_DIM
+                },
+            ),
         );
     }
 
@@ -304,7 +331,7 @@ fn draw_skills(
             Rect::new(
                 row.x,
                 row.y,
-                row.w - if points > 0 { 26.0 } else { 0.0 },
+                row.w - if points > 0 && hours > 0 { 26.0 } else { 0.0 },
                 row.h,
             ),
             &label,
@@ -317,6 +344,7 @@ fn draw_skills(
             },
         );
         if points > 0
+            && hours > 0
             && button_rect_tone_at(
                 Rect::new(row.right() - 22.0, row.y + 1.0, 22.0, 18.0),
                 "+",

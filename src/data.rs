@@ -43,9 +43,11 @@ pub struct GameConfig {
     pub casing_cost: i64,
     /// Added to that cost for every door already scouted on the same mark.
     pub casing_cost_step: i64,
-    /// Doors the crew can scout in a week, across the whole board. This is the
-    /// half of casing that money cannot buy (GDD 12, open question 2).
-    pub casing_steps_per_week: u32,
+    /// Hours of the crew's attention in a week, across everything. Scouting a
+    /// door spends one and so does drilling a hand who has levelled, so the two
+    /// compete: this is the half of casing that money cannot buy, and the half
+    /// of training that experience does not (GDD 12, open question 2).
+    pub attention_per_week: u32,
 
     /// Fatigue removed by a week of rest, before the constitution bonus.
     pub rest_recovery: i32,

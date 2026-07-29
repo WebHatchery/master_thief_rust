@@ -18,6 +18,13 @@ attention — a tail, a raid, or an arrest that puts somebody in a cell until ba
 is posted. The three answers are all purchases, and all of them are shown with
 their price on the Crew screen's **Outfit** tab.
 
+**The week's hours are one pool with two claims on it.** Scouting a door costs
+cash *and* an hour of the crew's attention; so does drilling a hand on a point
+they earned by levelling. Banked points used to be a free click the moment they
+appeared — now the board and the roster compete for the same rationed thing, and
+a week where two hands levelled is a week the vault door stays a rumour. Nothing
+earned is lost; it just waits.
+
 **Casing tells you which doors can rewrite the job.** A critical can skip the
 next encounter or add one that was never in the plan. Scouting a door reveals
 whether it is capable of either, alongside its difficulty class — so a

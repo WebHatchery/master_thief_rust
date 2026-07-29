@@ -12,7 +12,7 @@
   "recruit_pool_size": 4,
   "casing_cost": 2500,
   "casing_cost_step": 1800,
-  "casing_steps_per_week": 3,
+  "attention_per_week": 3,
 
   "rest_recovery": 25,
   "idle_loyalty_drift": 3,

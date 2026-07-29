@@ -123,14 +123,20 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
                 .map(|()| String::new()),
         ),
         UiAction::UnequipSlot { member_id, slot } => session.unequip(&member_id, slot),
+        // Drilling a hand costs an hour of the same weekly attention scouting
+        // spends, so the refusal has to say which of the two ran out.
         UiAction::SpendAttribute { member_id, kind } => {
-            if session.spend_attribute_point(&member_id, kind) {
+            if session.spend_attribute_point(&data.config, &member_id, kind) {
                 notifications.info(format!("{} raised", kind.short_label()));
+            } else if session.attention_left_this_week(&data.config) == 0 {
+                notifications.warning("The crew has no time left for training this week");
             }
         }
         UiAction::SpendSkill { member_id, skill } => {
-            if session.spend_skill_point(&member_id, skill) {
+            if session.spend_skill_point(&data.config, &member_id, skill) {
                 notifications.info(format!("{} trained", skill.label()));
+            } else if session.attention_left_this_week(&data.config) == 0 {
+                notifications.warning("The crew has no time left for training this week");
             }
         }
 
@@ -264,7 +270,7 @@ mod tests {
         assert_eq!(entry.casing, 1, "one look bought the whole building");
         assert!(entry.knows_door(0) && !entry.knows_door(1));
         assert_eq!(session.budget, budget - data.config.casing_cost);
-        assert_eq!(session.casing_this_week, 1);
+        assert_eq!(session.attention_spent_this_week, 1);
     }
 
     #[test]
@@ -303,7 +309,7 @@ mod tests {
         let target_id = session.board[0].target_id.clone();
         session.budget = 10_000_000;
 
-        for _ in 0..(data.config.casing_steps_per_week + 3) {
+        for _ in 0..(data.config.attention_per_week + 3) {
             apply(
                 UiAction::CaseTarget(target_id.clone()),
                 dispatch(&data, &mut session, &mut selection, &mut notifications),
@@ -311,26 +317,78 @@ mod tests {
         }
 
         let doors = data.targets.get(&target_id).unwrap().encounters.len() as u32;
-        let spent = session.casing_this_week;
+        let spent = session.attention_spent_this_week;
         assert!(
-            spent <= data.config.casing_steps_per_week,
+            spent <= data.config.attention_per_week,
             "{} looks in a week of {}",
             spent,
-            data.config.casing_steps_per_week
+            data.config.attention_per_week
         );
         assert!(session.board_entry(&target_id).unwrap().casing <= doors);
     }
 
     #[test]
+    fn drilling_a_hand_spends_the_same_week_scouting_does() {
+        // Banked points used to be a button that was always right to press the
+        // moment it lit up, which is not a decision. They now compete with the
+        // board for the one thing the week rations.
+        let (data, mut session) = setup();
+        let id = session.crew[0].id.clone();
+        session.crew[0].progression.skill_points = 5;
+        let before = session.attention_left_this_week(&data.config);
+        assert!(before > 0);
+
+        assert!(session.spend_skill_point(&data.config, &id, crate::model::Skill::Stealth));
+        assert_eq!(session.attention_left_this_week(&data.config), before - 1);
+        assert_eq!(session.member(&id).unwrap().progression.skill_points, 4);
+    }
+
+    #[test]
+    fn a_week_spent_on_the_board_is_a_week_nobody_gets_trained() {
+        let (data, mut session) = setup();
+        let id = session.crew[0].id.clone();
+        session.crew[0].progression.skill_points = 5;
+        session.crew[0].progression.attribute_points = 5;
+        session.attention_spent_this_week = data.config.attention_per_week;
+
+        assert!(!session.spend_skill_point(&data.config, &id, crate::model::Skill::Stealth));
+        assert!(!session.spend_attribute_point(
+            &data.config,
+            &id,
+            crate::model::AttributeKind::Dexterity
+        ));
+        assert_eq!(
+            session.member(&id).unwrap().progression.skill_points,
+            5,
+            "a point was spent with no week to spend it in"
+        );
+    }
+
+    #[test]
+    fn points_keep_until_there_is_a_week_to_spare_for_them() {
+        // The cost is pacing, not forfeiture: nothing earned is ever lost, it
+        // just waits behind whatever else the week wanted.
+        let (data, mut session) = setup();
+        let id = session.crew[0].id.clone();
+        session.crew[0].progression.skill_points = 2;
+        session.attention_spent_this_week = data.config.attention_per_week;
+
+        crate::sim::advance_week(&mut session, &data);
+
+        assert_eq!(session.member(&id).unwrap().progression.skill_points, 2);
+        assert!(session.spend_skill_point(&data.config, &id, crate::model::Skill::Stealth));
+    }
+
+    #[test]
     fn a_new_week_gives_the_crew_their_eyes_back() {
         let (data, mut session) = setup();
-        session.casing_this_week = data.config.casing_steps_per_week;
-        assert_eq!(session.casing_left_this_week(&data.config), 0);
+        session.attention_spent_this_week = data.config.attention_per_week;
+        assert_eq!(session.attention_left_this_week(&data.config), 0);
 
         crate::sim::advance_week(&mut session, &data);
         assert_eq!(
-            session.casing_left_this_week(&data.config),
-            data.config.casing_steps_per_week
+            session.attention_left_this_week(&data.config),
+            data.config.attention_per_week
         );
     }
 

@@ -95,7 +95,7 @@ impl Game {
                 if let Some(entry) = self.session.board.first_mut() {
                     entry.casing = 2;
                 }
-                self.session.casing_this_week = 2;
+                self.session.attention_spent_this_week = 2;
                 // And a trade already on the city's file, so the shot carries
                 // the watched-door line the board exists to warn with.
                 self.note_capture_method(0);
@@ -166,11 +166,24 @@ impl Game {
             }
             _ => {
                 // A roster where everybody reads "Ready" photographs none of
-                // the states the screen exists to distinguish.
+                // the states the screen exists to distinguish, and a dossier
+                // with nothing banked photographs none of the decision.
                 self.wear_out_a_hand();
+                self.bank_a_levels_worth();
                 Screen::Crew
             }
         };
+    }
+
+    /// Put a level's worth of unspent points on the dossier the crew screen
+    /// opens on, and half the week's hours behind them, so the shot carries
+    /// what training now costs rather than an empty column.
+    fn bank_a_levels_worth(&mut self) {
+        if let Some(member) = self.session.crew.first_mut() {
+            member.progression.attribute_points = 1;
+            member.progression.skill_points = 2;
+        }
+        self.session.attention_spent_this_week = 1;
     }
 
     /// Run one hand past the working threshold. They stay selectable — that is

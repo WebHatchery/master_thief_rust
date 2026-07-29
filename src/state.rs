@@ -34,11 +34,13 @@ pub struct GameSession {
     /// Weeks a tail stays on the crew, costing every door.
     #[serde(default)]
     pub surveillance_weeks: u32,
-    /// Doors put on a file this week. The crew only has so much attention, and
-    /// spending it on one mark is spending it away from every other
-    /// (GDD 12, open question 2).
-    #[serde(default)]
-    pub casing_this_week: u32,
+    /// What the crew's attention has already gone on this week. They only have
+    /// so much of it, and it buys two different things — doors put on a file,
+    /// and hours spent drilling a hand who has levelled — so spending it on one
+    /// mark is spending it away from every other mark *and* from everybody's
+    /// training (GDD 12, open question 2).
+    #[serde(default, alias = "casing_this_week")]
+    pub attention_spent_this_week: u32,
     /// Equipment ids in the lockup, including items currently assigned.
     pub inventory: Vec<String>,
     /// Jobs each piece of kit has been carried through since its last refit.
@@ -118,7 +120,7 @@ impl GameSession {
             crew,
             custody: Vec::new(),
             surveillance_weeks: 0,
-            casing_this_week: 0,
+            attention_spent_this_week: 0,
             inventory: config.starting_inventory.clone(),
             kit_wear: std::collections::BTreeMap::new(),
             board: Vec::new(),
@@ -166,11 +168,12 @@ impl GameSession {
             .max(config.recruiting.min_pool)
     }
 
-    /// Doors the crew still has the attention to scout this week.
-    pub fn casing_left_this_week(&self, config: &GameConfig) -> u32 {
+    /// What the crew can still turn their attention to this week — another door
+    /// on a file, or an afternoon drilling somebody. One pool, two uses.
+    pub fn attention_left_this_week(&self, config: &GameConfig) -> u32 {
         config
-            .casing_steps_per_week
-            .saturating_sub(self.casing_this_week)
+            .attention_per_week
+            .saturating_sub(self.attention_spent_this_week)
     }
 
     /// Has the outfit stopped for good?
@@ -279,11 +282,19 @@ impl GameSession {
     }
 
     /// Spend a level-up point. Returns false when there is none to spend.
+    /// Drill a hand on one attribute. Costs a point they earned *and* an hour of
+    /// the week the crew could have spent looking at a building — banked points
+    /// used to be a button that was always right to press the moment it lit up,
+    /// which is not a decision.
     pub fn spend_attribute_point(
         &mut self,
+        config: &GameConfig,
         member_id: &str,
         kind: crate::model::AttributeKind,
     ) -> bool {
+        if self.attention_left_this_week(config) == 0 {
+            return false;
+        }
         let Some(member) = self.member_mut(member_id) else {
             return false;
         };
@@ -292,10 +303,21 @@ impl GameSession {
         }
         member.progression.attribute_points -= 1;
         member.attributes.add(kind, 1);
+        self.attention_spent_this_week += 1;
         true
     }
 
-    pub fn spend_skill_point(&mut self, member_id: &str, skill: crate::model::Skill) -> bool {
+    /// The same for a trade. Points keep until the fixer has a week to spare for
+    /// them, so a hand who levelled in a busy fortnight stays as they were.
+    pub fn spend_skill_point(
+        &mut self,
+        config: &GameConfig,
+        member_id: &str,
+        skill: crate::model::Skill,
+    ) -> bool {
+        if self.attention_left_this_week(config) == 0 {
+            return false;
+        }
         let Some(member) = self.member_mut(member_id) else {
             return false;
         };
@@ -304,6 +326,7 @@ impl GameSession {
         }
         member.progression.skill_points -= 1;
         member.training.add(skill, 1);
+        self.attention_spent_this_week += 1;
         true
     }
 
