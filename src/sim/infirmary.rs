@@ -206,10 +206,16 @@ mod tests {
             Injury::major("Cracked rib"),
             Injury::minor("Sprain"),
         ];
-        assert!(!session.member(&id).unwrap().condition.is_fit_for_work());
+        assert!(!data
+            .config
+            .condition
+            .can_work(&session.member(&id).unwrap().condition));
 
         session.budget = 5_000_000;
         assert!(treat(&mut session, &data.config, &id).is_ok());
-        assert!(session.member(&id).unwrap().condition.is_fit_for_work());
+        assert!(data
+            .config
+            .condition
+            .can_work(&session.member(&id).unwrap().condition));
     }
 }

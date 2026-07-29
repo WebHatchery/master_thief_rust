@@ -18,6 +18,14 @@ attention — a tail, a raid, or an arrest that puts somebody in a cell until ba
 is posted. The three answers are all purchases, and all of them are shown with
 their price on the Crew screen's **Outfit** tab.
 
+**Being tired is a price, not a locked door.** Past the working threshold a hand
+is *spent*: still assignable, carrying a named `Running on empty` penalty,
+likelier to come back hurt from any door but a flawless one, and losing loyalty
+for having been sent. Only injuries take somebody off the roster outright. So a
+week of rest is one option against the payroll clock rather than the only one,
+and the planning screen warns in words about the half of the cost that never
+reaches the dice.
+
 **And the city learns how you work.** Every door the crew open puts its trade on
 a file the city keeps — going through one teaches more than being beaten by it —
 and once a trade's file is thick enough it adds a named penalty to every check of

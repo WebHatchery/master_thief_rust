@@ -87,16 +87,33 @@ pub struct Candidate {
     pub check: CheckBreakdown,
     /// True when this hand is already down for another door on this job.
     pub doubled_up: bool,
-    /// True when fatigue or injury has put them out of the running entirely.
+    /// True when injuries have put them out of the running entirely.
     pub unfit: bool,
+    /// True when they are past the working threshold: still selectable, and
+    /// worse on the die and likelier to come back hurt for it (GDD 5.6).
+    pub spent: bool,
     /// Somebody already on this job will not stand beside them (GDD 5.5).
     pub refused_by: Vec<String>,
 }
 
 impl Candidate {
-    /// Can this hand be put on the door at all?
+    /// Can this hand be put on the door at all? A spent hand can — that is the
+    /// decision, and taking it away from the fixer is what made resting free.
     pub fn selectable(&self) -> bool {
         !self.unfit && self.refused_by.is_empty()
+    }
+
+    /// What the planning screen has to say about them before anybody commits.
+    /// The die tells the player about the check; nothing on the breakdown can
+    /// tell them somebody is likelier to come back hurt, so this does (pillar 2).
+    pub fn warning(&self) -> Option<&'static str> {
+        if self.unfit {
+            Some("too hurt to work")
+        } else if self.spent {
+            Some("spent — worse odds, and gets hurt easier")
+        } else {
+            None
+        }
     }
 }
 
@@ -147,7 +164,8 @@ pub fn candidates(
             specialty: member.specialty.clone(),
             check: candidate_check(session, data, target, encounter, member, &crew_on_job),
             doubled_up: draft.assigned_elsewhere(&member.id, encounter),
-            unfit: !member.condition.is_fit_for_work(),
+            unfit: !data.config.condition.can_work(&member.condition),
+            spent: data.config.condition.is_spent(member.condition.fatigue),
             refused_by: session
                 .chemistry
                 .refusals(&member.id, crew_on_job.iter().map(|id| id.as_str()))
@@ -162,10 +180,13 @@ pub fn candidates(
         })
         .collect();
 
+    // Spent hands sort below the crew who are fit for it and above the ones who
+    // cannot go at all — they are a last resort, listed as one, not hidden.
     candidates.sort_by(|a, b| {
         a.selectable()
             .cmp(&b.selectable())
             .reverse()
+            .then(a.spent.cmp(&b.spent))
             .then(b.check.bonus().cmp(&a.check.bonus()))
             .then(a.member_name.cmp(&b.member_name))
     });
@@ -413,15 +434,55 @@ mod tests {
     }
 
     #[test]
-    fn unfit_crew_sink_to_the_bottom_of_the_list() {
+    fn a_spent_hand_sinks_below_the_fit_ones_and_a_hurt_one_below_them_all() {
+        // Three tiers, and the middle one is the new decision: a spent hand is
+        // listed last-but-one, warned about, and still selectable. Taking that
+        // choice away is what used to make lying low free (GDD 5.6).
         let (data, mut session, target) = setup(17);
         session.crew[0].condition.fatigue = 95;
+        session.crew[1].condition.injuries = (0..data.config.condition.max_injuries_for_work + 1)
+            .map(|n| crate::model::crew::Injury::major(format!("Hurt {}", n)))
+            .collect();
         let draft = PlanDraft::new(&target, &data);
         let encounter = data.encounters.get(&draft.doors[0]).unwrap();
 
         let ranked = candidates(&session, &data, &target, encounter, &draft);
-        assert!(ranked.last().unwrap().unfit);
-        assert!(!ranked[0].unfit);
+        let spent = ranked.iter().position(|c| c.spent && !c.unfit).unwrap();
+        let hurt = ranked.iter().position(|c| c.unfit).unwrap();
+
+        assert!(!ranked[0].spent && !ranked[0].unfit);
+        assert!(spent < hurt, "a hurt hand outranked a merely tired one");
+        assert!(ranked[spent].selectable(), "a tired hand cannot be sent");
+        assert!(!ranked[hurt].selectable());
+        assert_eq!(
+            ranked[spent].warning(),
+            Some("spent — worse odds, and gets hurt easier")
+        );
+    }
+
+    #[test]
+    fn being_spent_is_charged_by_name_on_the_breakdown() {
+        let (data, mut session, target) = setup(34);
+        let draft = PlanDraft::new(&target, &data);
+        let encounter = data.encounters.get(&draft.doors[0]).unwrap();
+
+        session.crew[0].condition.fatigue = data.config.condition.fatigue_work_threshold;
+        let rested = candidate_check(&session, &data, &target, encounter, &session.crew[0], &[]);
+        assert!(!rested
+            .entries
+            .iter()
+            .any(|entry| entry.label == "Running on empty"));
+
+        session.crew[0].condition.fatigue = data.config.condition.fatigue_work_threshold + 1;
+        let spent = candidate_check(&session, &data, &target, encounter, &session.crew[0], &[]);
+
+        let entry = spent
+            .entries
+            .iter()
+            .find(|entry| entry.label == "Running on empty")
+            .expect("a spent hand is charged by name");
+        assert_eq!(entry.value, -data.config.condition.spent_check_penalty);
+        assert!(spent.bonus() < rested.bonus());
     }
 
     #[test]

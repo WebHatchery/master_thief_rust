@@ -15,7 +15,6 @@
   "casing_steps_per_week": 3,
 
   "rest_recovery": 25,
-  "fatigue_work_threshold": 80,
   "idle_loyalty_drift": 3,
   "chemistry_cooling": 1,
 
@@ -142,6 +141,11 @@
   "condition": {
     "fatigue_free_threshold": 50,
     "fatigue_step": 10,
+    "fatigue_work_threshold": 80,
+    "spent_check_penalty": 2,
+    "spent_injury_chance": 0.15,
+    "spent_loyalty_cost": 2,
+    "max_injuries_for_work": 2,
     "loyalty_neutral": 60,
     "loyalty_step": 20,
     "loyalty_max_bonus": 2,

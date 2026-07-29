@@ -102,7 +102,7 @@ pub fn play(session: &mut GameSession, data: &GameData, weeks: u32) -> CampaignL
                 session.casing_this_week += 1;
             }
 
-            if session.available_crew().count() > 0 {
+            if session.available_crew(&data.config.condition).count() > 0 {
                 let target = data.targets.get(&target_id).cloned();
                 if let Some(target) = target {
                     let plan = super::auto_assign(session, data, &target);
@@ -322,14 +322,39 @@ mod tests {
     fn the_crew_forms_opinions_about_each_other() {
         let (_, session, _) = campaign(31_337, 20);
 
-        let opinions = session.chemistry.known_pairs().count();
-        assert!(opinions > 0, "twenty weeks together and nobody had a view");
+        // Measured as a spread rather than as one extreme pair: the single
+        // largest opinion in a campaign is one hand's luck, and pinning a test
+        // to it made the assertion turn over on changes that had nothing to do
+        // with chemistry. What has to be true is that the crew end up with
+        // views *both ways* — warmth somewhere and a grudge somewhere else —
+        // and that the total is not rounding error.
+        let opinions: Vec<i32> = session
+            .chemistry
+            .known_pairs()
+            .map(|(_, _, value)| value)
+            .collect();
+
         assert!(
-            session
-                .chemistry
-                .known_pairs()
-                .any(|(_, _, value)| value.abs() >= 5),
-            "chemistry never moved far enough to matter"
+            !opinions.is_empty(),
+            "twenty weeks together and nobody had a view"
+        );
+        assert!(
+            opinions.iter().any(|value| *value > 0),
+            "nobody warmed to anybody: {:?}",
+            opinions
+        );
+        assert!(
+            opinions.iter().any(|value| *value < 0),
+            "nobody fell out with anybody: {:?}",
+            opinions
+        );
+
+        let movement: i32 = opinions.iter().map(|value| value.abs()).sum();
+        assert!(
+            movement >= 8,
+            "the whole crew's opinions came to {}: {:?}",
+            movement,
+            opinions
         );
     }
 
@@ -618,7 +643,7 @@ mod tests {
         for _ in 0..weeks {
             log.weeks += 1;
             if let Some(target_id) = richest_openable_mark(session, data) {
-                if session.available_crew().count() > 0 {
+                if session.available_crew(&data.config.condition).count() > 0 {
                     if let Some(target) = data.targets.get(&target_id).cloned() {
                         let plan = super::super::auto_assign(session, data, &target);
                         if !plan.assignments.is_empty() {

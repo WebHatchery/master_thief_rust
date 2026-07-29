@@ -352,11 +352,16 @@ impl GameSession {
         self.crew.iter_mut().find(|member| member.id == id)
     }
 
-    /// Crew fit to be assigned to a door this week.
-    pub fn available_crew(&self) -> impl Iterator<Item = &CrewMember> {
+    /// Crew who can be put on a door at all. A spent hand is *available* — the
+    /// fixer is allowed to send somebody who should be resting, and pay for it
+    /// (GDD 5.6). Only injuries take a name off this list.
+    pub fn available_crew<'a>(
+        &'a self,
+        tuning: &'a crate::rules::ConditionTuning,
+    ) -> impl Iterator<Item = &'a CrewMember> {
         self.crew
             .iter()
-            .filter(|member| member.condition.is_fit_for_work())
+            .filter(move |member| tuning.can_work(&member.condition))
     }
 
     /// Resolve a member's kit against the catalogue.
@@ -612,12 +617,29 @@ mod tests {
     }
 
     #[test]
-    fn an_injured_or_exhausted_hand_is_not_offered_for_work() {
+    fn a_hand_too_hurt_to_go_is_not_offered_for_work_and_a_tired_one_still_is() {
+        // The distinction the change turns on: injuries are a wall, tiredness
+        // is a price. Exhaustion used to take a name off this list, which made
+        // "rest until everybody is fresh" the one move the week never argued
+        // with (GDD 5.6).
         let data = data();
+        let tuning = &data.config.condition;
         let mut session = GameSession::new(&data.config, &data, 5);
-        assert_eq!(session.available_crew().count(), session.crew.len());
+        assert_eq!(session.available_crew(tuning).count(), session.crew.len());
 
         session.crew[0].condition.fatigue = 95;
-        assert_eq!(session.available_crew().count(), session.crew.len() - 1);
+        assert_eq!(
+            session.available_crew(tuning).count(),
+            session.crew.len(),
+            "a spent hand was taken out of the fixer's hands"
+        );
+
+        session.crew[0].condition.injuries = (0..tuning.max_injuries_for_work + 1)
+            .map(|n| crate::model::crew::Injury::major(format!("Hurt {}", n)))
+            .collect();
+        assert_eq!(
+            session.available_crew(tuning).count(),
+            session.crew.len() - 1
+        );
     }
 }

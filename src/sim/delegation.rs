@@ -54,7 +54,7 @@ pub fn audit(
         // itself: the question is who *could* have taken this door, not who the
         // greedy pass was willing to spend.
         let best = session
-            .available_crew()
+            .available_crew(&data.config.condition)
             .filter(|member| {
                 !crew_on_job
                     .iter()
@@ -124,7 +124,7 @@ mod tests {
         for door in 0..draft.doors.len() {
             let encounter = data.encounters.get(&draft.doors[door]).unwrap();
             let best = session
-                .available_crew()
+                .available_crew(&data.config.condition)
                 .max_by_key(|member| {
                     candidate_check(&session, &data, &target, encounter, member, &[]).bonus()
                 })
@@ -147,7 +147,7 @@ mod tests {
         for door in 0..draft.doors.len() {
             let encounter = data.encounters.get(&draft.doors[door]).unwrap();
             let worst = session
-                .available_crew()
+                .available_crew(&data.config.condition)
                 .min_by_key(|member| {
                     candidate_check(&session, &data, &target, encounter, member, &[]).bonus()
                 })

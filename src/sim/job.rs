@@ -126,7 +126,7 @@ pub fn auto_assign(session: &GameSession, data: &GameData, target: &HeistTarget)
     for encounter in data.encounters_for(target) {
         let mut best: Option<(i32, String)> = None;
 
-        for member in session.available_crew() {
+        for member in session.available_crew(&data.config.condition) {
             // A pair that refuses to work together is not a choice the
             // auto-assigner gets to make either (GDD 5.5).
             if used
@@ -203,7 +203,8 @@ pub fn run_job(session: &mut GameSession, data: &GameData, plan: &JobPlan) -> Jo
         let Some(encounter) = data.encounters.get(&encounter_id).cloned() else {
             continue;
         };
-        let Some(member_id) = assigned_member(plan, &encounter_id, session) else {
+        let Some(member_id) = assigned_member(plan, &encounter_id, session, &data.config.condition)
+        else {
             continue;
         };
 
@@ -265,7 +266,12 @@ fn record_chemistry(
     );
 }
 
-fn assigned_member(plan: &JobPlan, encounter_id: &str, session: &GameSession) -> Option<String> {
+fn assigned_member(
+    plan: &JobPlan,
+    encounter_id: &str,
+    session: &GameSession,
+    tuning: &crate::rules::ConditionTuning,
+) -> Option<String> {
     plan.assignments
         .iter()
         .find(|assignment| assignment.encounter_id == encounter_id)
@@ -274,7 +280,7 @@ fn assigned_member(plan: &JobPlan, encounter_id: &str, session: &GameSession) ->
         // available hand takes it.
         .or_else(|| {
             session
-                .available_crew()
+                .available_crew(tuning)
                 .next()
                 .map(|member| member.id.clone())
         })
@@ -342,7 +348,15 @@ fn resolve_door(
         .unwrap_or(&encounter.failure_consequence)
         .to_owned();
 
-    let hurt = session.rng.next_f32() < result.outcome.injury_chance();
+    // A hand the fixer sent out tired is likelier to come back hurt, and that
+    // is priced here rather than on the die: the draw itself happens at the
+    // same point in the RNG order it always did, so the odds change and the
+    // replay does not (GDD 5.7).
+    let tuning = &data.config.condition;
+    let spent = session
+        .member(member_id)
+        .is_some_and(|member| tuning.is_spent(member.condition.fatigue));
+    let hurt = session.rng.next_f32() < tuning.injury_chance(result.outcome, spent);
     let injury = hurt.then(|| match result.outcome {
         Outcome::CriticalFailure => Injury::major(format!("Hurt at {}", encounter.name)),
         _ => Injury::minor(format!("Strained at {}", encounter.name)),
@@ -351,6 +365,11 @@ fn resolve_door(
     if let Some(member) = session.member_mut(member_id) {
         member.condition.add_fatigue(result.stress_inflicted);
         member.condition.worked_this_week = true;
+        // Being sent out past the point of usefulness is remembered whatever
+        // happened at the door.
+        if spent {
+            member.condition.adjust_loyalty(-tuning.spent_loyalty_cost);
+        }
         award_experience(&mut member.progression, result.experience_gained);
         member.progression.jobs_completed += 1;
         if result.passed() {
@@ -600,6 +619,103 @@ mod tests {
                 door.encounter_name
             );
         }
+    }
+
+    #[test]
+    fn a_crew_sent_out_spent_can_still_go_and_pays_for_it() {
+        // The move the week never used to argue with was "rest until everybody
+        // is fresh", because a tired hand simply could not be assigned. They
+        // can now — and over two hundred jobs the difference is doors lost,
+        // people hurt, and goodwill spent (GDD 5.6).
+        let data = GameData::load().unwrap();
+
+        let run = |fatigue: i32| {
+            let mut hurt = 0usize;
+            let mut passed = 0usize;
+            let mut doors = 0usize;
+            let mut goodwill = 0i32;
+
+            for seed in 0..200u64 {
+                let mut session = GameSession::new(&data.config, &data, seed);
+                for member in &mut session.crew {
+                    member.condition.fatigue = fatigue;
+                }
+                let before: i32 = session.crew.iter().map(|m| m.condition.loyalty).sum();
+
+                let Some(entry) = session.board.first().cloned() else {
+                    continue;
+                };
+                let Some(target) = data.targets.get(&entry.target_id).cloned() else {
+                    continue;
+                };
+                let plan = auto_assign(&session, &data, &target);
+                if plan.assignments.is_empty() {
+                    continue;
+                }
+                let report = run_job(&mut session, &data, &plan);
+
+                hurt += report.doors.iter().filter(|d| d.injury.is_some()).count();
+                passed += report.doors_passed();
+                doors += report.doors.len();
+                goodwill += session
+                    .crew
+                    .iter()
+                    .map(|m| m.condition.loyalty)
+                    .sum::<i32>()
+                    - before;
+            }
+            (hurt, passed as f32 / doors.max(1) as f32, goodwill)
+        };
+
+        let threshold = data.config.condition.fatigue_work_threshold;
+        let (fresh_hurt, fresh_rate, fresh_goodwill) = run(0);
+        let (spent_hurt, spent_rate, spent_goodwill) = run(threshold + 10);
+
+        assert!(
+            spent_rate < fresh_rate,
+            "a spent crew cleared {:.0}% against a fresh crew's {:.0}%",
+            spent_rate * 100.0,
+            fresh_rate * 100.0
+        );
+        assert!(
+            spent_hurt > fresh_hurt,
+            "{} hurt working spent against {} working fresh",
+            spent_hurt,
+            fresh_hurt
+        );
+        assert!(
+            spent_goodwill < fresh_goodwill,
+            "being sent out on empty cost nothing in goodwill"
+        );
+    }
+
+    #[test]
+    fn the_same_seed_replays_a_spent_crew_identically() {
+        // The odds move; the order of the draws does not (GDD 5.7).
+        let data = GameData::load().unwrap();
+        let build = || {
+            let mut session = GameSession::new(&data.config, &data, 5_150);
+            for member in &mut session.crew {
+                member.condition.fatigue = data.config.condition.fatigue_work_threshold + 10;
+            }
+            session
+        };
+        let (mut a, mut b) = (build(), build());
+        let target = first_target(&data, &a).clone();
+        let plan = auto_assign(&a, &data, &target);
+
+        let left = run_job(&mut a, &data, &plan);
+        let right = run_job(&mut b, &data, &plan);
+
+        let rolls = |report: &JobReport| -> Vec<i32> {
+            report.doors.iter().map(|d| d.result.roll).collect()
+        };
+        assert_eq!(rolls(&left), rolls(&right));
+        assert_eq!(
+            left.doors.iter().filter(|d| d.injury.is_some()).count(),
+            right.doors.iter().filter(|d| d.injury.is_some()).count()
+        );
+        assert_eq!(a.budget, b.budget);
     }
 
     #[test]

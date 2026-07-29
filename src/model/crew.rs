@@ -142,9 +142,10 @@ impl Default for Condition {
 }
 
 impl Condition {
-    pub fn is_fit_for_work(&self) -> bool {
-        self.fatigue <= 80 && self.injuries.len() <= 2
-    }
+    // Whether a hand can go at all, and whether they are past the point where
+    // they should be asked to, are both *rules* and live with the rest of the
+    // condition curve in `rules::ConditionTuning`. `model` stays a pure type;
+    // it does not know what the numbers mean.
 
     pub fn add_fatigue(&mut self, amount: i32) {
         self.fatigue = (self.fatigue + amount).clamp(0, 100);

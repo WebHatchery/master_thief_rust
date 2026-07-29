@@ -49,8 +49,6 @@ pub struct GameConfig {
 
     /// Fatigue removed by a week of rest, before the constitution bonus.
     pub rest_recovery: i32,
-    /// Fatigue above which a member is unfit for work.
-    pub fatigue_work_threshold: i32,
     /// Loyalty a week of idleness costs, and rest restores.
     pub idle_loyalty_drift: i32,
     /// Chemistry a pair loses each week they do not work the same job. Applies

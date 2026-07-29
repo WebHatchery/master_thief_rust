@@ -187,7 +187,11 @@ fn draw_detail(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         actions.push(UiAction::CaseTarget(entry.target_id.clone()));
     }
 
-    let crew_ready = ctx.session.available_crew().count() > 0;
+    let crew_ready = ctx
+        .session
+        .available_crew(&ctx.data.config.condition)
+        .count()
+        > 0;
     if button_rect_tone_at(
         Rect::new(
             content.right() - 166.0,

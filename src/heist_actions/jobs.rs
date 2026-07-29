@@ -100,7 +100,7 @@ pub(super) fn open_plan(
         notifications.info("The outfit is out. Start a new campaign to work again");
         return;
     }
-    if session.available_crew().count() == 0 {
+    if session.available_crew(&data.config.condition).count() == 0 {
         notifications.warning("Nobody on the payroll is fit to work");
         return;
     }
@@ -223,12 +223,27 @@ pub(super) fn delegate_job(
         notifications.info("The outfit is out. Start a new campaign to work again");
         return None;
     }
-    if session.available_crew().count() == 0 {
+    if session.available_crew(&data.config.condition).count() == 0 {
         notifications.warning("Nobody on the payroll is fit to work");
         return None;
     }
 
     let plan = sim::auto_assign(session, data, &target);
+    // The planning screen warns per candidate before anybody commits, and a
+    // delegated job skips it entirely. Somebody still has to say it: handing
+    // the work to a crew who should be resting is a decision, and the fixer
+    // making it without looking is exactly who this is for (pillar 2).
+    let spent: Vec<String> = plan
+        .crew_on_job()
+        .iter()
+        .filter_map(|id| session.member(id))
+        .filter(|member| data.config.condition.is_spent(member.condition.fatigue))
+        .map(|member| member.name.clone())
+        .collect();
+    if !spent.is_empty() {
+        notifications.warning(format!("{} went out on empty", spent.join(", ")));
+    }
+
     let report = sim::run_job(session, data, &plan);
     announce(notifications, &report);
     check_awards(data, session, notifications);

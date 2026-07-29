@@ -368,6 +368,25 @@ across the 0–100 range rather than two flat bands, so goodwill the outfit burn
 on the die immediately. The curve's numbers live in `game_config.json` under `condition`,
 alongside fatigue's.
 
+**And exhaustion is a price, not a locked door.** Fatigue used to take a hand off the
+roster outright — past a threshold they simply could not be assigned — which quietly made
+"rest until everybody is fresh" a move the week could never argue with, however expensive
+the wages got. It is now a decision the fixer is allowed to make badly. Past the working
+threshold a hand is **spent**: still selectable, carrying a named `Running on empty`
+penalty on top of the graded fatigue curve, likelier to come back hurt from any door but a
+flawless one, and losing loyalty for every door they were sent through in that state. Only
+*injuries* are still a wall, and deliberately so — fatigue is the fixer's call, and a third
+broken bone is not. The payroll clock is what gives the choice its teeth: a week of rest
+costs a week of wages, and an outfit that cannot afford one now has somewhere to go instead
+of nowhere.
+
+Every part of that price is quoted first. The candidate list warns in words — the die can
+say what a spent hand is worth on the check, but nothing on a breakdown can say they are
+likelier to get hurt — and a delegated job, which skips the planning screen entirely, names
+whoever went out on empty. The numbers live under `condition` with the rest of the curve,
+including the working threshold itself, which spent a long time sitting at the top of
+`game_config.json` being read by nothing while the real bar was a hardcoded 80.
+
 ### 5.7 Randomness & Determinism
 
 A single seeded `macroquad_toolkit::rng` owned by the run; the seed is saved and displayed

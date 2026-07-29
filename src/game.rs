@@ -164,8 +164,23 @@ impl Game {
                 self.run_capture_job();
                 Screen::Results
             }
-            _ => Screen::Crew,
+            _ => {
+                // A roster where everybody reads "Ready" photographs none of
+                // the states the screen exists to distinguish.
+                self.wear_out_a_hand();
+                Screen::Crew
+            }
         };
+    }
+
+    /// Run one hand past the working threshold. They stay selectable — that is
+    /// the whole point of the state — so the capture shows a crew the fixer can
+    /// still send and should not (GDD 5.6).
+    fn wear_out_a_hand(&mut self) {
+        let threshold = self.data.config.condition.fatigue_work_threshold;
+        if let Some(member) = self.session.crew.last_mut() {
+            member.condition.fatigue = threshold + 12;
+        }
     }
 
     /// Put one of the first mark's trades on the city's file, at the top of the
@@ -195,6 +210,7 @@ impl Game {
     /// A cased mark with the crew's own picks already in, so the capture shows
     /// difficulties, assignments, and odds rather than an empty draft.
     fn open_capture_plan(&mut self) {
+        self.wear_out_a_hand();
         let Some(entry) = self.session.board.first_mut() else {
             return;
         };

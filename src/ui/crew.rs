@@ -6,6 +6,7 @@ use super::chrome::{
 use super::{detail_rect, list_rect, CrewTab, UiAction, UiContext};
 use crate::model::{AttributeKind, CrewMember, EquipmentSlot, Skill};
 use crate::rules::attributes::{derived_stats, equipped_attributes, equipped_skills, power_level};
+use crate::rules::ConditionTuning;
 use crate::sim::retainer_for;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
@@ -93,7 +94,7 @@ fn draw_roster(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) 
             TextStyle::new(15.0, rarity_color(member.rarity)),
         );
 
-        let condition = condition_summary(member);
+        let condition = condition_summary(member, &ctx.data.config.condition);
         draw_text_right(
             &condition.0,
             rect.right() - 14.0,
@@ -111,15 +112,17 @@ fn draw_roster(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) 
     }
 }
 
-fn condition_summary(member: &CrewMember) -> (String, Color) {
+fn condition_summary(member: &CrewMember, tuning: &ConditionTuning) -> (String, Color) {
     if member.condition.notice_given {
         ("Notice".to_owned(), Color::new(0.94, 0.36, 0.34, 1.0))
+    } else if !tuning.can_work(&member.condition) {
+        ("Laid up".to_owned(), Color::new(0.94, 0.36, 0.34, 1.0))
     } else if !member.condition.injuries.is_empty() {
         (
             format!("{} injured", member.condition.injuries.len()),
             Color::new(0.90, 0.42, 0.36, 1.0),
         )
-    } else if !member.condition.is_fit_for_work() {
+    } else if tuning.is_spent(member.condition.fatigue) {
         ("Spent".to_owned(), Color::new(0.90, 0.62, 0.30, 1.0))
     } else {
         ("Ready".to_owned(), Color::new(0.46, 0.76, 0.52, 1.0))

@@ -343,7 +343,11 @@ fn draw_candidates(
         content.w,
         content.bottom() - content.y - 90.0,
     );
-    let layout = GridLayout::new(list.x, list.y, list.w, 8.0, 1, 96.0);
+    // Tall enough for three rows of modifiers. A hand can now carry nine at
+    // once — skill, proficiency, kit, two environmental factors, fatigue,
+    // running on empty, a watched trade, chemistry — and at two rows the card
+    // started answering pillar 2 with "+2 more".
+    let layout = GridLayout::new(list.x, list.y, list.w, 8.0, 1, CANDIDATE_HEIGHT);
     let mouse = ctx.mouse();
 
     for (index, candidate) in ranked.iter().enumerate() {
@@ -377,6 +381,11 @@ fn draw_candidates(
         actions.push(UiAction::ClearDoor(draft.focus));
     }
 }
+
+/// Unchanged, and load-bearing: the panel fits exactly three of these above the
+/// door's own controls, and a fourth candidate the fixer cannot see is worse
+/// than a tighter modifier grid. The grid inside gained a third row instead.
+const CANDIDATE_HEIGHT: f32 = 96.0;
 
 fn draw_candidate(
     rect: Rect,
@@ -427,8 +436,13 @@ fn draw_candidate(
     );
 
     let mut note = candidate.specialty.clone();
-    if candidate.unfit {
-        note.push_str(" · unfit for work");
+    // The dice can say what a spent hand is worth on the check; nothing on the
+    // breakdown can say they are likelier to come back hurt, so the row does
+    // (pillar 2). A warning outranks the doubling-up note: the fixer needs to
+    // know they are about to send somebody who should be resting.
+    if let Some(warning) = candidate.warning() {
+        note.push_str(" · ");
+        note.push_str(warning);
     } else if candidate.doubled_up {
         note.push_str(" · already on another door");
     }
@@ -436,16 +450,24 @@ fn draw_candidate(
         &note,
         rect.x + 12.0,
         rect.y + 42.0,
-        TextStyle::new(13.0, dark::TEXT_DIM).params(),
+        TextStyle::new(
+            13.0,
+            if candidate.spent && !candidate.unfit {
+                Color::new(0.90, 0.62, 0.36, 1.0)
+            } else {
+                dark::TEXT_DIM
+            },
+        )
+        .params(),
     );
 
     // The whole point of the screen: every modifier, by name, before commit —
     // in columns, because a door now carries up to fourteen of them.
     super::chrome::draw_modifier_grid(
-        Rect::new(rect.x + 12.0, rect.y + 50.0, rect.w - 24.0, 44.0),
+        Rect::new(rect.x + 12.0, rect.y + 48.0, rect.w - 24.0, 46.0),
         candidate.check.significant(),
         usize::MAX,
-        12.0,
+        10.0,
     );
 
     draw_text_right(
