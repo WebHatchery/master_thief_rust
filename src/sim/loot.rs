@@ -10,11 +10,6 @@ use crate::model::HeistTarget;
 use crate::rules::Outcome;
 use macroquad_toolkit::rng::SeededRng;
 
-/// Chance of a find for finishing the job at all.
-const COMPLETION_CHANCE: f32 = 0.45;
-/// Chance of a find for each door taken with a natural flourish.
-const CRITICAL_CHANCE: f32 = 0.5;
-
 /// Roll what a finished job leaves behind. `outcomes` is every door in the
 /// order it resolved; the job is only worth searching if it worked.
 pub fn roll_loot(
@@ -34,14 +29,15 @@ pub fn roll_loot(
         return Vec::new();
     }
 
+    let config = &data.config.payout;
     let mut found = Vec::new();
-    if rng.chance(COMPLETION_CHANCE) {
+    if rng.chance(config.loot_chance) {
         found.push(pool[rng.below(pool.len())].clone());
     }
 
     // A door taken brilliantly is where the unexpected thing turns up.
     for outcome in outcomes {
-        if *outcome == Outcome::CriticalSuccess && rng.chance(CRITICAL_CHANCE) {
+        if *outcome == Outcome::CriticalSuccess && rng.chance(config.loot_chance_per_critical) {
             found.push(pool[rng.below(pool.len())].clone());
         }
     }

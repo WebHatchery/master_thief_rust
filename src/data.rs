@@ -83,7 +83,9 @@ pub struct GameConfig {
     pub kit: KitConfig,
     /// What spare kit fetches, and what selling it costs in anonymity.
     pub fence: FenceConfig,
-    /// What a job the crew walked out of is worth, and what it costs.
+    /// What a job pays, and what it leaves behind.
+    pub payout: PayoutConfig,
+    /// What a job the crew walked out of costs.
     pub walk_away: WalkAwayConfig,
     /// What the outfit costs to keep standing, week in, week out.
     pub payroll: PayrollConfig,
@@ -97,18 +99,47 @@ pub struct GameConfig {
     pub mastery: crate::rules::MasteryTuning,
 }
 
-/// A job the crew were told to abandon. The standing order is set before the
-/// dice, so this is the price of a nerve the fixer committed to in advance
-/// (GDD 5.2).
+/// What a job is worth. Every one of these spent the campaign written into
+/// `sim/job/settle.rs` and `sim/loot.rs` as a literal, which is the one place
+/// balance is not allowed to live — and the whole of the game's income runs
+/// through them.
 ///
-/// Not `Eq`: these are shares, and pretending two floats compare exactly would
+/// Not `Eq`: these are shares and chances, and pretending two floats compare
+/// exactly would be a lie about what comparing them means.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct PayoutConfig {
+    /// Share of a mark's doors that have to be cleared for the job to have
+    /// worked at all.
+    pub success_threshold: f32,
+    /// Above this share, the crew were good enough to be paid for it.
+    pub clean_threshold: f32,
+    /// What a job that clean is multiplied by.
+    pub clean_bonus: f32,
+    /// Share of what the cleared doors were worth that a *failed* job fetches.
+    ///
+    /// It used to be a flat fifteen per cent of the mark regardless, which
+    /// meant that on a job the crew were losing, getting one more door open was
+    /// worth exactly nothing — and a total wipeout paid the same as a near
+    /// miss. Proportional, every door cleared is worth something and nothing
+    /// cleared is worth nothing.
+    pub failed_share: f32,
+    /// The same, for a job the crew were told to walk out of. Lower than
+    /// `failed_share`: staying means carrying more out.
+    pub walked_share: f32,
+    /// Chance a finished job leaves something behind at all.
+    pub loot_chance: f32,
+    /// Added chance per door taken with a natural flourish.
+    pub loot_chance_per_critical: f32,
+}
+
+/// What a job the crew were told to abandon costs. The standing order is set
+/// before the dice, so this is the price of a nerve the fixer committed to in
+/// advance (GDD 5.2). What it *pays* is `payout.walked_share`.
+///
+/// Not `Eq`: this is a share, and pretending two floats compare exactly would
 /// be a lie about what comparing them means.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct WalkAwayConfig {
-    /// Share of what the cleared doors were worth that a half-finished job
-    /// actually fetches. Walking late beats walking early, and both lose to
-    /// the score.
-    pub payout_share: f32,
     /// Share of the mark's notoriety a crew who left still pick up. The rest,
     /// and the botched-job penalty entirely, is what the forfeited take buys.
     pub notoriety_share: f32,

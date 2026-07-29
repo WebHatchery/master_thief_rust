@@ -229,7 +229,18 @@ run screen replays, rather than a second roll.
 Walking is never a win. A job the crew abandon is scored against the *building* — two of
 three cleared and out is two thirds of a job, not a clean sweep of what was attempted — and
 pays a fraction of what those cleared doors were worth, so leaving late beats leaving early
-and both lose badly to finishing. What the forfeited score buys is everything the unopened
+and both lose badly to finishing.
+
+**Every job pays for how far the crew actually got.** A finished job, a botched one and an
+abandoned one all take the same shape — the mark's worth, times the share of its doors
+cleared, times a share for which of the three happened: over one for a job clean enough to
+be paid for, one for an ordinary success, and progressively less for staying and losing
+than for leaving early. A failed job used to be a flat fifteen per cent of the mark
+whatever happened, which meant that on a job the crew were losing, opening one more door
+was worth nothing, and being wiped out at the front hall paid exactly what coming one door
+short paid. Now nothing cleared is worth nothing. All of it — the success threshold, the
+clean-job bonus, the three shares, and the two loot chances — lives in `game_config.json`
+under `payout`, where it spent the whole project not living. What the forfeited score buys is everything the unopened
 doors would have cost: no more injuries, no botched-job notoriety at all and a discount on
 the mark's own, less heat, and less taught to the city about the outfit's methods (§5.4).
 So a tight order is the cautious, poorer line and no order is the greedy one, which is the

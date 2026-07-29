@@ -38,7 +38,8 @@ pub fn settle(
     };
     // Leaving is never a win. The crew are out, whole, and the score is still
     // in the building.
-    let success = called_off_with.is_none() && rate >= 0.5;
+    let pay = &data.config.payout;
+    let success = called_off_with.is_none() && rate >= pay.success_threshold;
 
     // What the mark is worth today, not what it was worth when it appeared:
     // every week the crew left it sitting added to the take (GDD 5.4).
@@ -48,17 +49,20 @@ pub fn settle(
         .unwrap_or(target.potential_payout);
 
     let walk = &data.config.walk_away;
-    let payout = if success {
-        let bonus = if rate > 0.8 { 1.2 } else { 1.0 };
-        (worth as f32 * rate * bonus) as i64
-    } else if called_off_with.is_some() {
+    // All three cases scale with how far the crew actually got. The failed one
+    // used to be a flat share of the mark whatever happened, so on a job they
+    // were losing, opening one more door was worth nothing and a total wipeout
+    // paid the same as a near miss.
+    let share = match (success, called_off_with.is_some()) {
+        (true, _) if rate > pay.clean_threshold => pay.clean_bonus,
+        (true, _) => 1.0,
         // Whatever they were carrying when the order came, at a fence's rate
         // for a half-finished job. Walking early is worth less than walking
         // late, and both are worth less than the score.
-        (worth as f32 * rate * walk.payout_share) as i64
-    } else {
-        (worth as f32 * 0.15) as i64
+        (_, true) => pay.walked_share,
+        _ => pay.failed_share,
     };
+    let payout = (worth as f32 * rate * share) as i64;
     // What the hands who worked it want for having worked it, negotiated
     // against who they are and how they feel about the outfit (GDD 5.5).
     let cut = crate::sim::payroll::crew_cut_for(
@@ -396,6 +400,46 @@ mod tests {
     }
 
     #[test]
+    fn every_door_cleared_is_worth_something_even_on_a_job_being_lost() {
+        // A failed job used to pay a flat share of the mark whatever happened,
+        // so on a job the crew were losing, getting one more door open was
+        // worth exactly nothing — and being wiped out paid the same as coming
+        // one door short. Both halves of that are now false.
+        let data = GameData::load().unwrap();
+        let target = data.targets.get("velvet_room").unwrap().clone();
+        let worth = target.potential_payout as f32;
+        let pay = &data.config.payout;
+
+        let failed = |cleared: usize, total: usize| {
+            let rate = cleared as f32 / total as f32;
+            assert!(rate < pay.success_threshold, "that is not a failed job");
+            (worth * rate * pay.failed_share) as i64
+        };
+
+        assert_eq!(failed(0, 3), 0, "a total wipeout still paid out");
+        assert!(failed(1, 3) > failed(0, 3));
+        assert!(failed(1, 4) > 0);
+        assert!(
+            failed(1, 3) > failed(1, 4),
+            "getting a third of the way in paid the same as a quarter"
+        );
+    }
+
+    #[test]
+    fn staying_pays_better_per_door_than_leaving_and_the_score_beats_both() {
+        // The three shares have to stay in this order or the standing order
+        // stops being a trade: leaving buys safety at a price, staying is worth
+        // more per door because they were in there longer, and neither is worth
+        // finishing the job.
+        let pay = &GameData::load().unwrap().config.payout;
+
+        assert!(pay.walked_share < pay.failed_share);
+        assert!(pay.failed_share < 1.0);
+        assert!(pay.clean_bonus > 1.0);
+        assert!(pay.clean_threshold > pay.success_threshold);
+    }
+
+    #[test]
     fn walking_late_is_worth_more_than_walking_early() {
         // The curve that makes the standing order a judgement rather than a
         // switch: a tighter order is safer and poorer, and the player is
@@ -403,10 +447,10 @@ mod tests {
         let data = GameData::load().unwrap();
         let target = data.targets.get("velvet_room").unwrap().clone();
         let worth = target.potential_payout as f32;
-        let walk = &data.config.walk_away;
+        let pay = &data.config.payout;
 
         let quoted = |cleared: usize, total: usize| {
-            (worth * (cleared as f32 / total as f32) * walk.payout_share) as i64
+            (worth * (cleared as f32 / total as f32) * pay.walked_share) as i64
         };
 
         assert!(quoted(2, 3) > quoted(1, 3));

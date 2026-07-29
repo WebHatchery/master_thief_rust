@@ -25,6 +25,13 @@ complication is a hazard you can staff against rather than an ambush, and a
 blind run is trading that away too. Whatever arrives mid-job is answered by the
 best hand already in the building, which makes bringing cover a real hedge.
 
+**Every job pays for how far the crew got.** Finished, botched and abandoned
+jobs all take the same shape — the mark's worth times the share of its doors
+cleared times a share for which of the three happened. A failed job used to pay
+a flat cut of the mark whatever happened, so opening one more door on a job you
+were losing was worth nothing; now being wiped out at the front hall is worth
+nothing instead.
+
 **The run has a decision in it, made before the dice.** Alongside who stands
 where, the plan carries a *standing order*: push on regardless, or pull the crew
 out after one or two doors go wrong. Walking forfeits the score — a job the crew

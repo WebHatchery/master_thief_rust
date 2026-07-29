@@ -138,8 +138,16 @@
     "max_level": 10
   },
 
+  "payout": {
+    "success_threshold": 0.5,
+    "clean_threshold": 0.8,
+    "clean_bonus": 1.2,
+    "failed_share": 0.45,
+    "walked_share": 0.4,
+    "loot_chance": 0.45,
+    "loot_chance_per_critical": 0.5
+  },
   "walk_away": {
-    "payout_share": 0.4,
     "notoriety_share": 0.5
   },
   "condition": {
