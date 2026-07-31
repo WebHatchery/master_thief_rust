@@ -2,7 +2,7 @@
   "title": "Master Thief",
   "wasm": "master_thief",
   "roost_slug": "rust_master_thief",
-  "status": { "text": "In Development", "class": "wip" },
+  "status": { "text": "In Development", "class": "in-development" },
   "canvas_rendering": "pixelated",
   "about": [
     "A heist planner. You never pick a lock yourself — you recruit the crew, buy the gear, read the target, and decide who goes through which door. Then you watch the plan survive contact with the building, or not.",
