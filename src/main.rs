@@ -20,13 +20,15 @@ async fn main() {
 
     // Screenshot harness: with MASTER_THIEF_CAPTURE_PATH set, boot into the
     // named scene, render a fixed number of frames, write a PNG, and exit.
-    if let Some(config) = capture::CaptureConfig::from_env("MASTER_THIEF") {
-        game.set_capture_scene(&config.scene);
-        capture::run_capture(&config, |dt| {
-            game.update(dt);
-            game.draw();
-        })
-        .await;
+    if let Some(configs) = capture::CaptureConfig::all_from_env("MASTER_THIEF") {
+        for config in configs {
+            game.set_capture_scene(&config.scene);
+            capture::run_capture_once(&config, |dt| {
+                game.update(dt);
+                game.draw();
+            })
+            .await;
+        }
         return;
     }
 
