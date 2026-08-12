@@ -14,6 +14,7 @@ pub struct Artwork {
     pub safehouse_plate: Texture2D,
     pub portrait_sheet: Texture2D,
     pub target_sheet: Texture2D,
+    pub item_sheet: Texture2D,
 }
 
 impl Artwork {
@@ -23,12 +24,14 @@ impl Artwork {
         let safehouse_plate = load("assets/images/environments/safehouse_desk.png").await;
         let portrait_sheet = load("assets/images/portraits/crew_portrait_sheet.png").await;
         let target_sheet = load("assets/images/targets/target_contact_sheet.png").await;
+        let item_sheet = load("assets/images/items/equipment_icon_sheet.png").await;
         Self {
             wordmark,
             city_plate,
             safehouse_plate,
             portrait_sheet,
             target_sheet,
+            item_sheet,
         }
     }
 
@@ -101,46 +104,28 @@ impl Artwork {
         );
     }
 
-    /// Equipment is intentionally code-drawn: five slot families and five
-    /// rarity foils stay sharp at 24 px and can show wear/locked overlays
-    /// without shipping 335 duplicate bitmaps.
-    pub fn draw_item_glyph(&self, id: &str, rect: Rect, rarity: crate::model::EquipmentRarity) {
-        let fill = match rarity {
-            crate::model::EquipmentRarity::Basic => Color::new(0.36, 0.39, 0.45, 1.0),
-            crate::model::EquipmentRarity::Improved => Color::new(0.36, 0.68, 0.48, 1.0),
-            crate::model::EquipmentRarity::Advanced => Color::new(0.30, 0.58, 0.78, 1.0),
-            crate::model::EquipmentRarity::Masterwork => Color::new(0.64, 0.42, 0.75, 1.0),
-            crate::model::EquipmentRarity::Legendary => Color::new(0.82, 0.58, 0.18, 1.0),
-        };
-        let index = stable_index(id, 5);
-        draw_rectangle(
+    /// Equipment uses authored bitmap icon art; rarity remains procedural so
+    /// one recognizable object can carry five clear foils and state overlays.
+    pub fn draw_item_icon(&self, id: &str, rect: Rect, rarity: crate::model::EquipmentRarity) {
+        let index = stable_index(id, 25);
+        let source = Rect::new(
+            (index % 5) as f32 * self.item_sheet.width() / 5.0,
+            (index / 5) as f32 * self.item_sheet.height() / 5.0,
+            self.item_sheet.width() / 5.0,
+            self.item_sheet.height() / 5.0,
+        );
+        draw_texture_ex(
+            &self.item_sheet,
             rect.x,
             rect.y,
-            rect.w,
-            rect.h,
-            Color::new(0.04, 0.06, 0.09, 0.92),
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(rect.w, rect.h)),
+                source: Some(source),
+                ..Default::default()
+            },
         );
-        draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 2.0, fill);
-        let center = rect.center();
-        match index {
-            0 => draw_line(
-                rect.x + 12.0,
-                center.y,
-                rect.right() - 12.0,
-                center.y,
-                5.0,
-                fill,
-            ),
-            1 => draw_circle(center.x, center.y, rect.w * 0.25, fill),
-            2 => draw_rectangle(center.x - 13.0, center.y - 18.0, 26.0, 36.0, fill),
-            3 => draw_poly(center.x, center.y, 4, rect.w * 0.28, 45.0, fill),
-            _ => draw_triangle(
-                vec2(center.x, center.y - 18.0),
-                vec2(center.x - 20.0, center.y + 16.0),
-                vec2(center.x + 20.0, center.y + 16.0),
-                fill,
-            ),
-        }
+        draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 2.0, rarity_color(rarity));
     }
 }
 
@@ -156,4 +141,14 @@ fn stable_index(value: &str, count: usize) -> usize {
     let mut hasher = DefaultHasher::new();
     value.hash(&mut hasher);
     (hasher.finish() as usize) % count
+}
+
+fn rarity_color(rarity: crate::model::EquipmentRarity) -> Color {
+    match rarity {
+        crate::model::EquipmentRarity::Basic => Color::new(0.55, 0.58, 0.64, 1.0),
+        crate::model::EquipmentRarity::Improved => Color::new(0.36, 0.76, 0.54, 1.0),
+        crate::model::EquipmentRarity::Advanced => Color::new(0.34, 0.66, 0.94, 1.0),
+        crate::model::EquipmentRarity::Masterwork => Color::new(0.72, 0.50, 0.92, 1.0),
+        crate::model::EquipmentRarity::Legendary => Color::new(0.95, 0.72, 0.30, 1.0),
+    }
 }

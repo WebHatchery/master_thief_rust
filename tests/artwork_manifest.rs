@@ -38,6 +38,12 @@ fn every_authored_character_and_target_has_runtime_art() {
             "missing runtime target art for {id}"
         );
     }
+    for id in ids("assets/data/equipment.json") {
+        assert!(
+            project_file(&format!("assets/images/items/{id}.png")).is_file(),
+            "missing runtime equipment icon for {id}"
+        );
+    }
 }
 
 #[test]
@@ -50,6 +56,7 @@ fn manifest_and_authored_atmosphere_are_shipped() {
         "assets/images/brand/master_thief_wordmark.png",
         "assets/images/environments/night_city_rain.png",
         "assets/images/environments/safehouse_desk.png",
+        "assets/images/items/equipment_icon_sheet.png",
     ] {
         assert!(
             project_file(path).is_file(),

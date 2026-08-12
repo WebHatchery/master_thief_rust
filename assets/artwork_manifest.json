@@ -17,11 +17,13 @@
     { "key": "environment_night_city_rain", "path": "assets/images/environments/night_city_rain.png", "filter": "linear" },
     { "key": "environment_safehouse_desk", "path": "assets/images/environments/safehouse_desk.png", "filter": "linear" },
     { "key": "portrait_sheet_authored_source", "path": "assets/images/portraits/crew_portrait_sheet.png", "filter": "linear" },
-    { "key": "target_sheet_authored_source", "path": "assets/images/targets/target_contact_sheet.png", "filter": "linear" }
+    { "key": "target_sheet_authored_source", "path": "assets/images/targets/target_contact_sheet.png", "filter": "linear" },
+    { "key": "equipment_icon_sheet_authored_source", "path": "assets/images/items/equipment_icon_sheet.png", "filter": "linear" }
   ],
   "generated_families": [
     { "key_prefix": "portrait_", "path_pattern": "assets/images/portraits/{character_id}_neutral.png", "ids_source": "assets/data/characters.json", "state": "neutral plus deterministic identity variants" },
     { "key_prefix": "target_", "path_pattern": "assets/images/targets/{target_id}.png", "ids_source": "assets/data/targets.json", "state": "target thumbnail" },
+    { "key_prefix": "item_", "path_pattern": "assets/images/items/{equipment_id}.png", "ids_source": "assets/data/equipment.json", "state": "authored bitmap icon with procedural rarity/state overlay" },
     { "key_prefix": "class_", "path_pattern": "assets/images/portraits/class_{class_id}_badge.png", "state": "class badge" },
     { "key_prefix": "portrait_state_", "path_pattern": "assets/images/portraits/portrait_{state}.png", "states": ["unknown", "locked"] }
   ],
