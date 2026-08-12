@@ -4,6 +4,7 @@
 //! exercised headlessly: `rules` and `sim` never touch a window, and the ported
 //! tests plus the distribution soak run without one (GDD 11).
 
+pub mod artwork;
 pub mod audio;
 pub mod data;
 pub mod game;

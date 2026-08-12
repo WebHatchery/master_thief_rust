@@ -92,6 +92,11 @@ fn draw_catalogue(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
 
         let affordable = ctx.session.budget >= item.cost;
         list_card(rect, false, rarity_color(item.rarity), mouse);
+        ctx.artwork.draw_item_glyph(
+            &item.id,
+            Rect::new(rect.right() - 62.0, rect.y + 28.0, 42.0, 42.0),
+            item.rarity,
+        );
         draw_ui_text_ex(
             &item.name,
             rect.x + 14.0,

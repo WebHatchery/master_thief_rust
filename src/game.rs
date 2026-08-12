@@ -3,6 +3,7 @@
 
 pub mod playback;
 
+use crate::artwork::Artwork;
 use crate::audio::{Sfx, SoundBank};
 use crate::data::{GameConfig, GameData};
 use crate::game::playback::RunPlayback;
@@ -34,6 +35,7 @@ pub struct Game {
     floats: FloatingTextLayer,
     prefs: Preferences,
     sound: SoundBank,
+    artwork: Artwork,
     notifications: NotificationManager,
     events: EventBus<UiAction>,
     save_exists: bool,
@@ -54,6 +56,7 @@ impl Game {
 
         let prefs = Preferences::load(&data.config.game_name);
         let sound = SoundBank::load(prefs.effective_volume()).await;
+        let artwork = Artwork::load().await;
 
         let session = GameSession::new(&data.config, &data, new_seed());
         let mut game = Self {
@@ -64,6 +67,7 @@ impl Game {
             floats: FloatingTextLayer::new(),
             prefs,
             sound,
+            artwork,
             notifications,
             events: EventBus::new(),
             save_exists: false,
@@ -323,6 +327,7 @@ impl Game {
             playback: self.playback.as_ref(),
             last_report: self.selection.last_report.as_ref(),
             prefs: &self.prefs,
+            artwork: &self.artwork,
             settings_open: self.selection.settings_open,
             save_exists: self.save_exists,
             ui: &virtual_ui,

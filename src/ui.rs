@@ -15,6 +15,7 @@ pub mod run;
 pub mod settings;
 pub mod shop;
 
+use crate::artwork::Artwork;
 use crate::data::GameData;
 use crate::game::playback::RunPlayback;
 use crate::prefs::{Preferences, RunPacing};
@@ -180,6 +181,7 @@ pub struct UiContext<'a> {
     pub playback: Option<&'a RunPlayback>,
     pub last_report: Option<&'a JobReport>,
     pub prefs: &'a Preferences,
+    pub artwork: &'a Artwork,
     /// True while the settings panel is covering everything.
     pub settings_open: bool,
     pub save_exists: bool,
@@ -219,6 +221,7 @@ pub fn detail_rect() -> Rect {
 pub fn draw_game_ui(ctx: UiContext<'_>) -> Vec<UiAction> {
     let mut actions = Vec::new();
 
+    ctx.artwork.draw_backplate(ctx.screen);
     chrome::draw_header(&ctx);
     chrome::draw_tabs(&ctx, &mut actions);
     hints::draw(&ctx, &mut actions);

@@ -149,6 +149,12 @@ fn draw_dossier(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
 
     let content = draw_panel(rect, &format!("{} — {}", member.name, member.specialty));
 
+    ctx.artwork.draw_portrait(
+        &member.id,
+        Rect::new(content.right() - 112.0, content.y + 2.0, 96.0, 120.0),
+        true,
+    );
+
     // Somebody has to be able to leave. Retainers made a hand a standing cost
     // and nothing could stop one — the only exit was to starve the whole crew
     // until the unwanted one quit.

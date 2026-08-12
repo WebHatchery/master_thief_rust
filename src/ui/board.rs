@@ -54,9 +54,14 @@ fn draw_board(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
             actions.push(UiAction::SelectTarget(entry.target_id.clone()));
         }
 
+        ctx.artwork.draw_target(
+            &target.id,
+            Rect::new(rect.x + 10.0, rect.y + 8.0, 76.0, 42.0),
+        );
+
         draw_ui_text_ex(
             &target.name,
-            rect.x + 14.0,
+            rect.x + 98.0,
             rect.y + 25.0,
             TextStyle::new(18.0, dark::TEXT_BRIGHT).params(),
         );
@@ -74,7 +79,7 @@ fn draw_board(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
                     )
                 }
             ),
-            rect.x + 14.0,
+            rect.x + 98.0,
             rect.y + 46.0,
             TextStyle::new(14.0, dark::TEXT_DIM).params(),
         );

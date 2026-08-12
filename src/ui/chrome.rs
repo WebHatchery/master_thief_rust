@@ -28,11 +28,15 @@ pub fn draw_header(ctx: &UiContext<'_>) {
         .with_top_highlight(2.0, Color::new(0.55, 0.72, 0.95, 0.75));
     draw_surface(rect, &style);
 
-    draw_ui_text_ex(
-        &ctx.data.config.display_name,
-        rect.x + 18.0,
-        rect.y + 40.0,
-        TextStyle::new(30.0, dark::TEXT_BRIGHT).params(),
+    draw_texture_ex(
+        &ctx.artwork.wordmark,
+        rect.x + 16.0,
+        rect.y + 13.0,
+        WHITE,
+        DrawTextureParams {
+            dest_size: Some(vec2(190.0, 48.0)),
+            ..Default::default()
+        },
     );
 
     let session = ctx.session;
