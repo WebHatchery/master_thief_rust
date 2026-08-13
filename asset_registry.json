@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "assets": [
+    "assets/images/brand/master_thief_wordmark.png",
+    "assets/images/environments/night_city_rain.png",
+    "assets/images/environments/safehouse_desk.png",
+    "assets/images/portraits/crew_portrait_sheet.png",
+    "assets/images/targets/target_contact_sheet.png",
+    "assets/images/items/equipment_icon_sheet.png"
+  ]
+}
