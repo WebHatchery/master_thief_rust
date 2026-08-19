@@ -12,6 +12,7 @@
 //! measure — which is how a procedural drawing gets checked without a person
 //! looking at it (GDD 5.4, 14).
 
+pub use crate::model::Skill;
 use crate::rules::Outcome;
 use macroquad::prelude::*;
 use macroquad_toolkit::paint::Painter;
@@ -280,10 +281,10 @@ pub enum NodeState {
     Skipped,
 }
 
-
 mod symbols;
-pub use symbols::{draw_door_silhouette, draw_factor_glyph, draw_node_state, draw_route_ink, draw_skill_glyph};
-
+pub use symbols::{
+    draw_door_silhouette, draw_factor_glyph, draw_node_state, draw_route_ink, draw_skill_glyph,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct FloorplanPalette {
@@ -390,5 +391,3 @@ pub fn paint<P: Painter>(
 
 #[cfg(test)]
 mod tests;
-
-

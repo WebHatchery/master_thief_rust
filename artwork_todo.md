@@ -66,37 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 7. Global UI chrome and iconography
-
-### Brand and navigation
-
-- [ ] Establish the 24 x 24 icon grid, one stroke weight, and one corner
-  language before generating the bitmap glyph family.
-- [ ] Generate the horizontal Master Thief wordmark at runtime size.
-- [ ] Generate the compact monogram and monochrome light/dark variants.
-- [ ] Export bitmap glyphs at 48 x 48 RGBA when a procedural glyph is not
-  sufficient; keep UI frames and hit-tested surfaces procedural.
-- [ ] Wire the wordmark and monogram into title, loading, and catalog-safe
-  layouts without baking screen copy into the artwork.
-- [ ] Implement the Crew and The Board tab icons.
-- [ ] Implement the Outfitter, Last Job, and Records tab icons.
-
-### Generic controls
-
-- [ ] Implement save, load, delete, settings, sound, and music glyphs.
-- [ ] Implement fullscreen, help, close, back, warning, info, success, and
-  danger glyphs.
-- [ ] Implement search, filter, sort, add, remove, lock, unlock, and
-  notification glyphs.
-- [ ] Implement case file, target, payout, reputation, notoriety, and heat
-  glyphs.
-- [ ] Implement safehouse, payroll, doctor, fence, bail, retire, door, dice,
-  and crew glyphs.
-- [ ] Keep unfamiliar icon buttons paired with visible text labels and a
-  minimum 44 x 44 logical-pixel touch target.
-- [ ] Keep plaque, panel, modal, button, tooltip, footer, and close chrome
-  procedural and responsive.
-
 ## 8. Records and campaign marks
 
 Achievement identity is data-driven. Do not create a badge or label for a

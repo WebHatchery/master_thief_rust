@@ -1,5 +1,6 @@
 //! Header, tabs, footer, and the small shared pieces every screen borrows.
 
+use super::iconography::{draw_icon, Icon};
 use super::{Screen, UiAction, UiContext, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
@@ -30,13 +31,18 @@ pub fn draw_header(ctx: &UiContext<'_>) {
 
     draw_texture_ex(
         &ctx.artwork.wordmark,
-        rect.x + 16.0,
+        rect.x + 48.0,
         rect.y + 13.0,
         WHITE,
         DrawTextureParams {
-            dest_size: Some(vec2(190.0, 48.0)),
+            dest_size: Some(vec2(178.0, 48.0)),
             ..Default::default()
         },
+    );
+    draw_icon(
+        Icon::Monogram,
+        Rect::new(rect.x + 14.0, rect.y + 20.0, 24.0, 24.0),
+        dark::ACCENT,
     );
 
     let session = ctx.session;
@@ -136,6 +142,27 @@ pub fn draw_tabs(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     if let Some(index) = clicked {
         actions.push(UiAction::ShowScreen(Screen::TABS[index]));
     }
+
+    for (index, icon) in [
+        Icon::Crew,
+        Icon::Board,
+        Icon::Outfitter,
+        Icon::LastJob,
+        Icon::Records,
+    ]
+    .iter()
+    .enumerate()
+    {
+        draw_icon(
+            *icon,
+            Rect::new(22.0 + index as f32 * 100.0, 98.0, 18.0, 18.0),
+            if index == active {
+                dark::ACCENT
+            } else {
+                dark::TEXT_DIM
+            },
+        );
+    }
 }
 
 pub fn draw_footer(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
@@ -148,46 +175,62 @@ pub fn draw_footer(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
 
     let mouse = ctx.mouse();
     let mut x = rect.x + 14.0;
-    let buttons: [(&str, bool, ButtonTone, UiAction); 6] = [
+    let buttons: [(&str, Icon, bool, ButtonTone, UiAction); 6] = [
         (
             "Advance Week",
+            Icon::Advance,
             true,
             ButtonTone::Primary,
             UiAction::AdvanceWeek,
         ),
-        ("Save", true, ButtonTone::Positive, UiAction::Save),
-        ("Load", ctx.save_exists, ButtonTone::Primary, UiAction::Load),
+        (
+            "Save",
+            Icon::Save,
+            true,
+            ButtonTone::Positive,
+            UiAction::Save,
+        ),
+        (
+            "Load",
+            Icon::Load,
+            ctx.save_exists,
+            ButtonTone::Primary,
+            UiAction::Load,
+        ),
         (
             "New Campaign",
+            Icon::NewCampaign,
             true,
             ButtonTone::Secondary,
             UiAction::NewGame,
         ),
         (
             "Delete Save",
+            Icon::Delete,
             ctx.save_exists,
             ButtonTone::Danger,
             UiAction::DeleteSave,
         ),
         (
             "Settings",
+            Icon::Settings,
             true,
             ButtonTone::Secondary,
             UiAction::OpenSettings,
         ),
     ];
 
-    for (label, enabled, tone, action) in buttons {
+    for (label, icon, enabled, tone, action) in buttons {
         let width = 132.0;
-        if button_rect_tone_at(
-            Rect::new(x, rect.y + 9.0, width, 36.0),
-            label,
-            enabled,
-            tone,
-            mouse,
-        ) {
+        let button = Rect::new(x, rect.y + 9.0, width, 36.0);
+        if button_rect_tone_at(button, label, enabled, tone, mouse) {
             actions.push(action);
         }
+        draw_icon(
+            icon,
+            Rect::new(button.x + 7.0, button.y + 8.0, 20.0, 20.0),
+            if enabled { dark::TEXT } else { dark::TEXT_DIM },
+        );
         x += width + 10.0;
     }
 

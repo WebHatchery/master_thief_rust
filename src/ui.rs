@@ -7,6 +7,7 @@ pub mod crew;
 pub mod floorplan;
 pub mod hints;
 pub mod hiring;
+pub mod iconography;
 pub mod outfit;
 pub mod planning;
 pub mod records;

@@ -1,5 +1,6 @@
 //! The settings panel, reachable from anywhere and covering the screen.
 
+use super::iconography::{draw_icon, Icon};
 use super::{UiAction, UiContext, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use crate::prefs::RunPacing;
 use macroquad::prelude::*;
@@ -41,7 +42,7 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
 
     // How much of the run the player sits through — a pacing choice and an
     // accessibility one at the same time (GDD 9).
-    row(content, 0, "The run", prefs.pacing.label());
+    row(content, 0, Icon::Dice, "The run", prefs.pacing.label());
     if button_rect_tone_at(
         control(content, 0),
         "Change",
@@ -52,7 +53,13 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         actions.push(UiAction::SetPacing(prefs.pacing.next()));
     }
 
-    row(content, 1, "Sound", if prefs.sound { "On" } else { "Off" });
+    row(
+        content,
+        1,
+        if prefs.sound { Icon::Sound } else { Icon::Mute },
+        "Sound",
+        if prefs.sound { "On" } else { "Off" },
+    );
     if button_rect_tone_at(
         control(content, 1),
         if prefs.sound { "Mute" } else { "Unmute" },
@@ -70,6 +77,7 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     row(
         content,
         2,
+        Icon::Music,
         "Volume",
         &format!("{:.0}%", prefs.volume * 100.0),
     );
@@ -97,6 +105,7 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     row(
         content,
         3,
+        Icon::Hints,
         "Hints",
         if prefs.hints { "Shown" } else { "Hidden" },
     );
@@ -144,17 +153,22 @@ fn pacing_note(pacing: RunPacing) -> &'static str {
     }
 }
 
-fn row(content: Rect, index: usize, label: &str, value: &str) {
+fn row(content: Rect, index: usize, icon: Icon, label: &str, value: &str) {
     let y = content.y + index as f32 * 46.0;
+    draw_icon(
+        icon,
+        Rect::new(content.x, y + 7.0, 24.0, 24.0),
+        dark::ACCENT,
+    );
     draw_ui_text_ex(
         label,
-        content.x,
+        content.x + 34.0,
         y + 20.0,
         TextStyle::new(17.0, dark::TEXT).params(),
     );
     draw_ui_text_ex(
         value,
-        content.x + 120.0,
+        content.x + 154.0,
         y + 20.0,
         TextStyle::new(17.0, dark::TEXT_BRIGHT).params(),
     );
