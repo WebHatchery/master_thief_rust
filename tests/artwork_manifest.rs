@@ -24,6 +24,16 @@ fn ids(relative: &str) -> Vec<String> {
         .collect()
 }
 
+fn png_dimensions(relative: &str) -> (u32, u32, u8) {
+    let bytes = fs::read(project_file(relative)).expect("PNG must be readable");
+    assert_eq!(&bytes[..8], b"\x89PNG\r\n\x1a\n", "not a PNG: {relative}");
+    assert_eq!(&bytes[12..16], b"IHDR", "PNG has no IHDR: {relative}");
+    let width = u32::from_be_bytes(bytes[16..20].try_into().unwrap());
+    let height = u32::from_be_bytes(bytes[20..24].try_into().unwrap());
+    let color_type = bytes[25];
+    (width, height, color_type)
+}
+
 #[test]
 fn every_authored_character_and_target_has_runtime_art() {
     for id in ids("assets/data/characters.json") {
@@ -55,9 +65,13 @@ fn manifest_and_authored_atmosphere_are_shipped() {
     for path in [
         "assets/images/brand/master_thief_wordmark.png",
         "assets/images/environments/night_city_clear.png",
+        "assets/images/environments/night_city_clear_dark.png",
         "assets/images/environments/night_city_fog.png",
+        "assets/images/environments/night_city_fog_dark.png",
         "assets/images/environments/night_city_rain.png",
+        "assets/images/environments/night_city_rain_dark.png",
         "assets/images/environments/safehouse_desk.png",
+        "assets/images/environments/safehouse_desk_dark.png",
         "assets/images/items/equipment_icon_sheet.png",
         "assets/images/icons/slot_weapon.png",
         "assets/images/icons/slot_armor.png",
@@ -83,6 +97,60 @@ fn authored_runtime_families_have_id_parity() {
     }
     for id in ids("assets/data/equipment.json") {
         assert!(project_file(&format!("assets/images/items/{id}.png")).is_file());
+    }
+}
+
+#[test]
+fn authored_png_deliveries_keep_runtime_dimensions_and_alpha() {
+    for id in ids("assets/data/characters.json") {
+        assert_eq!(
+            png_dimensions(&format!("assets/images/portraits/{id}_neutral.png")),
+            (512, 640, 6),
+            "portrait delivery changed for {id}"
+        );
+        assert_eq!(
+            png_dimensions(&format!("assets/images/portraits/{id}_neutral_small.png")),
+            (256, 320, 6),
+            "small portrait delivery changed for {id}"
+        );
+    }
+    for id in ids("assets/data/targets.json") {
+        assert_eq!(
+            png_dimensions(&format!("assets/images/targets/{id}.png")),
+            (640, 360, 6),
+            "target delivery changed for {id}"
+        );
+    }
+    for id in ids("assets/data/equipment.json") {
+        assert_eq!(
+            png_dimensions(&format!("assets/images/items/{id}.png")),
+            (128, 128, 6),
+            "item delivery changed for {id}"
+        );
+    }
+    for path in [
+        "assets/images/environments/night_city_clear.png",
+        "assets/images/environments/night_city_fog.png",
+        "assets/images/environments/night_city_rain.png",
+        "assets/images/environments/safehouse_desk.png",
+    ] {
+        assert_eq!(
+            png_dimensions(path),
+            (1920, 1080, 2),
+            "plate delivery changed for {path}"
+        );
+    }
+    for path in [
+        "assets/images/environments/night_city_clear_dark.png",
+        "assets/images/environments/night_city_fog_dark.png",
+        "assets/images/environments/night_city_rain_dark.png",
+        "assets/images/environments/safehouse_desk_dark.png",
+    ] {
+        assert_eq!(
+            png_dimensions(path),
+            (1280, 720, 2),
+            "dark plate changed for {path}"
+        );
     }
 }
 

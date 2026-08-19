@@ -15,9 +15,13 @@
   "textures": [
     { "key": "brand_master_thief_wordmark", "path": "assets/images/brand/master_thief_wordmark.png", "filter": "linear" },
     { "key": "environment_night_city_clear", "path": "assets/images/environments/night_city_clear.png", "filter": "linear" },
+    { "key": "environment_night_city_clear_dark", "path": "assets/images/environments/night_city_clear_dark.png", "filter": "linear" },
     { "key": "environment_night_city_fog", "path": "assets/images/environments/night_city_fog.png", "filter": "linear" },
+    { "key": "environment_night_city_fog_dark", "path": "assets/images/environments/night_city_fog_dark.png", "filter": "linear" },
     { "key": "environment_night_city_rain", "path": "assets/images/environments/night_city_rain.png", "filter": "linear" },
+    { "key": "environment_night_city_rain_dark", "path": "assets/images/environments/night_city_rain_dark.png", "filter": "linear" },
     { "key": "environment_safehouse_desk", "path": "assets/images/environments/safehouse_desk.png", "filter": "linear" },
+    { "key": "environment_safehouse_desk_dark", "path": "assets/images/environments/safehouse_desk_dark.png", "filter": "linear" },
     { "key": "slot_weapon", "path": "assets/images/icons/slot_weapon.png", "filter": "nearest" },
     { "key": "slot_armor", "path": "assets/images/icons/slot_armor.png", "filter": "nearest" },
     { "key": "slot_accessory", "path": "assets/images/icons/slot_accessory.png", "filter": "nearest" },
@@ -43,5 +47,5 @@
     { "key_prefix": "chrome_", "coverage": "tabs, save/load/delete, settings, accessibility, modal, tooltip and footer glyphs", "renderer": "macroquad-toolkit UI surfaces", "filter": "nearest" },
     { "key_prefix": "achievement_", "coverage": "all achievement IDs from achievements.json", "renderer": "ui::records badge/stamp treatment", "filter": "nearest" }
   ],
-  "prompt_notes": "Noir payday: rain-glossed streets, smoked glass, brass hardware, sodium lamps, paper case files, blue police rim light, and professional tradespeople. Avoid gore, militarized assault imagery, branded marks, readable baked UI text, watermarks, and celebrity likenesses. Slot glyph atlas generated with the OpenAI image generation tool on 2026-08-19; cropped to five 64x64 RGBA runtime icons and retained at source_art/slot_glyph_atlas.png. Clear and fog city plates were generated with the OpenAI image generation tool on 2026-08-19, resized to 1920x1080 runtime plates, and kept text-safe in the lower third."
+  "prompt_notes": "Noir payday: rain-glossed streets, smoked glass, brass hardware, sodium lamps, paper case files, blue police rim light, and professional tradespeople. Avoid gore, militarized assault imagery, branded marks, readable baked UI text, watermarks, and celebrity likenesses. Slot glyph atlas generated with the OpenAI image generation tool on 2026-08-19; cropped to five 64x64 RGBA runtime icons and retained at source_art/slot_glyph_atlas.png. Clear and fog city plates were generated with the OpenAI image generation tool on 2026-08-19, resized to 1920x1080 runtime plates, and kept text-safe in the lower third. Rain and safehouse plates were normalized to the same 1920x1080 plate size; their 1280x720 dark derivatives are used as a lower-band fallback for catalog and narrow layouts. The Board remains a procedural case-file surface because it has no map interaction."
 }

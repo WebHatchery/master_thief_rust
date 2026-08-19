@@ -221,7 +221,16 @@ pub fn detail_rect() -> Rect {
 pub fn draw_game_ui(ctx: UiContext<'_>) -> Vec<UiAction> {
     let mut actions = Vec::new();
 
-    ctx.artwork.draw_backplate(ctx.screen);
+    let weather = ctx
+        .selected_target
+        .and_then(|id| ctx.data.targets.get(id))
+        .map(|target| target.environment.weather.as_str())
+        .or_else(|| {
+            ctx.last_report
+                .and_then(|report| ctx.data.targets.get(&report.target_id))
+                .map(|target| target.environment.weather.as_str())
+        });
+    ctx.artwork.draw_backplate(ctx.screen, weather);
     chrome::draw_header(&ctx);
     chrome::draw_tabs(&ctx, &mut actions);
     hints::draw(&ctx, &mut actions);

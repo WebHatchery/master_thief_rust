@@ -123,12 +123,12 @@ impl Artwork {
         }
     }
 
-    pub fn draw_backplate(&self, screen: crate::ui::Screen) {
+    pub fn draw_backplate(&self, screen: crate::ui::Screen, weather: Option<&str>) {
         let texture = match screen {
             crate::ui::Screen::Board
             | crate::ui::Screen::Planning
             | crate::ui::Screen::Run
-            | crate::ui::Screen::Results => &self.city_rain,
+            | crate::ui::Screen::Results => self.city_plate(weather),
             _ => &self.safehouse_plate,
         };
         draw_texture_ex(
@@ -148,6 +148,14 @@ impl Artwork {
             crate::ui::LOGICAL_HEIGHT,
             Color::new(0.02, 0.04, 0.07, 0.54),
         );
+    }
+
+    fn city_plate(&self, weather: Option<&str>) -> &Texture2D {
+        match weather {
+            Some("clear") => &self.city_clear,
+            Some("fog") => &self.city_fog,
+            _ => &self.city_rain,
+        }
     }
 
     pub fn draw_portrait(&self, id: &str, rect: Rect, small: bool) {

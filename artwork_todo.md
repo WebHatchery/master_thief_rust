@@ -66,31 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 3. Targets, districts, and safehouse atmosphere
-
-Target thumbnails are cards, not explorable maps. Keep encounter doors and node
-positions procedural.
-
-Use 640 x 360 RGBA or opaque PNGs with a 16:9 crop, a text-safe zone, and a
-focal subject placed according to the screen layout. Use 1920 x 1080 PNG/JPG
-environment plates and darken them for UI overlays rather than painting stats
-into the plates.
-
-- [ ] Generate target thumbnails for IDs 1–15 from `targets.json`.
-- [ ] Generate target thumbnails for IDs 16–30 from `targets.json`.
-- [ ] Generate target thumbnails for IDs 31–45 from `targets.json`.
-- [ ] Validate all 45 target files for a 16:9 crop, text-safe zone, focal
-  subject, dimensions, and target-ID parity.
-- [ ] Generate the night/clear environment plate.
-- [ ] Generate the night/rain environment plate.
-- [ ] Generate the night/fog environment plate.
-- [ ] Generate the safehouse desk plate with case folders, brass lamp, radio,
-  coffee, lockbox, and a clean negative-space region for cards.
-- [ ] Inspect the Board composition: add a map texture only if the screen
-  actually uses a map; otherwise document and keep the board procedural.
-- [ ] Add darkened 1280 x 720 derivatives for any opaque environment plate used
-  beneath UI overlays.
-
 ## 4. Equipment and loot icons
 
 The current equipment registry has 67 items, five slot values (`accessory`,
