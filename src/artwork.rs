@@ -15,6 +15,7 @@ pub struct Artwork {
     pub portrait_sheet: Texture2D,
     pub target_sheet: Texture2D,
     pub item_sheet: Texture2D,
+    pub slot_glyphs: [Texture2D; 5],
 }
 
 impl Artwork {
@@ -25,6 +26,13 @@ impl Artwork {
         let portrait_sheet = load("assets/images/portraits/crew_portrait_sheet.png").await;
         let target_sheet = load("assets/images/targets/target_contact_sheet.png").await;
         let item_sheet = load("assets/images/items/equipment_icon_sheet.png").await;
+        let slot_glyphs = [
+            load_icon("assets/images/icons/slot_weapon.png").await,
+            load_icon("assets/images/icons/slot_armor.png").await,
+            load_icon("assets/images/icons/slot_accessory.png").await,
+            load_icon("assets/images/icons/slot_tool.png").await,
+            load_icon("assets/images/icons/slot_gadget.png").await,
+        ];
         Self {
             wordmark,
             city_plate,
@@ -32,6 +40,7 @@ impl Artwork {
             portrait_sheet,
             target_sheet,
             item_sheet,
+            slot_glyphs,
         }
     }
 
@@ -127,6 +136,26 @@ impl Artwork {
         );
         draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 2.0, rarity_color(rarity));
     }
+
+    pub fn draw_slot_glyph(&self, slot: crate::model::EquipmentSlot, rect: Rect) {
+        let index = match slot {
+            crate::model::EquipmentSlot::Weapon => 0,
+            crate::model::EquipmentSlot::Armor => 1,
+            crate::model::EquipmentSlot::Accessory => 2,
+            crate::model::EquipmentSlot::Tool => 3,
+            crate::model::EquipmentSlot::Gadget => 4,
+        };
+        draw_texture_ex(
+            &self.slot_glyphs[index],
+            rect.x,
+            rect.y,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(rect.w, rect.h)),
+                ..Default::default()
+            },
+        );
+    }
 }
 
 async fn load(path: &str) -> Texture2D {
@@ -134,6 +163,14 @@ async fn load(path: &str) -> Texture2D {
         .await
         .unwrap_or_else(|err| panic!("failed to load authored artwork {path}: {err}"));
     texture.set_filter(FilterMode::Linear);
+    texture
+}
+
+async fn load_icon(path: &str) -> Texture2D {
+    let texture = load_texture(path)
+        .await
+        .unwrap_or_else(|err| panic!("failed to load authored icon {path}: {err}"));
+    texture.set_filter(FilterMode::Nearest);
     texture
 }
 

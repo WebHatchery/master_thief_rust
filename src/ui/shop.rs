@@ -204,9 +204,11 @@ fn draw_lockup(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
                 },
             ),
         );
+        ctx.artwork
+            .draw_slot_glyph(*slot, Rect::new(rect.x + 8.0, rect.y + 6.0, 22.0, 22.0));
         draw_ui_text_ex(
             slot.label(),
-            rect.x + 10.0,
+            rect.x + 35.0,
             rect.y + 16.0,
             TextStyle::new(12.0, dark::TEXT_DIM).params(),
         );

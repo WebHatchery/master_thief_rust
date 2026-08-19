@@ -171,7 +171,7 @@ art burden.
 
 ### Slot and item inventory
 
-- [ ] Generate one slot glyph for each of the five current slot values.
+- [x] Generate one slot glyph for each of the five current slot values.
 - [ ] Generate item icons for equipment records 1–17.
 - [ ] Generate item icons for equipment records 18–34.
 - [ ] Generate item icons for equipment records 35–51.
@@ -305,7 +305,7 @@ mechanic that is absent from `achievements.json`.
   required reputation, or required touch targets.
 - [ ] Verify all required actions work through visible touch/click targets;
   keyboard shortcuts remain supplemental.
-- [ ] Record the generator, prompt notes, date, and source/runtime relationship
+- [x] Record the generator, prompt notes, date, and source/runtime relationship
   for each generated asset family in `assets/artwork_manifest.json`.
 - [ ] Scan generated images for accidental text, watermarks, broken anatomy,
   broken props, unreadable dice, and inconsistent character identity; regenerate
@@ -338,11 +338,11 @@ mechanic that is absent from `achievements.json`.
   dossier treatment.
 - [ ] Integrate and verify Crew/For Hire portraits, rarity, cost, and specialty
   markers.
-- [ ] Integrate and verify Crew/The Outfit slot glyphs, item states, payroll,
+- [x] Integrate and verify Crew/The Outfit slot glyphs, item states, payroll,
   and safehouse treatment.
 - [ ] Integrate and verify The Board target art, payout, heat, notoriety, and
   location treatment.
-- [ ] Integrate and verify Outfitter items, slot families, rarity, repair, and
+- [x] Integrate and verify Outfitter items, slot families, rarity, repair, and
   wear treatment.
 - [ ] Integrate and verify Planning target art, floorplan states, routes,
   legends, and candidate portraits.

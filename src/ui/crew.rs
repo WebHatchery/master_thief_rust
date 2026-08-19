@@ -552,9 +552,13 @@ fn draw_kit(
                 },
             ),
         );
+        ctx.artwork.draw_slot_glyph(
+            *slot,
+            Rect::new(slot_rect.x + 8.0, slot_rect.y + 5.0, 22.0, 22.0),
+        );
         draw_ui_text_ex(
             slot.label(),
-            slot_rect.x + 10.0,
+            slot_rect.x + 35.0,
             slot_rect.y + 20.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );

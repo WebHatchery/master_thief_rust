@@ -57,10 +57,36 @@ fn manifest_and_authored_atmosphere_are_shipped() {
         "assets/images/environments/night_city_rain.png",
         "assets/images/environments/safehouse_desk.png",
         "assets/images/items/equipment_icon_sheet.png",
+        "assets/images/icons/slot_weapon.png",
+        "assets/images/icons/slot_armor.png",
+        "assets/images/icons/slot_accessory.png",
+        "assets/images/icons/slot_tool.png",
+        "assets/images/icons/slot_gadget.png",
     ] {
         assert!(
             project_file(path).is_file(),
             "missing atmosphere asset {path}"
+        );
+    }
+}
+
+#[test]
+fn every_equipment_slot_has_a_manifest_texture() {
+    let manifest = fs::read_to_string(project_file("assets/artwork_manifest.json"))
+        .expect("artwork manifest must be shipped");
+    let parsed: Value = serde_json::from_str(&manifest).expect("artwork manifest must be JSON");
+    let textures = parsed["textures"]
+        .as_array()
+        .expect("manifest textures must be an array");
+    for slot in ["weapon", "armor", "accessory", "tool", "gadget"] {
+        let path = format!("assets/images/icons/slot_{slot}.png");
+        assert!(
+            textures.iter().any(|entry| entry["path"] == path),
+            "missing manifest texture for equipment slot {slot}"
+        );
+        assert!(
+            project_file(&path).is_file(),
+            "missing runtime slot glyph {slot}"
         );
     }
 }

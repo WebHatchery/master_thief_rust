@@ -3,10 +3,15 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::Path;
 
-const RUNTIME_ASSETS: [&str; 6] = [
+const RUNTIME_ASSETS: [&str; 11] = [
     "assets/images/brand/master_thief_wordmark.png",
     "assets/images/environments/night_city_rain.png",
     "assets/images/environments/safehouse_desk.png",
+    "assets/images/icons/slot_weapon.png",
+    "assets/images/icons/slot_armor.png",
+    "assets/images/icons/slot_accessory.png",
+    "assets/images/icons/slot_tool.png",
+    "assets/images/icons/slot_gadget.png",
     "assets/images/items/equipment_icon_sheet.png",
     "assets/images/portraits/crew_portrait_sheet.png",
     "assets/images/targets/target_contact_sheet.png",
