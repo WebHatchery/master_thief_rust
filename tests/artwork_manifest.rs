@@ -174,3 +174,48 @@ fn every_equipment_slot_has_a_manifest_texture() {
         );
     }
 }
+
+#[test]
+fn manifest_paths_keys_filters_and_accessibility_rules_are_valid() {
+    let manifest: Value = serde_json::from_str(
+        &fs::read_to_string(project_file("assets/artwork_manifest.json")).unwrap(),
+    )
+    .unwrap();
+    let textures = manifest["textures"].as_array().unwrap();
+    let mut keys = std::collections::HashSet::new();
+    let mut paths = std::collections::HashSet::new();
+    for texture in textures {
+        let key = texture["key"].as_str().expect("texture needs a stable key");
+        let path = texture["path"].as_str().expect("texture needs a path");
+        let filter = texture["filter"].as_str().expect("texture needs a filter");
+        assert!(keys.insert(key), "duplicate manifest key {key}");
+        assert!(paths.insert(path), "duplicate manifest path {path}");
+        assert!(matches!(filter, "nearest" | "linear"));
+        assert!(project_file(path).is_file(), "missing manifest path {path}");
+    }
+
+    let accessibility = &manifest["accessibility"];
+    assert_eq!(accessibility["touch_targets"]["minimum_logical_pixels"], 44);
+    assert!(accessibility["touch_targets"]["labels_paired"]
+        .as_bool()
+        .unwrap());
+    assert!(!accessibility["touch_targets"]["keyboard_required"]
+        .as_bool()
+        .unwrap());
+    for state in accessibility["state_channels"].as_array().unwrap() {
+        assert!(state["channels"].as_array().unwrap().len() >= 2);
+    }
+    for review in accessibility["generated_image_review"]
+        .as_object()
+        .unwrap()
+        .values()
+    {
+        assert_eq!(
+            review, false,
+            "generated asset review found an unresolved issue"
+        );
+    }
+    assert_eq!(accessibility["filtering"]["flat_icons"], "nearest");
+    assert_eq!(accessibility["filtering"]["portraits"], "linear");
+    assert_eq!(accessibility["filtering"]["plates"], "linear");
+}

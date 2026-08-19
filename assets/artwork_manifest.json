@@ -12,6 +12,40 @@
     "success": "#73C2A1",
     "felt": "#4C1F2A"
   },
+  "accessibility": {
+    "state_channels": [
+      { "state": "selected", "channels": ["color", "border", "label"] },
+      { "state": "locked", "channels": ["color", "lock_shape", "label"] },
+      { "state": "success", "channels": ["color", "check_shape", "outcome_label"] },
+      { "state": "failure", "channels": ["color", "cross_shape", "outcome_label"] },
+      { "state": "injured", "channels": ["color", "bandage", "injury_label"] },
+      { "state": "exhausted", "channels": ["color", "clock", "fatigue_label"] },
+      { "state": "alarm", "channels": ["color", "edge_pulse", "alarm_label"] }
+    ],
+    "contrast": {
+      "ink_on_paper": "AA",
+      "paper_on_ink": "AA",
+      "neon_on_safehouse": "AA",
+      "warning_on_ink": "AA",
+      "danger_on_ink": "AA",
+      "success_on_ink": "AA"
+    },
+    "touch_targets": { "minimum_logical_pixels": 44, "labels_paired": true, "keyboard_required": false },
+    "layout_guards": { "portrait_reserved_rect": true, "target_reserved_rect": true, "stats_reserved_rect": true },
+    "generated_image_review": {
+      "accidental_text": false,
+      "watermarks": false,
+      "broken_anatomy": false,
+      "broken_props": false,
+      "inconsistent_identity": false,
+      "real_logos": false,
+      "police_insignia": false,
+      "branded_weapons": false,
+      "copyrighted_characters": false,
+      "celebrity_likenesses": false
+    },
+    "filtering": { "flat_icons": "nearest", "procedural_glyphs": "nearest", "portraits": "linear", "plates": "linear", "soft_effects": "linear" }
+  },
   "textures": [
     { "key": "brand_master_thief_wordmark", "path": "assets/images/brand/master_thief_wordmark.png", "filter": "linear" },
     { "key": "environment_night_city_clear", "path": "assets/images/environments/night_city_clear.png", "filter": "linear" },

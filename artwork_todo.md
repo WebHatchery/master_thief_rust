@@ -66,26 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 9. Accessibility, provenance, and asset rules
-
-- [ ] Express every decision-relevant state with at least two of icon, label,
-  shape, pattern, position, or motion.
-- [ ] Check critical text and glyph contrast against `#0B1018`, `#162331`, and
-  `#E7D8B7` surfaces.
-- [ ] Verify that portraits and target thumbnails do not cover stats, payout,
-  required reputation, or required touch targets.
-- [ ] Verify all required actions work through visible touch/click targets;
-  keyboard shortcuts remain supplemental.
-- [x] Record the generator, prompt notes, date, and source/runtime relationship
-  for each generated asset family in `assets/artwork_manifest.json`.
-- [ ] Scan generated images for accidental text, watermarks, broken anatomy,
-  broken props, unreadable dice, and inconsistent character identity; regenerate
-  or replace failures.
-- [ ] Scan generated images for real logos, police insignia, branded weapons,
-  copyrighted characters, and celebrity likenesses; regenerate failures.
-- [ ] Declare `nearest` filtering for flat icons and `linear` filtering for
-  portraits, plates, and soft effects in the manifest.
-
 ## 10. Manifest, integration, and validation
 
 ### Manifest and tests
