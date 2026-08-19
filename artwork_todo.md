@@ -1,14 +1,25 @@
-# Master Thief — Artwork Requirements
+# Master Thief — AI Artwork TODO
 
-Status: production brief and asset checklist  
+Status: agent-executable artwork, UI, and validation checklist
 Visual direction: **noir payday** — rain-glossed streets, smoked glass,
 brass hardware, sodium lamps, paper case files, and the quiet confidence of a
 crew that knows exactly what it is doing.
+
+This checklist contains work an AI agent can complete in this repository:
+generate raster artwork, implement procedural rendering, update manifests and
+tests, capture verification images, and run the project publisher. Every
+checkbox is intended to be one bounded task or one small batch of related
+assets. Use the current JSON registries as the source of truth for any future
+additions; the explicit batch ranges below reflect the current data snapshot.
 
 This is a heist-planning game, not a real-time action game. Art must make the
 plan, the people, the building, and the dice legible before it makes them
 dramatic. No asset may hide a DC, modifier, assignment, injury, payout, or
 required tap target.
+
+The checklist does not track external commissions, human-only art direction or
+licensing approvals, or layered editable masters. Runtime PNGs, procedural
+renderers, metadata, and repeatable validation are the deliverables here.
 
 ## Art direction
 
@@ -17,7 +28,7 @@ required tap target.
 - Late-night city, professional crew, expensive targets, controlled danger.
 - Noir references: wet asphalt, venetian-blind shadows, cigarette-card
   silhouettes, typewritten dossiers, hotel brass, green-shaded desk lamps,
-  burgundy felt, and blue police light seen through frosted glass.
+  and blue police light through frosted glass.
 - Payday energy: a clean payday board, bold take values, tool rolls, masks,
   gloves, radios, drills, and the visual rhythm of preparing a score.
 - The crew are tradespeople first. Avoid torture, gore, skull-heavy outlaw
@@ -25,8 +36,8 @@ required tap target.
 
 ### Palette
 
-Use this as the shared art palette; procedural UI colors should harmonize with
-it rather than compete with it.
+Use this shared palette; procedural UI colors should harmonize with it rather
+than compete with it.
 
 | Role | Color | Hex | Use |
 | --- | --- | --- | --- |
@@ -41,311 +52,335 @@ it rather than compete with it.
 | Felt | deep burgundy | `#4C1F2A` | rare accents, results, high-value loot |
 
 Do not use color as the sole carrier of state. Pair every color with a glyph,
-label, pattern, border, or motion change.
+label, pattern, border, shape, or motion change.
 
 ### Rendering language
 
-- 2D graphic illustration with crisp silhouettes and selective painterly grain.
-- Strong outer silhouettes; details should survive a 25% reduction.
-- Hard directional light from a desk lamp, street lamp, or police beacon.
-- Restrained halftone, paper grain, blueprint lines, and rain streaks; never
-  put noisy texture behind dense stats or dice results.
-- Use procedural geometry for the building floorplan, node links, dice, meters,
-  buttons, tabs, and ordinary UI chrome. Bitmap art is reserved for identity,
-  atmosphere, and authored content.
-- Artwork must read at the game's 1280 x 720 logical layout and remain usable
-  on narrow WebGL windows.
+- Use crisp 2D illustration with strong silhouettes and selective painterly
+  grain. Details must survive a 25% reduction.
+- Use hard directional light from a desk lamp, street lamp, or police beacon.
+- Keep halftone, paper grain, blueprint lines, and rain streaks restrained;
+  never put noisy texture behind dense stats or dice results.
+- Use procedural geometry for floorplans, node links, dice, meters, buttons,
+  tabs, and ordinary UI chrome. Use raster art for identity, atmosphere, and
+  authored content.
+- Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## Current screens and required art coverage
+## 1. Inventory and technical scaffolding
 
-| Screen | Art that must exist | Delivery status |
-| --- | --- | --- |
-| Crew / Payroll | crew portraits, class badges, injury/fatigue/loyalty marks, dossier paper | TODO |
-| Crew / For Hire | recruit portraits, rarity treatment, hire-cost marker, specialty badges | TODO |
-| Crew / The Outfit | equipment slot glyphs, worn/broken kit marks, payroll and safehouse motifs | TODO |
-| The Board | target category marks, payout stamp, notoriety/heat marks, location thumbnails | TODO |
-| Outfitter | item icons, five slot families, five rarity treatments, repair/wear overlay | TODO |
-| Planning | target header art, floorplan node states, route/connection treatment, candidate portraits | TODO |
-| The Run | encounter node resolution states, assigned-hand portrait, dice faces, modifier chips, alarm/door VFX | TODO |
-| Last Job | outcome illustration, payout/loot stamps, injury/fatigue result marks, heat/reputation arrows | TODO |
-| Records | achievement badges, campaign milestones, statistics marks, case-file tabs | TODO |
-| Settings | sound/music/fullscreen/help icons, pacing controls, reset/delete confirmation marks | TODO |
-| Global chrome | title mark, tab icons, save/load/delete, hint strip, footer, tooltips, modal close | TODO |
-
-## 1. Character portraits and crew identity
-
-The data currently defines 40 recruit archetypes and seven classes. Portraits
-must support a rotating roster without making every generated recruit look like
-the same person.
-
-### Required portrait set
-
-- [ ] Seven class key portraits, one for each class in `assets/data/characters.json`:
-  infiltrator/safecracker, muscle/doorman, face/talker, hacker, lookout,
-  technician, and the remaining authored class in the data.
-- [ ] A reusable portrait recipe for all 40 recruit archetypes. Each recruit
-  needs a distinct face, age, silhouette, hairstyle, clothing cue, and prop;
-  never distinguish recruits by hair color alone.
-- [ ] Portrait states for neutral, speaking, pleased/success, worried/low
-  loyalty, injured, exhausted, arrested/absent, and unavailable/unknown.
-- [ ] A crew silhouette fallback for an unillustrated recruit and a locked
-  silhouette for unrevealed content.
-- [ ] Tiny class/employment badges that remain readable beside a 16–18 px label.
-
-### Portrait composition
-
-- Bust or shoulders-up, 4:5 crop, face and identifying prop inside a 10% safe
-  margin; transparent foreground preferred for cards.
-- Head angle is three-quarter or front, with eye line aligned across the cast.
-- Neutral background: transparent cutout plus optional 512 x 640 case-file
-  background plate. Do not bake UI text into the art.
-- Master: layered 2048 x 2560 source. Runtime: 512 x 640 RGBA PNG; provide a
-  256 x 320 derivative for dense lists.
-- Lighting: one warm key and one cool rim. Injured/exhausted states may alter
-  light and posture, but must preserve identity.
-- Wardrobe should signal trade: picks and gloves, heavy coat, immaculate suit,
-  tool belt, radio headset, camera, or electrician's kit. Avoid firearms as the
-  default identity cue.
-
-### Portrait naming
-
-```text
-assets/images/portraits/<character_id>_<state>.png
-assets/images/portraits/class_<class_id>_badge.png
-assets/images/portraits/portrait_unknown.png
-assets/images/portraits/portrait_locked.png
-```
-
-## 2. Target, district, and safehouse art
-
-Targets are cards and procedural floorplans, not explorable levels. Art should
-sell the mark and the city while leaving the encounter graph to code.
-
-- [ ] One location thumbnail per target archetype: casino, warehouse, mansion,
-  bank, gallery, hotel, nightclub, office, dock, and any additional target
-  categories present in `assets/data/targets.json`.
-- [ ] Three environment plates: night/clear, night/rain, and night/fog. These
-  are atmospheric backplates for the Board, Planning, and Results screens, not
-  gameplay maps.
-- [ ] Safehouse desk plate: case folders, brass lamp, radio, coffee, lockbox,
-  and a clean negative-space region for Crew/Outfitter cards.
-- [ ] The Board needs a city-map texture or paper map only if the screen uses
-  a map composition. Keep the target list usable without it.
-- [ ] Target thumbnails: 640 x 360 RGBA/opaque PNG, 16:9, focal subject on the
-  right or left according to the screen layout, with a text-safe zone.
-- [ ] Environment plates: 1920 x 1080 JPG/PNG for opaque art; provide a darkened
-  1280 x 720 derivative for UI overlays.
-- [ ] Do not paint encounter doors or node positions into a target thumbnail;
-  those belong to the procedural floorplan.
-
-## 3. Equipment and loot icons
-
-`assets/data/equipment.json` contains 67 equipment templates across five slots
-and five rarity tiers. Every item shown in the Outfitter, Crew, Results, or loot
-summary needs a stable visual key.
-
-### Slot families
-
-- [ ] Tool: picks, tension sets, drill, bypass kit, climbing kit.
-- [ ] Weapon/defence: non-glamorized emergency tools, baton, vest, restraint
-  kit, or the actual authored items in the data.
-- [ ] Outfit/disguise: coat, uniform, mask, gloves, credentials, shoes.
-- [ ] Tech: radio, camera loop, signal jammer, laptop, access device.
-- [ ] Utility: medkit, rope, light, bag, decoy, consumable.
-
-### Icon requirements
-
-- 67 named item icons, plus `loot_unknown`, `loot_cash`, `loot_document`, and
-  `loot_jewellery` if those result categories are displayed.
-- 64 x 64 RGBA PNG delivery; 128 x 128 source/master. Keep the object centered
-  inside a 52 x 52 safe area with a consistent three-quarter view.
-- Five rarity treatments: basic, improved, advanced, rare, legendary. Prefer a
-  shared object drawing with procedural rarity frame/foil so variants do not
-  multiply the art burden.
-- State overlays: equipped, selected, locked/level-gated, worn, broken, sold,
-  and newly found. Use a separate overlay or code-drawn badge where possible.
-- No baked item names, stats, rarity labels, or prices in the bitmap.
-- Strong silhouette at 24 x 24 and recognizable in the 44 x 44 touch target.
-
-### Naming and manifest
-
-```text
-assets/images/items/<equipment_id>.png
-assets/images/items/loot_<kind>.png
-assets/images/items/slot_<slot>.png
-```
-
-The item manifest must match `equipment.json` one-for-one. Add a validation
-test that reports missing or duplicate keys before a publish.
-
-## 4. Floorplan, door, and encounter artwork
-
-The floorplan is the signature visual: a clean case-file blueprint that turns a
-sequence of encounters into a readable building.
-
-- [ ] Procedural node symbols for every encounter trade: social, lockpicking,
-  stealth, hacking, athletics, combat, investigation, and any authored type.
-- [ ] A bespoke symbol for each environment complication: crowded, noisy, dark,
-  exposed, wet, watched, alarmed, and any `environment.json` factor.
-- [ ] Node states: unknown, cased, selected, assigned, ready, in progress,
-  success, failure, critical success, critical failure, skipped, and locked.
-- [ ] Door/room silhouettes: lobby, service door, vault, office, loading dock,
-  roof, alley, elevator, and exit. Draw in the toolkit `paint`/UI layer unless
-  a screen proves a bitmap is needed.
-- [ ] Connecting route lines should look like red pencil or cyan drafting ink;
-  they must remain visible under node highlights.
-- [ ] Assigned crew portrait medallion at each node; do not use a tiny full
-  portrait that becomes unrecognizable.
-- [ ] A small target-specific floorplan legend with labels, never icon-only.
-
-If any floorplan texture is commissioned, use a seamless 1024 x 1024 paper or
-blueprint texture with low contrast and transparent/neutral margins. No fixed
-door positions may be baked into it.
-
-## 5. Dice, resolution, and heist VFX
-
-The d20 resolution sequence is the emotional payoff. Its art should be crisp,
-fast, and inspectable rather than particle-heavy.
-
-- [ ] d20 face treatment: ivory/black base, brass edge, cyan critical glow,
-  red critical-failure crack. Faces 1–20 must remain readable at 32 px.
-- [ ] Modifier chips for attribute, skill, equipment, condition, environment,
-  and chemistry. Each gets a glyph and a short label.
-- [ ] Door transition VFX: paper snap, brass stamp, cyan scan sweep, red alarm
-  pulse, and a restrained dust/rain of paper flecks.
-- [ ] Outcome marks: cleared, partial/neutral, failed, critical success, and
-  critical failure. Each state needs icon + label + motion/shape difference.
-- [ ] Alarm/heat treatment: rotating beacon reflection or pulsing red edge,
-  never a full-screen flash that harms readability.
-- [ ] Injury/fatigue treatment: bandage/clock glyph and subdued portrait change;
-  avoid blood as the primary signal.
-- [ ] Loot reveal: folder slide, evidence stamp, or velvet-lined reveal frame.
-
-All effects must support reduced motion and low-opacity modes. Do not make
-procedural VFX depend on external bitmap sprites unless a visual test proves
-the effect cannot be drawn by the toolkit.
-
-## 6. Global UI chrome and iconography
-
-- [ ] Master Thief wordmark: horizontal title lockup, compact monogram, and
-  monochrome light/dark versions. Runtime title art: 640 x 160 transparent PNG.
-- [ ] Tab icons for Crew, The Board, Outfitter, Last Job, and Records.
-- [ ] Save, load, delete, settings, sound, music, fullscreen, help, close,
-  back, warning, info, success, danger, search, filter, sort, add, remove,
-  lock, unlock, and notification glyphs.
-- [ ] Heist-specific glyphs: case file, target, payout, reputation, notoriety,
-  heat, safehouse, payroll, doctor, fence, bail, retire, door, dice, and crew.
-- [ ] 24 x 24 design grid; deliver 48 x 48 RGBA PNG masters. Maintain one stroke
-  weight and one corner language across the family.
-- [ ] Icon buttons keep visible text labels for unfamiliar actions and retain a
-  minimum 44 x 44 logical-pixel touch target.
-- [ ] Plaque/button chrome remains procedural. Bitmap frames are optional and
-  must not replace the toolkit's responsive hit-tested surfaces.
-
-## 7. Records, achievements, and campaign marks
-
-- [ ] Achievement badge family for the five authored achievement categories.
-- [ ] Campaign record stamps: first job, clean job, botched job, legendary loot,
-  retired outfit, heat peak, and long-running crew.
-- [ ] Three tiers per badge (locked, earned, notable) using silhouette/foil,
-  not color alone.
-- [ ] 96 x 96 RGBA PNG badge masters, delivered at 48 x 48 and 24 x 24.
-- [ ] No badge may imply a mechanic that does not exist in `achievements.json`.
-
-## 8. Production rules and technical delivery
-
-### Formats and folders
-
-```text
-assets/images/
-  brand/
-  portraits/
-  targets/
-  environments/
-  items/
-  icons/
-  achievements/
-  effects/
-  ui/
-source_art/                 # layered/editable masters; not loaded at runtime
-assets/artwork_manifest.json
-```
-
-- PNG RGBA for portraits, sprites, icons, logos, and transparent UI art.
-- JPG/PNG for opaque environment plates; use PNG when crisp type or linework is
-  embedded in the image (normally avoid embedded type).
-- Nearest filter for pixel/flat icon art; linear filter for painted portraits,
-  plates, and soft effects. Declare the choice in `artwork_manifest.json`.
-- Lowercase `snake_case`; semantic identity first, state last:
-  `vera_sloan_injured.png`, `icon_heat_high.png`, `target_velvet_room.png`.
-- Do not put prices, DCs, names, screen positions, or revision numbers in
+- [ ] Read the IDs and relevant fields from `characters.json`,
+  `equipment.json`, `targets.json`, `encounters.json`, `environment.json`,
+  and `achievements.json`; refresh the explicit batch ranges below if the
+  registries change before beginning a batch.
+- [ ] Create or update the `assets/images/brand`, `portraits`, `targets`,
+  `environments`, `items`, `icons`, `achievements`, `effects`, and `ui`
+  folders needed by the current runtime.
+- [ ] Apply lowercase `snake_case` filenames with semantic identity first and
+  state last; keep prices, DCs, names, positions, and revision numbers out of
   runtime filenames.
+- [ ] Add one shared generation prompt block and the palette to
+  `assets/artwork_manifest.json`.
+- [ ] Add manifest entries for every authored raster family and every
+  procedural renderer before adding new UI references.
 
-### Accessibility and readability
+## 2. Crew portraits and identity
 
-- [ ] Every state that matters to a decision is expressed by at least two of
-  icon, label, shape, pattern, position, or motion.
-- [ ] Check all critical text and glyphs against `#0B1018`, `#162331`, and
+### Registry and class assets
+
+- [ ] Extract the seven current class values from `characters.json` and create
+  exactly one readable badge key for each class.
+- [ ] Generate the seven class badges and wire each badge to the class lookup.
+- [ ] Generate `portrait_unknown.png` and `portrait_locked.png` with matching
+  case-file framing and no baked UI copy.
+- [ ] Define a portrait recipe that keeps face, age, silhouette, hairstyle,
+  clothing cue, and prop distinct across the 40 character IDs.
+
+### Neutral portrait batches
+
+Generate one 4:5 transparent portrait and one dense-list derivative per batch.
+Keep each batch small enough to compare identity and lighting against the
+previous batch.
+
+Use a 512 x 640 RGBA runtime PNG and a 256 x 320 derivative. Keep the face and
+identifying prop inside a 10% safe margin, use a three-quarter or front angle,
+and do not bake UI copy into the art.
+
+- [ ] Batch 1: `vera_sloan`, `otis_kemp`, `birdie_lang`, `hollis_pike`,
+  `juno_vasquez`, `marcus_dunn`, `sasha_reyes`, `walter_boyd`.
+- [ ] Batch 2: `delphine_arceneaux`, `tobias_crane`, `nadia_frost`,
+  `gerald_moss`, `imani_okoro`, `rook_maddox`, `priya_raman`, `cyril_mott`.
+- [ ] Batch 3: `eda_stroud`, `bram_teague`, `ivy_calder`, `harlan_vise`,
+  `nell_faraday`, `desmond_okafor`, `greta_lindqvist`, `aurelio_bassi`.
+- [ ] Batch 4: `kit_mahoney`, `solomon_pike`, `yusra_haddad`, `orson_bray`,
+  `clemency_dunne`, `matthias_orr`, `rosalind_vane`, `tobias_lench`.
+- [ ] Batch 5: `aiko_shimada`, `gaspard_rue`, `wilhelmina_dove`,
+  `emeric_shaw`, `petra_almeida`, `leonid_varga`, `beatrix_hollow`,
+  `august_vane`.
+- [ ] Validate the full neutral set for dimensions, transparency, safe margin,
+  filename/ID parity, and small-size readability.
+
+### Portrait state behavior
+
+Use the neutral portrait as the identity source and prefer code-drawn overlays
+or controlled tint/posture changes over multiplying the 40-portrait bitmap
+set.
+
+- [ ] Implement neutral and speaking states in the portrait renderer.
+- [ ] Implement pleased/success and worried/low-loyalty states.
+- [ ] Implement injured and exhausted states without using blood as the main
+  signal.
+- [ ] Implement arrested/absent and unavailable/unknown states.
+- [ ] Add class/employment badges that remain readable beside a 16–18 px label.
+
+## 3. Targets, districts, and safehouse atmosphere
+
+Target thumbnails are cards, not explorable maps. Keep encounter doors and node
+positions procedural.
+
+Use 640 x 360 RGBA or opaque PNGs with a 16:9 crop, a text-safe zone, and a
+focal subject placed according to the screen layout. Use 1920 x 1080 PNG/JPG
+environment plates and darken them for UI overlays rather than painting stats
+into the plates.
+
+- [ ] Generate target thumbnails for IDs 1–15 from `targets.json`.
+- [ ] Generate target thumbnails for IDs 16–30 from `targets.json`.
+- [ ] Generate target thumbnails for IDs 31–45 from `targets.json`.
+- [ ] Validate all 45 target files for a 16:9 crop, text-safe zone, focal
+  subject, dimensions, and target-ID parity.
+- [ ] Generate the night/clear environment plate.
+- [ ] Generate the night/rain environment plate.
+- [ ] Generate the night/fog environment plate.
+- [ ] Generate the safehouse desk plate with case folders, brass lamp, radio,
+  coffee, lockbox, and a clean negative-space region for cards.
+- [ ] Inspect the Board composition: add a map texture only if the screen
+  actually uses a map; otherwise document and keep the board procedural.
+- [ ] Add darkened 1280 x 720 derivatives for any opaque environment plate used
+  beneath UI overlays.
+
+## 4. Equipment and loot icons
+
+The current equipment registry has 67 items, five slot values (`accessory`,
+`armor`, `gadget`, `tool`, and `weapon`), and five rarity values
+(`basic`, `improved`, `advanced`, `masterwork`, and `legendary`).
+
+Use 64 x 64 RGBA runtime icons with the object centered in a 52 x 52 safe area,
+a consistent three-quarter view, no baked names/stats/prices, and a silhouette
+that remains recognizable at 24 x 24. Use the shared object drawing with
+procedural rarity and state overlays so bitmap variants do not multiply the
+art burden.
+
+### Slot and item inventory
+
+- [ ] Generate one slot glyph for each of the five current slot values.
+- [ ] Generate item icons for equipment records 1–17.
+- [ ] Generate item icons for equipment records 18–34.
+- [ ] Generate item icons for equipment records 35–51.
+- [ ] Generate item icons for equipment records 52–67.
+- [ ] Validate all 67 item files for one-to-one ID parity, centered silhouette,
+  64 x 64 runtime dimensions, and recognition at 24 x 24.
+- [ ] Add `loot_unknown`, `loot_cash`, `loot_document`, and `loot_jewellery`
+  only when the results UI displays those categories.
+
+### Shared item treatments
+
+- [ ] Implement the `basic` and `improved` rarity treatments.
+- [ ] Implement the `advanced` and `masterwork` rarity treatments.
+- [ ] Implement the `legendary` rarity treatment.
+- [ ] Implement equipped and selected overlays.
+- [ ] Implement locked/level-gated and newly-found overlays.
+- [ ] Implement worn, broken, and sold overlays.
+- [ ] Add the item manifest validation so every equipment ID resolves to one
+  bitmap or one explicit procedural renderer, never both accidentally.
+
+## 5. Floorplan, doors, and encounters
+
+The floorplan should read as a case-file blueprint. Keep node positions,
+connections, and state transitions in code.
+
+- [ ] Add procedural symbols for the six current encounter skills:
+  `social`, `lockpicking`, `stealth`, `hacking`, `athletics`, and `combat`.
+- [ ] Add complication glyphs for time/light factors: `day`, `dusk`, `night`,
+  and `dawn`.
+- [ ] Add complication glyphs for weather factors: `clear`, `rain`, `fog`, and
+  `storm`.
+- [ ] Add complication glyphs for scene factors: `crowded`, `well_lit`,
+  `noisy`, and `high_security`.
+- [ ] Add complication glyphs for security/context factors: `wired`,
+  `old_money`, `understaffed`, and `private_security`.
+- [ ] Implement unknown, cased, and locked node states.
+- [ ] Implement selected, assigned, ready, and in-progress node states.
+- [ ] Implement success, failure, critical-success, and critical-failure node
+  states.
+- [ ] Implement skipped state and verify it cannot be mistaken for success.
+- [ ] Draw door/room silhouettes for lobby, service door, vault, and office.
+- [ ] Draw door/room silhouettes for loading dock, roof, alley, elevator, and
+  exit.
+- [ ] Render route lines as readable red drafting ink or cyan drafting ink
+  beneath node highlights.
+- [ ] Add an assigned-crew portrait medallion that remains recognizable at node
+  size.
+- [ ] Add a target-specific floorplan legend with text labels.
+- [ ] Add a low-contrast procedural paper/blueprint treatment only if the
+  floorplan needs texture after the readable geometry is complete.
+
+## 6. Dice, resolution, and heist effects
+
+- [ ] Draw the ivory/black d20 base and brass edge with readable numbers 1–20
+  at 32 px.
+- [ ] Add cyan critical-success treatment without obscuring the number.
+- [ ] Add red critical-failure crack treatment without obscuring the number.
+- [ ] Implement attribute, skill, and equipment modifier chips.
+- [ ] Implement condition, environment, and chemistry modifier chips.
+- [ ] Implement the paper-snap door transition.
+- [ ] Implement the brass-stamp door transition.
+- [ ] Implement the cyan scan-sweep door transition.
+- [ ] Implement the restrained red alarm pulse.
+- [ ] Implement paper-fleck motion only where it does not cover resolution text.
+- [ ] Implement cleared and partial/neutral outcome marks.
+- [ ] Implement failed, critical-success, and critical-failure outcome marks.
+- [ ] Implement the alarm/heat edge treatment as a readable beacon reflection or
+  pulse rather than a full-screen flash.
+- [ ] Implement the injury/fatigue bandage and clock glyphs with subdued
+  portrait changes.
+- [ ] Implement the loot reveal as a folder slide, evidence stamp, or
+  velvet-lined reveal frame.
+- [ ] Add reduced-motion and low-opacity paths for dice, scans, alarms, and
+  loot reveals.
+
+## 7. Global UI chrome and iconography
+
+### Brand and navigation
+
+- [ ] Establish the 24 x 24 icon grid, one stroke weight, and one corner
+  language before generating the bitmap glyph family.
+- [ ] Generate the horizontal Master Thief wordmark at runtime size.
+- [ ] Generate the compact monogram and monochrome light/dark variants.
+- [ ] Export bitmap glyphs at 48 x 48 RGBA when a procedural glyph is not
+  sufficient; keep UI frames and hit-tested surfaces procedural.
+- [ ] Wire the wordmark and monogram into title, loading, and catalog-safe
+  layouts without baking screen copy into the artwork.
+- [ ] Implement the Crew and The Board tab icons.
+- [ ] Implement the Outfitter, Last Job, and Records tab icons.
+
+### Generic controls
+
+- [ ] Implement save, load, delete, settings, sound, and music glyphs.
+- [ ] Implement fullscreen, help, close, back, warning, info, success, and
+  danger glyphs.
+- [ ] Implement search, filter, sort, add, remove, lock, unlock, and
+  notification glyphs.
+- [ ] Implement case file, target, payout, reputation, notoriety, and heat
+  glyphs.
+- [ ] Implement safehouse, payroll, doctor, fence, bail, retire, door, dice,
+  and crew glyphs.
+- [ ] Keep unfamiliar icon buttons paired with visible text labels and a
+  minimum 44 x 44 logical-pixel touch target.
+- [ ] Keep plaque, panel, modal, button, tooltip, footer, and close chrome
+  procedural and responsive.
+
+## 8. Records and campaign marks
+
+Achievement identity is data-driven. Do not create a badge or label for a
+mechanic that is absent from `achievements.json`.
+
+- [ ] Enumerate the 82 current achievement IDs and group them into four lookup
+  batches of no more than 21 IDs.
+- [ ] Add the procedural badge renderer for locked, earned, and notable states.
+- [ ] Wire achievement lookup batch 1 to the badge renderer.
+- [ ] Wire achievement lookup batch 2 to the badge renderer.
+- [ ] Wire achievement lookup batch 3 to the badge renderer.
+- [ ] Wire achievement lookup batch 4 to the badge renderer.
+- [ ] Add campaign record stamps for first job, clean job, botched job,
+  legendary loot, retired outfit, heat peak, and long-running crew only when
+  each event exists in the simulation data.
+- [ ] Validate badge readability at 96 x 96, 48 x 48, and 24 x 24.
+
+## 9. Accessibility, provenance, and asset rules
+
+- [ ] Express every decision-relevant state with at least two of icon, label,
+  shape, pattern, position, or motion.
+- [ ] Check critical text and glyph contrast against `#0B1018`, `#162331`, and
   `#E7D8B7` surfaces.
-- [ ] Verify at 1280 x 720, 1024 x 576, and a narrow 800 x 600 window.
-- [ ] Portraits and target thumbnails must not obscure the candidate's stats or
-  the target's payout/required reputation.
-- [ ] All required actions remain possible through visible touch/click targets;
-  keyboard shortcuts are supplemental.
-- [ ] Provide reduced-motion behavior for dice, scan, alarm, and loot reveals.
+- [ ] Verify that portraits and target thumbnails do not cover stats, payout,
+  required reputation, or required touch targets.
+- [ ] Verify all required actions work through visible touch/click targets;
+  keyboard shortcuts remain supplemental.
+- [ ] Record the generator, prompt notes, date, and source/runtime relationship
+  for each generated asset family in `assets/artwork_manifest.json`.
+- [ ] Scan generated images for accidental text, watermarks, broken anatomy,
+  broken props, unreadable dice, and inconsistent character identity; regenerate
+  or replace failures.
+- [ ] Scan generated images for real logos, police insignia, branded weapons,
+  copyrighted characters, and celebrity likenesses; regenerate failures.
+- [ ] Declare `nearest` filtering for flat icons and `linear` filtering for
+  portraits, plates, and soft effects in the manifest.
 
-### Copyright and provenance
+## 10. Manifest, integration, and validation
 
-- [ ] Record artist/generator, prompt or source, edit history, date, and license
-  beside each shipped asset family.
-- [ ] No real bank logos, police insignia, branded weapons, copyrighted movie
-  characters, or recognizable celebrity likenesses.
-- [ ] Generated images must be reviewed for accidental text, watermarks, extra
-  fingers, broken props, unreadable dice, and inconsistent character identity.
+### Manifest and tests
 
-## 9. Asset manifest and validation
+- [ ] Keep one manifest entry per shipped runtime texture with a valid path,
+  filter, and stable key.
+- [ ] Add a test that every character ID resolves to exactly one portrait or an
+  explicit procedural renderer.
+- [ ] Add a test that every equipment ID resolves to exactly one item asset or
+  an explicit procedural renderer.
+- [ ] Add a test that every target ID resolves to exactly one target asset.
+- [ ] Add a test that every achievement ID resolves to a badge renderer.
+- [ ] Add a test that every encounter skill and environment factor used by the
+  floorplan has a glyph or documented fallback.
+- [ ] Add PNG dimension and alpha-edge checks for generated deliveries.
+- [ ] Add a test that rejects duplicate keys and missing manifest paths.
 
-Create `assets/artwork_manifest.json` with one entry per runtime texture:
+### Screen integration
 
-```json
-{
-  "textures": [
-    {
-      "key": "portrait_vera_sloan_neutral",
-      "path": "assets/images/portraits/vera_sloan_neutral.png",
-      "filter": "linear"
-    },
-    {
-      "key": "icon_heat_high",
-      "path": "assets/images/icons/icon_heat_high.png",
-      "filter": "nearest"
-    }
-  ]
-}
-```
+- [ ] Integrate and verify Crew/Payroll portraits, badges, state marks, and
+  dossier treatment.
+- [ ] Integrate and verify Crew/For Hire portraits, rarity, cost, and specialty
+  markers.
+- [ ] Integrate and verify Crew/The Outfit slot glyphs, item states, payroll,
+  and safehouse treatment.
+- [ ] Integrate and verify The Board target art, payout, heat, notoriety, and
+  location treatment.
+- [ ] Integrate and verify Outfitter items, slot families, rarity, repair, and
+  wear treatment.
+- [ ] Integrate and verify Planning target art, floorplan states, routes,
+  legends, and candidate portraits.
+- [ ] Integrate and verify The Run encounter states, assigned portrait, dice,
+  modifiers, alarm, and door effects.
+- [ ] Integrate and verify Last Job outcome art, payout, loot, injury/fatigue,
+  heat, and reputation changes.
+- [ ] Integrate and verify Records badges, milestones, statistics, and tabs.
+- [ ] Integrate and verify Settings sound/music/fullscreen/help, pacing, reset,
+  delete, and confirmation states.
+- [ ] Integrate and verify global title, tabs, save/load/delete, hints, footer,
+  tooltips, and modal close controls.
 
-- [ ] Add a test that every character ID, equipment ID, target ID, achievement
-  ID, and icon key used by the UI resolves to exactly one asset or an explicit
-  procedural renderer.
-- [ ] Add alpha-edge and dimensions checks for PNG deliveries.
-- [ ] Add a visual verification capture for each screen listed above. Replace
-  an existing capture of the same state rather than duplicating it.
-- [ ] Run `.\publish.ps1` from the project root after each meaningful art batch.
+### Repeatable project checks
+
+- [ ] Capture or replace the corresponding image in `docs/verification/` for
+  each verified screen; do not create duplicate captures of the same state.
+- [ ] Check the final UI at 1280 x 720.
+- [ ] Check the final UI at 1024 x 576.
+- [ ] Check the final UI in a narrow 800 x 600 window.
+- [ ] Run `.\publish.ps1` from the project root after each meaningful art or
+  UI batch.
+- [ ] Replace the root `catalog_thumbnail.png` with a title-screen or main-menu
+  capture when the title composition is ready.
 
 ## Definition of done
 
-The art pass is complete when:
-
-- [ ] Every authored character, equipment item, target category, achievement,
-  and visible semantic state has either a named asset or a documented
-  procedural renderer.
-- [ ] All eight primary screens and modal/settings states have a coherent noir
-  payday presentation with no placeholder art.
-- [ ] Crew identity remains readable in list, detail, planning-node, run, and
-  results contexts.
-- [ ] Equipment and loot remain recognizable at the smallest rendered size.
-- [ ] The floorplan and dice sequence remain the visual focus of Planning and
-  The Run without obscuring the numbers that drive decisions.
-- [ ] The manifest, asset-key test, screenshots, and `publish.ps1` all pass.
-- [ ] The final catalog thumbnail shows the title-screen noir safehouse/board
-  composition and uses the same palette and wordmark.
+- [ ] Every authored character, equipment item, target, achievement, encounter
+  skill, environment factor, and visible semantic state has a named asset or a
+  documented procedural renderer.
+- [ ] All primary screens and modal/settings states pass the screen integration
+  checklist with no placeholder art.
+- [ ] Crew identity is readable in list, detail, planning-node, run, and results
+  contexts.
+- [ ] Equipment and loot are recognizable at their smallest rendered size.
+- [ ] The floorplan and dice sequence remain the visual focus without obscuring
+  the numbers that drive decisions.
+- [ ] The manifest, asset-key tests, verification captures, and `publish.ps1`
+  all pass.
+- [ ] The catalog thumbnail uses the title-screen noir safehouse/board
+  composition and the shared palette.
