@@ -66,30 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 6. Dice, resolution, and heist effects
-
-- [ ] Draw the ivory/black d20 base and brass edge with readable numbers 1–20
-  at 32 px.
-- [ ] Add cyan critical-success treatment without obscuring the number.
-- [ ] Add red critical-failure crack treatment without obscuring the number.
-- [ ] Implement attribute, skill, and equipment modifier chips.
-- [ ] Implement condition, environment, and chemistry modifier chips.
-- [ ] Implement the paper-snap door transition.
-- [ ] Implement the brass-stamp door transition.
-- [ ] Implement the cyan scan-sweep door transition.
-- [ ] Implement the restrained red alarm pulse.
-- [ ] Implement paper-fleck motion only where it does not cover resolution text.
-- [ ] Implement cleared and partial/neutral outcome marks.
-- [ ] Implement failed, critical-success, and critical-failure outcome marks.
-- [ ] Implement the alarm/heat edge treatment as a readable beacon reflection or
-  pulse rather than a full-screen flash.
-- [ ] Implement the injury/fatigue bandage and clock glyphs with subdued
-  portrait changes.
-- [ ] Implement the loot reveal as a folder slide, evidence stamp, or
-  velvet-lined reveal frame.
-- [ ] Add reduced-motion and low-opacity paths for dice, scans, alarms, and
-  loot reveals.
-
 ## 7. Global UI chrome and iconography
 
 ### Brand and navigation

@@ -21,6 +21,7 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     };
 
     draw_building(ctx, playback);
+    draw_run_effects(ctx, playback);
     draw_dice(ctx, playback, actions);
 }
 
@@ -121,11 +122,12 @@ fn draw_building(ctx: &UiContext<'_>, playback: &RunPlayback) {
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
         if !door.result.check.member_id.is_empty() {
+            let portrait_state = run_portrait_state(ctx, &door.result.check.member_id, door);
             ctx.artwork.draw_portrait_state(
                 &door.result.check.member_id,
                 Rect::new(room.right() - 70.0, room.bottom() - 30.0, 24.0, 24.0),
                 true,
-                crate::artwork::PortraitState::Neutral,
+                portrait_state,
             );
             draw_circle_lines(
                 room.right() - 58.0,
@@ -152,6 +154,170 @@ fn draw_building(ctx: &UiContext<'_>, playback: &RunPlayback) {
         content.bottom() + 6.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
+}
+
+fn run_portrait_state(
+    ctx: &UiContext<'_>,
+    member_id: &str,
+    door: &crate::sim::DoorOutcome,
+) -> crate::artwork::PortraitState {
+    if door.injury.is_some() {
+        return crate::artwork::PortraitState::Injured;
+    }
+    if ctx.session.member(member_id).is_some_and(|member| {
+        member.condition.fatigue >= ctx.data.config.condition.fatigue_work_threshold
+    }) {
+        return crate::artwork::PortraitState::Exhausted;
+    }
+    crate::artwork::PortraitState::Neutral
+}
+
+fn draw_run_effects(ctx: &UiContext<'_>, playback: &RunPlayback) {
+    let reduced_motion = ctx.prefs.pacing.skips_the_run();
+    let building = building_rect();
+    let area = draw_area(building);
+    let report = playback.report();
+    let plan = floorplan::layout(
+        area,
+        report.doors.len(),
+        floorplan::seed_for(&report.target_id),
+    );
+    let progress = playback.phase_progress().clamp(0.0, 1.0);
+
+    if let Some(room) = plan.room(playback.door_index()) {
+        match playback.phase() {
+            DoorPhase::Approach => draw_paper_snap(room, progress, reduced_motion),
+            DoorPhase::Tally => draw_scan_sweep(building, progress, reduced_motion),
+            DoorPhase::Verdict => draw_brass_stamp(room, reduced_motion),
+            DoorPhase::Roll => {}
+        }
+    }
+    draw_paper_flecks(building, progress, reduced_motion);
+
+    if let Some(door) = playback.current_door() {
+        if playback.phase() == DoorPhase::Verdict
+            && matches!(
+                door.result.outcome,
+                Outcome::Failure | Outcome::CriticalFailure
+            )
+        {
+            draw_alarm_edge(building, reduced_motion);
+        }
+    }
+}
+
+fn draw_paper_snap(room: Rect, progress: f32, reduced_motion: bool) {
+    let alpha = if reduced_motion {
+        0.20
+    } else {
+        0.62 * (1.0 - progress * 0.35)
+    };
+    let paper = Color::new(0.88, 0.82, 0.66, alpha);
+    draw_line(
+        room.x - 8.0,
+        room.y,
+        room.x - 8.0 + progress * 14.0,
+        room.y,
+        2.0,
+        paper,
+    );
+    draw_line(
+        room.right() + 8.0,
+        room.bottom(),
+        room.right() + 8.0 - progress * 14.0,
+        room.bottom(),
+        2.0,
+        paper,
+    );
+    draw_line(
+        room.x,
+        room.y - 8.0,
+        room.x,
+        room.y - 8.0 + progress * 12.0,
+        1.5,
+        paper,
+    );
+}
+
+fn draw_scan_sweep(building: Rect, progress: f32, reduced_motion: bool) {
+    let area = draw_area(building);
+    let x = area.x + area.w * progress;
+    let alpha = if reduced_motion { 0.18 } else { 0.68 };
+    draw_line(
+        x,
+        area.y,
+        x,
+        area.bottom(),
+        if reduced_motion { 1.0 } else { 2.0 },
+        Color::new(0.24, 0.82, 0.86, alpha),
+    );
+    draw_line(
+        x + 5.0,
+        area.y + 10.0,
+        x + 5.0,
+        area.bottom() - 10.0,
+        1.0,
+        Color::new(0.24, 0.82, 0.86, alpha * 0.35),
+    );
+}
+
+fn draw_brass_stamp(room: Rect, reduced_motion: bool) {
+    let alpha = if reduced_motion { 0.28 } else { 0.68 };
+    let brass = Color::new(0.78, 0.56, 0.22, alpha);
+    let center = vec2(room.right() - 22.0, room.y + 22.0);
+    draw_circle_lines(center.x, center.y, 14.0, 2.0, brass);
+    draw_line(
+        center.x - 7.0,
+        center.y,
+        center.x - 2.0,
+        center.y + 5.0,
+        2.0,
+        brass,
+    );
+    draw_line(
+        center.x - 2.0,
+        center.y + 5.0,
+        center.x + 8.0,
+        center.y - 6.0,
+        2.0,
+        brass,
+    );
+}
+
+fn draw_paper_flecks(building: Rect, progress: f32, reduced_motion: bool) {
+    let alpha = if reduced_motion { 0.10 } else { 0.26 };
+    let drift = if reduced_motion {
+        0.0
+    } else {
+        (get_time() as f32 * 0.8 + progress * 4.0).sin() * 5.0
+    };
+    let paper = Color::new(0.84, 0.76, 0.58, alpha);
+    for (index, x) in [12.0, building.w * 0.47, building.w - 22.0]
+        .iter()
+        .enumerate()
+    {
+        let y = building.bottom() - 25.0 + drift * (index as f32 * 0.25);
+        draw_rectangle(building.x + *x, y, 7.0, 2.0, paper);
+    }
+}
+
+fn draw_alarm_edge(building: Rect, reduced_motion: bool) {
+    let pulse = if reduced_motion {
+        0.16
+    } else {
+        0.22 + 0.20 * ((get_time() as f32 * 4.0).sin() * 0.5 + 0.5)
+    };
+    let alarm = Color::new(0.88, 0.20, 0.18, pulse);
+    draw_rectangle_lines(
+        building.x + 2.0,
+        building.y + 2.0,
+        building.w - 4.0,
+        building.h - 4.0,
+        2.0,
+        alarm,
+    );
+    draw_circle(building.x + 10.0, building.y + 10.0, 5.0, alarm);
+    draw_circle(building.right() - 10.0, building.y + 10.0, 5.0, alarm);
 }
 
 fn run_node_state(outcome: Option<Outcome>, active: bool) -> floorplan::NodeState {
@@ -193,6 +359,7 @@ fn draw_dice(ctx: &UiContext<'_>, playback: &RunPlayback, actions: &mut Vec<UiAc
         Rect::new(content.x, content.y + 32.0, 108.0, 108.0),
         playback,
         door.result.roll,
+        ctx.prefs.pacing.skips_the_run(),
     );
 
     // The modifiers stack up beside the die, one at a time, in as many
@@ -229,7 +396,7 @@ fn draw_dice(ctx: &UiContext<'_>, playback: &RunPlayback, actions: &mut Vec<UiAc
 }
 
 /// The die itself: tumbling while it is in the air, then landed and legible.
-fn draw_die(rect: Rect, playback: &RunPlayback, roll: i32) {
+fn draw_die(rect: Rect, playback: &RunPlayback, roll: i32, reduced_motion: bool) {
     let landed = playback.roll_landed();
     let phase = playback.phase();
     let progress = playback.phase_progress();
@@ -245,23 +412,28 @@ fn draw_die(rect: Rect, playback: &RunPlayback, roll: i32) {
         20
     };
 
-    let settle = if landed { 0.0 } else { (1.0 - progress) * 5.0 };
-    let body = Rect::new(rect.x + settle, rect.y - settle * 0.6, rect.w, rect.h);
-    let tone = if !landed {
-        Color::new(0.20, 0.24, 0.32, 1.0)
-    } else if roll == 20 {
-        Color::new(0.20, 0.38, 0.24, 1.0)
-    } else if roll == 1 {
-        Color::new(0.40, 0.18, 0.18, 1.0)
+    let settle = if landed || reduced_motion {
+        0.0
     } else {
-        Color::new(0.16, 0.19, 0.25, 1.0)
+        (1.0 - progress) * 5.0
+    };
+    let body = Rect::new(rect.x + settle, rect.y - settle * 0.6, rect.w, rect.h);
+    let tone = if landed {
+        Color::new(0.88, 0.82, 0.68, 1.0)
+    } else {
+        Color::new(0.10, 0.13, 0.18, 1.0)
+    };
+    let ink = if landed {
+        Color::new(0.08, 0.10, 0.12, 1.0)
+    } else {
+        dark::TEXT_BRIGHT
     };
 
     draw_surface(
         body,
         &SurfaceStyle::new(tone)
-            .with_border(2.0, Color::new(0.52, 0.60, 0.74, 0.9))
-            .with_top_highlight(3.0, Color::new(0.72, 0.80, 0.95, 0.5)),
+            .with_border(2.0, Color::new(0.76, 0.54, 0.22, 0.95))
+            .with_top_highlight(3.0, Color::new(0.98, 0.90, 0.68, 0.42)),
     );
     draw_text_centered_in_box_ex(
         &face.to_string(),
@@ -269,14 +441,7 @@ fn draw_die(rect: Rect, playback: &RunPlayback, roll: i32) {
         body.y + 6.0,
         body.w,
         body.h,
-        TextStyle::new(
-            52.0,
-            if landed {
-                dark::TEXT_BRIGHT
-            } else {
-                dark::TEXT_DIM
-            },
-        ),
+        TextStyle::new(32.0, ink),
     );
     draw_text_centered_in_box_ex(
         "d20",
@@ -286,6 +451,53 @@ fn draw_die(rect: Rect, playback: &RunPlayback, roll: i32) {
         18.0,
         TextStyle::new(13.0, dark::TEXT_DIM),
     );
+
+    if landed && roll == 20 {
+        let cyan = Color::new(0.24, 0.82, 0.86, if reduced_motion { 0.42 } else { 0.88 });
+        draw_circle_lines(body.right() - 18.0, body.y + 18.0, 9.0, 1.5, cyan);
+        draw_line(
+            body.right() - 23.0,
+            body.y + 18.0,
+            body.right() - 19.0,
+            body.y + 22.0,
+            2.0,
+            cyan,
+        );
+        draw_line(
+            body.right() - 19.0,
+            body.y + 22.0,
+            body.right() - 13.0,
+            body.y + 14.0,
+            2.0,
+            cyan,
+        );
+    } else if landed && roll == 1 {
+        let red = Color::new(0.82, 0.22, 0.20, if reduced_motion { 0.40 } else { 0.86 });
+        draw_line(
+            body.x + 20.0,
+            body.y + 8.0,
+            body.x + 43.0,
+            body.y + 45.0,
+            2.0,
+            red,
+        );
+        draw_line(
+            body.x + 43.0,
+            body.y + 45.0,
+            body.x + 33.0,
+            body.y + 75.0,
+            2.0,
+            red,
+        );
+        draw_line(
+            body.x + 43.0,
+            body.y + 45.0,
+            body.x + 76.0,
+            body.y + 93.0,
+            2.0,
+            red,
+        );
+    }
 }
 
 fn draw_total(rect: Rect, playback: &RunPlayback, dc: i32) {

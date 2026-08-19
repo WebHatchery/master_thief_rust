@@ -79,6 +79,10 @@ fn draw_door(rect: Rect, door: &DoorOutcome, ordinal: usize) {
             .with_left_accent(4.0, tone)
             .with_border(1.0, Color::new(0.42, 0.48, 0.58, 0.35)),
     );
+    draw_outcome_mark(
+        vec2(rect.right() - 52.0, rect.y + 20.0),
+        door.result.outcome,
+    );
 
     let title = if door.was_complication {
         format!("{}. {} (complication)", ordinal, door.encounter_name)
@@ -241,11 +245,42 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
         );
     }
 
+    let injuries: Vec<&str> = report
+        .doors
+        .iter()
+        .filter_map(|door| door.injury.as_ref())
+        .map(|injury| injury.description.as_str())
+        .collect();
+    let mut detail_y = content.y + 244.0;
+    if !injuries.is_empty() {
+        draw_bandage_glyph(vec2(content.x + 6.0, detail_y + 8.0), 6.0);
+        draw_clock_glyph(vec2(content.x + 24.0, detail_y + 8.0), 6.0);
+        draw_ui_text_ex(
+            "Cost",
+            content.x + 38.0,
+            detail_y + 14.0,
+            TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
+        );
+        draw_text_block(
+            &injuries.join("\n"),
+            content.x,
+            detail_y + 20.0,
+            content.w,
+            44.0,
+            14.0,
+            3.0,
+            Color::new(0.88, 0.46, 0.40, 1.0),
+        );
+        detail_y += 68.0;
+    }
+
     if !report.loot.is_empty() {
+        let frame = Rect::new(content.x, detail_y, content.w, 64.0);
+        draw_loot_reveal_frame(frame, ctx.prefs.pacing.skips_the_run());
         draw_ui_text_ex(
             "Carried out",
-            content.x,
-            content.y + 302.0,
+            frame.x + 12.0,
+            frame.y + 18.0,
             TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
         );
         let names: Vec<&str> = report
@@ -260,44 +295,195 @@ fn draw_ledger(ctx: &UiContext<'_>, report: &JobReport) {
             })
             .collect();
         draw_text_block(
-            &names.join(
-                "
-",
-            ),
-            content.x,
-            content.y + 304.0,
-            content.w,
-            56.0,
+            &names.join("\n"),
+            frame.x + 12.0,
+            frame.y + 24.0,
+            frame.w - 56.0,
+            34.0,
             14.0,
             3.0,
             Color::new(0.56, 0.82, 0.60, 1.0),
         );
     }
+}
 
-    let injuries: Vec<&str> = report
-        .doors
-        .iter()
-        .filter_map(|door| door.injury.as_ref())
-        .map(|injury| injury.description.as_str())
-        .collect();
-    if !injuries.is_empty() {
-        draw_ui_text_ex(
-            "Cost",
-            content.x,
-            content.y + 244.0,
-            TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
-        );
-        draw_text_block(
-            &injuries.join("\n"),
-            content.x,
-            content.y + 252.0,
-            content.w,
-            90.0,
-            14.0,
-            3.0,
-            Color::new(0.88, 0.46, 0.40, 1.0),
-        );
+fn draw_outcome_mark(center: Vec2, outcome: crate::rules::Outcome) {
+    let tone = outcome_color(outcome);
+    match outcome {
+        crate::rules::Outcome::Success => {
+            draw_line(
+                center.x - 7.0,
+                center.y,
+                center.x - 2.0,
+                center.y + 5.0,
+                2.0,
+                tone,
+            );
+            draw_line(
+                center.x - 2.0,
+                center.y + 5.0,
+                center.x + 8.0,
+                center.y - 7.0,
+                2.0,
+                tone,
+            );
+        }
+        crate::rules::Outcome::CriticalSuccess => {
+            draw_circle_lines(center.x, center.y, 13.0, 2.0, tone);
+            draw_line(
+                center.x - 7.0,
+                center.y,
+                center.x - 2.0,
+                center.y + 5.0,
+                2.0,
+                tone,
+            );
+            draw_line(
+                center.x - 2.0,
+                center.y + 5.0,
+                center.x + 8.0,
+                center.y - 7.0,
+                2.0,
+                tone,
+            );
+        }
+        crate::rules::Outcome::Neutral => {
+            draw_line(
+                center.x - 8.0,
+                center.y,
+                center.x + 8.0,
+                center.y,
+                2.0,
+                tone,
+            );
+        }
+        crate::rules::Outcome::Failure => {
+            draw_line(
+                center.x - 7.0,
+                center.y - 7.0,
+                center.x + 7.0,
+                center.y + 7.0,
+                2.0,
+                tone,
+            );
+            draw_line(
+                center.x + 7.0,
+                center.y - 7.0,
+                center.x - 7.0,
+                center.y + 7.0,
+                2.0,
+                tone,
+            );
+        }
+        crate::rules::Outcome::CriticalFailure => {
+            draw_circle_lines(center.x, center.y, 13.0, 2.0, tone);
+            draw_line(
+                center.x - 8.0,
+                center.y - 8.0,
+                center.x - 1.0,
+                center.y + 1.0,
+                2.0,
+                tone,
+            );
+            draw_line(
+                center.x - 1.0,
+                center.y + 1.0,
+                center.x + 6.0,
+                center.y - 5.0,
+                2.0,
+                tone,
+            );
+            draw_line(
+                center.x - 1.0,
+                center.y + 1.0,
+                center.x + 5.0,
+                center.y + 8.0,
+                2.0,
+                tone,
+            );
+        }
     }
+}
+
+fn draw_bandage_glyph(center: Vec2, size: f32) {
+    let tone = Color::new(0.88, 0.46, 0.40, 0.95);
+    draw_line(
+        center.x - size,
+        center.y + size,
+        center.x + size,
+        center.y - size,
+        2.0,
+        tone,
+    );
+    draw_line(
+        center.x - size + 2.0,
+        center.y + size,
+        center.x + size,
+        center.y - size + 2.0,
+        1.0,
+        tone,
+    );
+    draw_circle(center.x - 2.0, center.y + 2.0, 1.0, tone);
+    draw_circle(center.x + 3.0, center.y - 3.0, 1.0, tone);
+}
+
+fn draw_clock_glyph(center: Vec2, size: f32) {
+    let tone = Color::new(0.82, 0.72, 0.40, 0.95);
+    draw_circle_lines(center.x, center.y, size, 1.5, tone);
+    draw_line(
+        center.x,
+        center.y,
+        center.x,
+        center.y - size + 2.0,
+        1.5,
+        tone,
+    );
+    draw_line(
+        center.x,
+        center.y,
+        center.x + size - 2.0,
+        center.y + 2.0,
+        1.5,
+        tone,
+    );
+}
+
+fn draw_loot_reveal_frame(rect: Rect, reduced_motion: bool) {
+    let alpha = if reduced_motion { 0.24 } else { 0.46 };
+    let brass = Color::new(0.78, 0.56, 0.22, 0.75);
+    draw_rectangle(
+        rect.x,
+        rect.y,
+        rect.w,
+        rect.h,
+        Color::new(0.30, 0.12, 0.17, alpha),
+    );
+    draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 1.5, brass);
+    draw_line(
+        rect.x + 8.0,
+        rect.y + 22.0,
+        rect.right() - 8.0,
+        rect.y + 22.0,
+        1.0,
+        brass,
+    );
+    draw_circle_lines(rect.right() - 21.0, rect.y + 16.0, 9.0, 1.5, brass);
+    draw_line(
+        rect.right() - 26.0,
+        rect.y + 16.0,
+        rect.right() - 22.0,
+        rect.y + 20.0,
+        1.5,
+        brass,
+    );
+    draw_line(
+        rect.right() - 22.0,
+        rect.y + 20.0,
+        rect.right() - 16.0,
+        rect.y + 12.0,
+        1.5,
+        brass,
+    );
 }
 
 fn signed(value: i32) -> String {

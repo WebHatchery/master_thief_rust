@@ -256,6 +256,24 @@ pub fn draw_modifier_grid<'a>(
         let x = rect.x + column as f32 * column_w;
         let y = rect.y + (row + 1) as f32 * line_height;
 
+        let chip = Rect::new(x, y - line_height + 2.0, column_w - 8.0, line_height - 2.0);
+        let chip_tone = if entry.value > 0 {
+            Color::new(0.16, 0.28, 0.27, 0.72)
+        } else if entry.value < 0 {
+            Color::new(0.28, 0.17, 0.18, 0.72)
+        } else {
+            Color::new(0.13, 0.16, 0.21, 0.72)
+        };
+        draw_rectangle(chip.x, chip.y, chip.w, chip.h, chip_tone);
+        draw_rectangle_lines(
+            chip.x,
+            chip.y,
+            chip.w,
+            chip.h,
+            1.0,
+            Color::new(0.42, 0.48, 0.58, 0.35),
+        );
+
         draw_ui_text_ex(
             &entry.label,
             x,
