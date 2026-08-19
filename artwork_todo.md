@@ -66,55 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 2. Crew portraits and identity
-
-### Registry and class assets
-
-- [ ] Extract the seven current class values from `characters.json` and create
-  exactly one readable badge key for each class.
-- [ ] Generate the seven class badges and wire each badge to the class lookup.
-- [ ] Generate `portrait_unknown.png` and `portrait_locked.png` with matching
-  case-file framing and no baked UI copy.
-- [ ] Define a portrait recipe that keeps face, age, silhouette, hairstyle,
-  clothing cue, and prop distinct across the 40 character IDs.
-
-### Neutral portrait batches
-
-Generate one 4:5 transparent portrait and one dense-list derivative per batch.
-Keep each batch small enough to compare identity and lighting against the
-previous batch.
-
-Use a 512 x 640 RGBA runtime PNG and a 256 x 320 derivative. Keep the face and
-identifying prop inside a 10% safe margin, use a three-quarter or front angle,
-and do not bake UI copy into the art.
-
-- [ ] Batch 1: `vera_sloan`, `otis_kemp`, `birdie_lang`, `hollis_pike`,
-  `juno_vasquez`, `marcus_dunn`, `sasha_reyes`, `walter_boyd`.
-- [ ] Batch 2: `delphine_arceneaux`, `tobias_crane`, `nadia_frost`,
-  `gerald_moss`, `imani_okoro`, `rook_maddox`, `priya_raman`, `cyril_mott`.
-- [ ] Batch 3: `eda_stroud`, `bram_teague`, `ivy_calder`, `harlan_vise`,
-  `nell_faraday`, `desmond_okafor`, `greta_lindqvist`, `aurelio_bassi`.
-- [ ] Batch 4: `kit_mahoney`, `solomon_pike`, `yusra_haddad`, `orson_bray`,
-  `clemency_dunne`, `matthias_orr`, `rosalind_vane`, `tobias_lench`.
-- [ ] Batch 5: `aiko_shimada`, `gaspard_rue`, `wilhelmina_dove`,
-  `emeric_shaw`, `petra_almeida`, `leonid_varga`, `beatrix_hollow`,
-  `august_vane`.
-- [ ] Validate the full neutral set for dimensions, transparency, safe margin,
-  filename/ID parity, and small-size readability.
-
-### Portrait state behavior
-
-Use the neutral portrait as the identity source and prefer code-drawn overlays
-or controlled tint/posture changes over multiplying the 40-portrait bitmap
-set.
-
-- [ ] Implement neutral and speaking states in the portrait renderer.
-- [ ] Implement pleased/success and worried/low-loyalty states.
-- [ ] Implement injured and exhausted states without using blood as the main
-  signal.
-- [ ] Implement arrested/absent and unavailable/unknown states.
-- [ ] Add class/employment badges that remain readable beside a 16–18 px label.
-
 ## 3. Targets, districts, and safehouse atmosphere
 
 Target thumbnails are cards, not explorable maps. Keep encounter doors and node

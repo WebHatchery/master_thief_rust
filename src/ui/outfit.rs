@@ -8,6 +8,7 @@
 
 use super::chrome::stat_row;
 use super::{UiAction, UiContext};
+use crate::artwork::PortraitState;
 use crate::sim::{
     attention_chance, bribe_cost, safehouse_upkeep, weekly_outgoings, weeks_of_runway,
 };
@@ -207,12 +208,18 @@ fn draw_custody(rect: Rect, ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         }
         draw_ui_text_ex(
             &format!("{} — taken week {}", record.member.name, record.week_taken),
-            rect.x,
+            rect.x + 48.0,
             y + 14.0,
             TextStyle::new(14.0, DANGER).params(),
         );
+        ctx.artwork.draw_portrait_state(
+            &record.member.id,
+            Rect::new(rect.x, y, 36.0, 42.0),
+            true,
+            PortraitState::Arrested,
+        );
         if button_rect_tone_at(
-            Rect::new(rect.x, y + 20.0, rect.w, 22.0),
+            Rect::new(rect.x + 48.0, y + 20.0, rect.w - 48.0, 22.0),
             &format!("Post bail — {}", format_compact_money(record.bail)),
             session.budget >= record.bail,
             ButtonTone::Positive,

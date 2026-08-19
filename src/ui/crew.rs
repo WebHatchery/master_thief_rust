@@ -4,6 +4,7 @@ use super::chrome::{
     draw_panel, empty_notice, list_card, panel_style, rarity_color, stat_row, title_style,
 };
 use super::{detail_rect, list_rect, CrewTab, UiAction, UiContext};
+use crate::artwork::PortraitState;
 use crate::model::{AttributeKind, CrewMember, EquipmentSlot, Skill};
 use crate::rules::attributes::{derived_stats, equipped_attributes, equipped_skills, power_level};
 use crate::rules::ConditionTuning;
@@ -87,6 +88,10 @@ fn draw_roster(ctx: &UiContext<'_>, content: Rect, actions: &mut Vec<UiAction>) 
             rect.y + 46.0,
             TextStyle::new(14.0, dark::TEXT_DIM).params(),
         );
+        ctx.artwork.draw_class_badge(
+            member.class,
+            Rect::new(rect.right() - 48.0, rect.y + 8.0, 24.0, 24.0),
+        );
         draw_text_right(
             &format!("Lv {}", member.progression.level),
             rect.right() - 14.0,
@@ -129,6 +134,20 @@ fn condition_summary(member: &CrewMember, tuning: &ConditionTuning) -> (String, 
     }
 }
 
+fn portrait_state(member: &CrewMember, ctx: &UiContext<'_>) -> PortraitState {
+    if member.condition.notice_given || member.condition.loyalty <= 24 {
+        PortraitState::Worried
+    } else if !member.condition.injuries.is_empty() {
+        PortraitState::Injured
+    } else if ctx.data.config.condition.is_spent(member.condition.fatigue) {
+        PortraitState::Exhausted
+    } else if ctx.selected_member == Some(member.id.as_str()) {
+        PortraitState::Speaking
+    } else {
+        PortraitState::Neutral
+    }
+}
+
 fn fatigue_color(fatigue: i32) -> Color {
     if fatigue > 80 {
         Color::new(0.88, 0.32, 0.32, 1.0)
@@ -149,10 +168,21 @@ fn draw_dossier(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
 
     let content = draw_panel(rect, &format!("{} — {}", member.name, member.specialty));
 
-    ctx.artwork.draw_portrait(
+    ctx.artwork.draw_portrait_state(
         &member.id,
         Rect::new(content.right() - 112.0, content.y + 2.0, 96.0, 120.0),
         true,
+        portrait_state(member, ctx),
+    );
+    ctx.artwork.draw_class_badge(
+        member.class,
+        Rect::new(content.right() - 144.0, content.y + 4.0, 24.0, 24.0),
+    );
+    draw_ui_text_ex(
+        member.class.label(),
+        content.right() - 144.0,
+        content.y + 136.0,
+        TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
 
     // Somebody has to be able to leave. Retainers made a hand a standing cost

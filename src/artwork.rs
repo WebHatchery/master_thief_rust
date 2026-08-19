@@ -5,6 +5,7 @@
 //! authored identity and atmosphere called for by `artwork_todo.md`.
 
 use crate::data::GameData;
+use crate::model::CharacterClass;
 use macroquad::prelude::*;
 
 struct NamedTexture {
@@ -16,6 +17,37 @@ struct PortraitTexture {
     id: String,
     full: Texture2D,
     small: Texture2D,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PortraitState {
+    Neutral,
+    Speaking,
+    Pleased,
+    Worried,
+    Injured,
+    Exhausted,
+    Arrested,
+    Unavailable,
+    Unknown,
+    Locked,
+}
+
+impl PortraitState {
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::Neutral => "neutral",
+            Self::Speaking => "speaking",
+            Self::Pleased => "pleased",
+            Self::Worried => "worried",
+            Self::Injured => "injured",
+            Self::Exhausted => "exhausted",
+            Self::Arrested => "arrested",
+            Self::Unavailable => "unavailable",
+            Self::Unknown => "unknown",
+            Self::Locked => "locked",
+        }
+    }
 }
 
 pub struct Artwork {
@@ -119,21 +151,320 @@ impl Artwork {
     }
 
     pub fn draw_portrait(&self, id: &str, rect: Rect, small: bool) {
+        self.draw_portrait_state(id, rect, small, PortraitState::Neutral);
+    }
+
+    pub fn draw_portrait_state(&self, id: &str, rect: Rect, small: bool, state: PortraitState) {
         let texture = self
-            .portraits
-            .iter()
-            .find(|portrait| portrait.id == id)
-            .map(|portrait| if small { &portrait.small } else { &portrait.full })
+            .state_portrait(id, small, state)
             .unwrap_or(&self.portrait_unknown);
         draw_texture_ex(texture, rect.x, rect.y, WHITE, dest_size(rect));
+        self.draw_portrait_treatment(rect, state);
+    }
+
+    fn state_portrait(&self, id: &str, small: bool, state: PortraitState) -> Option<&Texture2D> {
+        match state {
+            PortraitState::Unknown => Some(&self.portrait_unknown),
+            PortraitState::Locked | PortraitState::Unavailable => Some(&self.portrait_locked),
+            _ => self
+                .portraits
+                .iter()
+                .find(|portrait| portrait.id == id)
+                .map(|portrait| {
+                    if small {
+                        &portrait.small
+                    } else {
+                        &portrait.full
+                    }
+                }),
+        }
+    }
+
+    fn draw_portrait_treatment(&self, rect: Rect, state: PortraitState) {
+        let brass = Color::new(0.76, 0.54, 0.22, 0.95);
+        let cyan = Color::new(0.24, 0.72, 0.78, 0.95);
+        let mint = Color::new(0.45, 0.76, 0.63, 0.95);
+        let amber = Color::new(0.88, 0.61, 0.25, 0.95);
+        let red = Color::new(0.78, 0.28, 0.27, 0.95);
+        match state {
+            PortraitState::Neutral => {}
+            PortraitState::Speaking => {
+                draw_rectangle(rect.x, rect.bottom() - 4.0, rect.w, 4.0, cyan);
+                draw_circle(rect.right() - 10.0, rect.y + 10.0, 3.0, cyan);
+            }
+            PortraitState::Pleased => {
+                draw_line(
+                    rect.right() - 18.0,
+                    rect.y + 12.0,
+                    rect.right() - 10.0,
+                    rect.y + 20.0,
+                    3.0,
+                    mint,
+                );
+                draw_line(
+                    rect.right() - 10.0,
+                    rect.y + 20.0,
+                    rect.right() - 4.0,
+                    rect.y + 8.0,
+                    3.0,
+                    mint,
+                );
+            }
+            PortraitState::Worried => {
+                draw_line(
+                    rect.x + 8.0,
+                    rect.y + 10.0,
+                    rect.x + 24.0,
+                    rect.y + 6.0,
+                    2.0,
+                    amber,
+                );
+                draw_line(
+                    rect.x + 8.0,
+                    rect.y + 16.0,
+                    rect.x + 24.0,
+                    rect.y + 12.0,
+                    2.0,
+                    amber,
+                );
+            }
+            PortraitState::Injured => {
+                draw_rectangle(
+                    rect.x,
+                    rect.y,
+                    rect.w,
+                    rect.h,
+                    Color::new(0.32, 0.10, 0.12, 0.20),
+                );
+                let bandage = Rect::new(rect.x + 8.0, rect.bottom() - 22.0, 28.0, 12.0);
+                draw_rectangle(
+                    bandage.x,
+                    bandage.y,
+                    bandage.w,
+                    bandage.h,
+                    Color::new(0.86, 0.76, 0.58, 0.9),
+                );
+                draw_line(
+                    bandage.x + 8.0,
+                    bandage.y,
+                    bandage.x + 8.0,
+                    bandage.bottom(),
+                    1.0,
+                    red,
+                );
+                draw_line(
+                    bandage.x + 18.0,
+                    bandage.y,
+                    bandage.x + 18.0,
+                    bandage.bottom(),
+                    1.0,
+                    red,
+                );
+            }
+            PortraitState::Exhausted => {
+                draw_rectangle(
+                    rect.x,
+                    rect.y,
+                    rect.w,
+                    rect.h,
+                    Color::new(0.03, 0.05, 0.08, 0.34),
+                );
+                let center = vec2(rect.right() - 16.0, rect.bottom() - 16.0);
+                draw_circle_lines(center.x, center.y, 9.0, 2.0, brass);
+                draw_line(center.x, center.y, center.x, center.y - 5.0, 2.0, brass);
+                draw_line(
+                    center.x,
+                    center.y,
+                    center.x + 4.0,
+                    center.y + 3.0,
+                    2.0,
+                    brass,
+                );
+            }
+            PortraitState::Arrested => {
+                for index in 1..4 {
+                    let x = rect.x + rect.w * index as f32 / 4.0;
+                    draw_line(x, rect.y, x, rect.bottom(), 3.0, red);
+                }
+            }
+            PortraitState::Unavailable => {
+                draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 3.0, amber);
+            }
+            PortraitState::Unknown => {
+                draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 2.0, brass);
+            }
+            PortraitState::Locked => {
+                draw_rectangle_lines(
+                    rect.x,
+                    rect.y,
+                    rect.w,
+                    rect.h,
+                    3.0,
+                    Color::new(0.45, 0.50, 0.58, 0.9),
+                );
+            }
+        }
+    }
+
+    /// Draw a stable, text-free class badge. The outer ring is shared so the
+    /// badge remains readable at 16–18 px; the inner glyph is distinct by
+    /// class rather than relying on color alone.
+    pub fn draw_class_badge(&self, class: CharacterClass, rect: Rect) {
+        let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
+        let radius = rect.w.min(rect.h) * 0.38;
+        let stroke = 1.5_f32.max(rect.w * 0.08);
+        let dark = Color::new(0.04, 0.06, 0.09, 0.9);
+        let brass = Color::new(0.76, 0.54, 0.22, 0.95);
+        let cyan = Color::new(0.24, 0.72, 0.78, 0.95);
+        draw_circle(center.x, center.y, radius + stroke + 1.0, dark);
+        draw_circle_lines(center.x, center.y, radius, stroke, brass);
+        let glyph = match class {
+            CharacterClass::Infiltrator => cyan,
+            CharacterClass::Tech => Color::new(0.42, 0.70, 0.90, 1.0),
+            CharacterClass::Face => Color::new(0.78, 0.54, 0.72, 1.0),
+            CharacterClass::Muscle => Color::new(0.78, 0.28, 0.27, 0.95),
+            CharacterClass::Acrobat => Color::new(0.45, 0.76, 0.63, 0.95),
+            CharacterClass::Mastermind => Color::new(0.78, 0.66, 0.36, 1.0),
+            CharacterClass::Wildcard => Color::new(0.88, 0.61, 0.25, 0.95),
+        };
+        match class {
+            CharacterClass::Infiltrator => {
+                draw_circle(center.x, center.y - 2.0, radius * 0.24, glyph);
+                draw_rectangle(
+                    center.x - radius * 0.12,
+                    center.y,
+                    radius * 0.24,
+                    radius * 0.38,
+                    glyph,
+                );
+            }
+            CharacterClass::Tech => {
+                draw_line(
+                    center.x - radius * 0.45,
+                    center.y,
+                    center.x + radius * 0.45,
+                    center.y,
+                    stroke,
+                    glyph,
+                );
+                draw_line(
+                    center.x,
+                    center.y - radius * 0.45,
+                    center.x,
+                    center.y + radius * 0.45,
+                    stroke,
+                    glyph,
+                );
+                draw_circle(center.x, center.y, radius * 0.12, glyph);
+            }
+            CharacterClass::Face => {
+                draw_rectangle_lines(
+                    center.x - radius * 0.42,
+                    center.y - radius * 0.28,
+                    radius * 0.72,
+                    radius * 0.52,
+                    stroke,
+                    glyph,
+                );
+                draw_line(
+                    center.x - radius * 0.05,
+                    center.y + radius * 0.24,
+                    center.x - radius * 0.24,
+                    center.y + radius * 0.46,
+                    stroke,
+                    glyph,
+                );
+            }
+            CharacterClass::Muscle => {
+                draw_rectangle(
+                    center.x - radius * 0.38,
+                    center.y - radius * 0.30,
+                    radius * 0.76,
+                    radius * 0.60,
+                    glyph,
+                );
+                draw_line(
+                    center.x - radius * 0.18,
+                    center.y - radius * 0.45,
+                    center.x - radius * 0.18,
+                    center.y + radius * 0.45,
+                    stroke,
+                    dark,
+                );
+            }
+            CharacterClass::Acrobat => {
+                draw_line(
+                    center.x - radius * 0.45,
+                    center.y + radius * 0.35,
+                    center.x,
+                    center.y - radius * 0.45,
+                    stroke,
+                    glyph,
+                );
+                draw_line(
+                    center.x,
+                    center.y - radius * 0.45,
+                    center.x + radius * 0.45,
+                    center.y + radius * 0.35,
+                    stroke,
+                    glyph,
+                );
+                draw_line(
+                    center.x - radius * 0.30,
+                    center.y + radius * 0.12,
+                    center.x + radius * 0.30,
+                    center.y + radius * 0.12,
+                    stroke,
+                    glyph,
+                );
+            }
+            CharacterClass::Mastermind => {
+                draw_circle_lines(center.x, center.y, radius * 0.34, stroke, glyph);
+                draw_line(
+                    center.x - radius * 0.45,
+                    center.y,
+                    center.x + radius * 0.45,
+                    center.y,
+                    stroke,
+                    glyph,
+                );
+            }
+            CharacterClass::Wildcard => {
+                for index in 0..4 {
+                    let angle = index as f32 * std::f32::consts::FRAC_PI_2;
+                    draw_line(
+                        center.x,
+                        center.y,
+                        center.x + angle.cos() * radius * 0.48,
+                        center.y + angle.sin() * radius * 0.48,
+                        stroke,
+                        glyph,
+                    );
+                }
+                draw_circle(center.x, center.y, radius * 0.13, glyph);
+            }
+        }
     }
 
     pub fn draw_target(&self, id: &str, rect: Rect) {
         if let Some(target) = self.targets.iter().find(|target| target.id == id) {
             draw_texture_ex(&target.texture, rect.x, rect.y, WHITE, dest_size(rect));
         } else {
-            draw_rectangle(rect.x, rect.y, rect.w, rect.h, Color::new(0.08, 0.12, 0.16, 1.0));
-            draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 2.0, Color::new(0.75, 0.55, 0.22, 0.8));
+            draw_rectangle(
+                rect.x,
+                rect.y,
+                rect.w,
+                rect.h,
+                Color::new(0.08, 0.12, 0.16, 1.0),
+            );
+            draw_rectangle_lines(
+                rect.x,
+                rect.y,
+                rect.w,
+                rect.h,
+                2.0,
+                Color::new(0.75, 0.55, 0.22, 0.8),
+            );
         }
     }
 
@@ -143,7 +474,13 @@ impl Artwork {
         if let Some(item) = self.items.iter().find(|item| item.id == id) {
             draw_texture_ex(&item.texture, rect.x, rect.y, WHITE, dest_size(rect));
         } else {
-            draw_rectangle(rect.x, rect.y, rect.w, rect.h, Color::new(0.08, 0.12, 0.16, 1.0));
+            draw_rectangle(
+                rect.x,
+                rect.y,
+                rect.w,
+                rect.h,
+                Color::new(0.08, 0.12, 0.16, 1.0),
+            );
         }
         draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 2.0, rarity_color(rarity));
     }
@@ -201,3 +538,6 @@ fn rarity_color(rarity: crate::model::EquipmentRarity) -> Color {
         crate::model::EquipmentRarity::Legendary => Color::new(0.95, 0.72, 0.30, 1.0),
     }
 }
+
+#[cfg(test)]
+mod tests;
