@@ -66,37 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 5. Floorplan, doors, and encounters
-
-The floorplan should read as a case-file blueprint. Keep node positions,
-connections, and state transitions in code.
-
-- [ ] Add procedural symbols for the six current encounter skills:
-  `social`, `lockpicking`, `stealth`, `hacking`, `athletics`, and `combat`.
-- [ ] Add complication glyphs for time/light factors: `day`, `dusk`, `night`,
-  and `dawn`.
-- [ ] Add complication glyphs for weather factors: `clear`, `rain`, `fog`, and
-  `storm`.
-- [ ] Add complication glyphs for scene factors: `crowded`, `well_lit`,
-  `noisy`, and `high_security`.
-- [ ] Add complication glyphs for security/context factors: `wired`,
-  `old_money`, `understaffed`, and `private_security`.
-- [ ] Implement unknown, cased, and locked node states.
-- [ ] Implement selected, assigned, ready, and in-progress node states.
-- [ ] Implement success, failure, critical-success, and critical-failure node
-  states.
-- [ ] Implement skipped state and verify it cannot be mistaken for success.
-- [ ] Draw door/room silhouettes for lobby, service door, vault, and office.
-- [ ] Draw door/room silhouettes for loading dock, roof, alley, elevator, and
-  exit.
-- [ ] Render route lines as readable red drafting ink or cyan drafting ink
-  beneath node highlights.
-- [ ] Add an assigned-crew portrait medallion that remains recognizable at node
-  size.
-- [ ] Add a target-specific floorplan legend with text labels.
-- [ ] Add a low-contrast procedural paper/blueprint treatment only if the
-  floorplan needs texture after the readable geometry is complete.
-
 ## 6. Dice, resolution, and heist effects
 
 - [ ] Draw the ivory/black d20 base and brass edge with readable numbers 1–20

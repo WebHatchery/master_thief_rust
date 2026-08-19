@@ -20,7 +20,7 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         return;
     };
 
-    draw_building(playback);
+    draw_building(ctx, playback);
     draw_dice(ctx, playback, actions);
 }
 
@@ -62,7 +62,7 @@ fn draw_area(panel: Rect) -> Rect {
     )
 }
 
-fn draw_building(playback: &RunPlayback) {
+fn draw_building(ctx: &UiContext<'_>, playback: &RunPlayback) {
     let report = playback.report();
     let content = draw_panel(building_rect(), &report.target_name);
     let area = draw_area(building_rect());
@@ -89,11 +89,25 @@ fn draw_building(playback: &RunPlayback) {
         &states,
         &FloorplanPalette::default(),
     );
+    floorplan::draw_route_ink(&plan, Color::new(0.24, 0.72, 0.78, 0.72));
 
     for (index, room) in plan.rooms.iter().enumerate() {
         let Some(door) = report.doors.get(index) else {
             continue;
         };
+        floorplan::draw_node_state(
+            *room,
+            run_node_state(
+                outcomes.get(index).copied().flatten(),
+                index == playback.door_index() && !playback.finished(),
+            ),
+        );
+        floorplan::draw_skill_glyph(
+            door.result.check.skill,
+            vec2(room.right() - 48.0, room.y + 18.0),
+            9.0,
+        );
+        floorplan::draw_door_silhouette(*room, &door.encounter_name);
         draw_ui_text_ex(
             &format!("{}. {}", index + 1, door.encounter_name),
             room.x + 10.0,
@@ -106,6 +120,21 @@ fn draw_building(playback: &RunPlayback) {
             room.y + 40.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
+        if !door.result.check.member_id.is_empty() {
+            ctx.artwork.draw_portrait_state(
+                &door.result.check.member_id,
+                Rect::new(room.right() - 70.0, room.bottom() - 30.0, 24.0, 24.0),
+                true,
+                crate::artwork::PortraitState::Neutral,
+            );
+            draw_circle_lines(
+                room.right() - 58.0,
+                room.bottom() - 18.0,
+                12.0,
+                1.5,
+                Color::new(0.45, 0.76, 0.63, 0.95),
+            );
+        }
         if let Some(outcome) = outcomes[index] {
             draw_ui_text_ex(
                 outcome.label(),
@@ -123,6 +152,21 @@ fn draw_building(playback: &RunPlayback) {
         content.bottom() + 6.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
+}
+
+fn run_node_state(outcome: Option<Outcome>, active: bool) -> floorplan::NodeState {
+    if active {
+        floorplan::NodeState::InProgress
+    } else {
+        match outcome {
+            Some(Outcome::CriticalSuccess) => floorplan::NodeState::CriticalSuccess,
+            Some(Outcome::Success) => floorplan::NodeState::Success,
+            Some(Outcome::Neutral) => floorplan::NodeState::Assigned,
+            Some(Outcome::Failure) => floorplan::NodeState::Failure,
+            Some(Outcome::CriticalFailure) => floorplan::NodeState::CriticalFailure,
+            None => floorplan::NodeState::Ready,
+        }
+    }
 }
 
 fn draw_dice(ctx: &UiContext<'_>, playback: &RunPlayback, actions: &mut Vec<UiAction>) {

@@ -87,12 +87,15 @@ fn draw_route(
         &states,
         &FloorplanPalette::default(),
     );
+    floorplan::draw_route_ink(&plan, Color::new(0.24, 0.72, 0.78, 0.72));
 
     for (index, room) in plan.rooms.iter().enumerate() {
         let Some(encounter) = ctx.data.encounters.get(&draft.doors[index]) else {
             continue;
         };
         let known = knows_door(ctx, &target.id, index);
+        floorplan::draw_node_state(*room, node_state(draft, index, known));
+        floorplan::draw_door_silhouette(*room, &encounter.name);
         draw_room_label(ctx, *room, draft, index, encounter, known);
     }
 
@@ -116,6 +119,11 @@ fn draw_room_label(
     cased: bool,
 ) {
     let text = room.x + 12.0;
+    floorplan::draw_skill_glyph(
+        encounter.primary_skill,
+        vec2(room.right() - 48.0, room.y + 18.0),
+        9.0,
+    );
     draw_ui_text_ex(
         &format!("{}. {}", index + 1, encounter.name),
         text,
@@ -169,6 +177,19 @@ fn draw_room_label(
                     );
                 }
             }
+            ctx.artwork.draw_portrait_state(
+                member_id,
+                Rect::new(room.right() - 70.0, room.bottom() - 30.0, 24.0, 24.0),
+                true,
+                crate::artwork::PortraitState::Neutral,
+            );
+            draw_circle_lines(
+                room.right() - 58.0,
+                room.bottom() - 18.0,
+                12.0,
+                1.5,
+                Color::new(0.45, 0.76, 0.63, 0.95),
+            );
         }
         None => {
             draw_ui_text_ex(
@@ -213,6 +234,12 @@ fn draw_route_footer(
     let width = (content.w - 30.0) / 4.0;
     let column = |index: f32| Rect::new(content.x + (width + 10.0) * index, y, width, 38.0);
 
+    draw_ui_text_ex(
+        "Legend: cyan route · brass cased · mint assigned · amber active · red result",
+        content.x,
+        y - 44.0,
+        TextStyle::new(12.0, dark::TEXT_DIM).params(),
+    );
     draw_crew_cut(ctx, content, draft, y - 26.0);
 
     if button_rect_tone_at(column(0.0), "Back", true, ButtonTone::Secondary, mouse) {
@@ -260,6 +287,18 @@ fn draw_route_footer(
         mouse,
     ) {
         actions.push(UiAction::CommitPlan);
+    }
+}
+
+fn node_state(draft: &PlanDraft, index: usize, cased: bool) -> floorplan::NodeState {
+    if !cased {
+        floorplan::NodeState::Unknown
+    } else if draft.focus == index {
+        floorplan::NodeState::Selected
+    } else if draft.assigned(index).is_some() {
+        floorplan::NodeState::Assigned
+    } else {
+        floorplan::NodeState::Cased
     }
 }
 

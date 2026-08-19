@@ -3,6 +3,7 @@
 use super::chrome::{
     difficulty_color, draw_panel, empty_notice, list_card, panel_style, stat_row, title_style,
 };
+use super::floorplan;
 use super::{detail_rect, list_rect, UiAction, UiContext};
 use crate::model::HeistTarget;
 use crate::state::BoardEntry;
@@ -297,9 +298,13 @@ fn draw_summary(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &B
         TextStyle::new(16.0, dark::TEXT_BRIGHT).params(),
     );
 
-    let conditions: Vec<String> = target
+    let factor_ids: Vec<String> = target
         .environment
         .modifier_ids()
+        .map(str::to_owned)
+        .collect();
+    let conditions: Vec<String> = factor_ids
+        .iter()
         .map(|id| {
             ctx.data
                 .environment
@@ -308,12 +313,19 @@ fn draw_summary(rect: Rect, ctx: &UiContext<'_>, target: &HeistTarget, entry: &B
                 .unwrap_or_else(|| id.to_owned())
         })
         .collect();
+    for (index, id) in factor_ids.iter().enumerate() {
+        floorplan::draw_factor_glyph(
+            id,
+            vec2(rect.x + 10.0 + index as f32 * 28.0, rect.y + 194.0),
+            8.0,
+        );
+    }
     draw_text_block(
         &conditions.join(", "),
         rect.x,
-        rect.y + 178.0,
+        rect.y + 204.0,
         rect.w,
-        60.0,
+        34.0,
         14.0,
         3.0,
         dark::TEXT_DIM,

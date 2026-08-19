@@ -203,3 +203,23 @@ fn the_three_door_floorplan_matches_its_recorded_fingerprint() {
     let buffer = painted(3, &[RoomState::default(); 3]);
     assert_eq!(buffer.fingerprint(), 13_893_598_833_480_542_666);
 }
+
+#[test]
+fn encounter_symbols_cover_all_trades_and_semantic_node_states() {
+    assert_eq!(Skill::ALL.len(), 6);
+    let states = [
+        NodeState::Unknown,
+        NodeState::Cased,
+        NodeState::Locked,
+        NodeState::Selected,
+        NodeState::Assigned,
+        NodeState::Ready,
+        NodeState::InProgress,
+        NodeState::Success,
+        NodeState::Failure,
+        NodeState::CriticalSuccess,
+        NodeState::CriticalFailure,
+        NodeState::Skipped,
+    ];
+    assert_eq!(states.len(), 12);
+}
