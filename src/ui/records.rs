@@ -1,6 +1,7 @@
 //! The records screen: what the outfit did, what it is owed, and what it cost.
 
 use super::chrome::{difficulty_color, draw_panel, empty_notice, stat_row};
+use super::iconography::{draw_icon, Icon};
 use super::{content_rect, UiAction, UiContext};
 use crate::state::JobRecord;
 use macroquad::prelude::*;
@@ -325,29 +326,8 @@ fn draw_awards(rect: Rect, ctx: &UiContext<'_>) {
         None,
     );
 
-    // The most recent unlocks, then whatever is closest to happening next.
-    let mut unlocked_names: Vec<&str> = ctx
-        .session
-        .achievements
-        .iter()
-        .filter(|a| a.unlocked)
-        .map(|a| a.name.as_str())
-        .collect();
-    unlocked_names.reverse();
-
-    let rows = (((rect.h - 60.0) / 16.0) as usize).max(1);
-    for (index, name) in unlocked_names.iter().enumerate() {
-        if index >= rows * 2 {
-            break;
-        }
-        let column = index / rows;
-        draw_ui_text_ex(
-            name,
-            rect.x + column as f32 * (rect.w * 0.5),
-            rect.y + 40.0 + (index % rows) as f32 * 16.0,
-            TextStyle::new(13.0, Color::new(0.56, 0.82, 0.60, 1.0)).params(),
-        );
-    }
+    draw_badge_grid(Rect::new(rect.x, rect.y + 28.0, rect.w, 102.0), ctx);
+    draw_campaign_stamps(Rect::new(rect.x, rect.y + 132.0, rect.w, 28.0), ctx);
 
     if let Some(next) = closest_locked(ctx) {
         draw_ui_text_ex(
@@ -355,6 +335,182 @@ fn draw_awards(rect: Rect, ctx: &UiContext<'_>) {
             rect.x,
             rect.bottom() - 8.0,
             TextStyle::new(12.0, dark::TEXT_DIM).params(),
+        );
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AchievementBadgeState {
+    Locked,
+    Earned,
+    Notable,
+}
+
+/// The registry is deliberately split into four stable lookup batches: three
+/// complete shelves of 21 and a final shelf containing the remaining IDs.
+pub fn achievement_batch(index: usize) -> usize {
+    (index / 21).min(3)
+}
+
+fn draw_badge_grid(rect: Rect, ctx: &UiContext<'_>) {
+    let size = 24.0;
+    let gap = 4.0;
+    let columns = ((rect.w + gap) / (size + gap)).floor().max(1.0) as usize;
+
+    for (index, award) in ctx.data.awards.iter().enumerate() {
+        let column = index % columns;
+        let row = index / columns;
+        let x = rect.x + column as f32 * (size + gap);
+        let y = rect.y + row as f32 * (size + gap);
+        if y + size > rect.bottom() {
+            break;
+        }
+        let earned = ctx.session.achievements.is_unlocked(&award.id);
+        let state = if !earned {
+            AchievementBadgeState::Locked
+        } else if index % 21 == 0 {
+            AchievementBadgeState::Notable
+        } else {
+            AchievementBadgeState::Earned
+        };
+        draw_achievement_badge(Rect::new(x, y, size, size), state, achievement_batch(index));
+    }
+}
+
+/// The same renderer is used by records at 96, 48, and 24 logical pixels.
+pub fn draw_achievement_badge(rect: Rect, state: AchievementBadgeState, batch: usize) {
+    let size = rect.w.min(rect.h);
+    let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
+    let radius = size * 0.40;
+    let locked = Color::new(0.36, 0.40, 0.48, 0.70);
+    let earned = Color::new(0.45, 0.76, 0.63, 0.98);
+    let brass = Color::new(0.78, 0.56, 0.22, 0.98);
+    let tone = match state {
+        AchievementBadgeState::Locked => locked,
+        AchievementBadgeState::Earned => earned,
+        AchievementBadgeState::Notable => brass,
+    };
+
+    if matches!(state, AchievementBadgeState::Notable) {
+        draw_circle_lines(center.x, center.y, radius + size * 0.10, 1.5, brass);
+    }
+    draw_circle_lines(center.x, center.y, radius, (size * 0.055).max(1.0), tone);
+
+    if matches!(state, AchievementBadgeState::Locked) {
+        for offset in [-0.24, 0.0, 0.24] {
+            draw_line(
+                center.x - radius * 0.65 + size * offset,
+                center.y + radius * 0.65,
+                center.x + radius * 0.65 + size * offset,
+                center.y - radius * 0.65,
+                (size * 0.045).max(1.0),
+                locked,
+            );
+        }
+    } else {
+        let points = match batch {
+            0 => [(0.0, -0.32), (-0.30, 0.25), (0.30, 0.25)],
+            1 => [(-0.28, -0.18), (0.28, -0.18), (0.0, 0.34)],
+            2 => [(-0.30, 0.24), (0.0, -0.34), (0.30, 0.24)],
+            _ => [(-0.30, 0.0), (0.0, -0.30), (0.30, 0.0)],
+        };
+        for (x, y) in points {
+            draw_circle(
+                center.x + x * size,
+                center.y + y * size,
+                (size * 0.07).max(1.0),
+                tone,
+            );
+        }
+        draw_line(
+            center.x - radius * 0.42,
+            center.y,
+            center.x - radius * 0.08,
+            center.y + radius * 0.34,
+            (size * 0.065).max(1.0),
+            tone,
+        );
+        draw_line(
+            center.x - radius * 0.08,
+            center.y + radius * 0.34,
+            center.x + radius * 0.48,
+            center.y - radius * 0.36,
+            (size * 0.065).max(1.0),
+            tone,
+        );
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct CampaignStamp {
+    label: &'static str,
+    icon: Icon,
+    tone: Color,
+}
+
+fn draw_campaign_stamps(rect: Rect, ctx: &UiContext<'_>) {
+    let tally = &ctx.session.tally;
+    let mut stamps = Vec::new();
+    if tally.jobs_run > 0 {
+        stamps.push(CampaignStamp {
+            label: "First job",
+            icon: Icon::Door,
+            tone: Color::new(0.46, 0.72, 0.92, 1.0),
+        });
+    }
+    if tally.clean_sweeps > 0 {
+        stamps.push(CampaignStamp {
+            label: "Clean",
+            icon: Icon::Success,
+            tone: Color::new(0.45, 0.76, 0.63, 1.0),
+        });
+    }
+    if tally.jobs_lost > 0 {
+        stamps.push(CampaignStamp {
+            label: "Botched",
+            icon: Icon::Warning,
+            tone: Color::new(0.88, 0.61, 0.25, 1.0),
+        });
+    }
+    if ctx.session.retired.is_some() {
+        stamps.push(CampaignStamp {
+            label: "Retired",
+            icon: Icon::Retire,
+            tone: Color::new(0.78, 0.56, 0.22, 1.0),
+        });
+    }
+    if tally.heat_peak > 0 {
+        stamps.push(CampaignStamp {
+            label: "Heat peak",
+            icon: Icon::Heat,
+            tone: Color::new(0.88, 0.34, 0.30, 1.0),
+        });
+    }
+    if tally.jobs_run >= 10 {
+        stamps.push(CampaignStamp {
+            label: "Long run",
+            icon: Icon::Payroll,
+            tone: Color::new(0.55, 0.67, 0.88, 1.0),
+        });
+    }
+
+    if stamps.is_empty() {
+        return;
+    }
+    let width = rect.w / stamps.len() as f32;
+    for (index, stamp) in stamps.iter().enumerate() {
+        let x = rect.x + index as f32 * width;
+        draw_circle_lines(x + 11.0, rect.y + 13.0, 11.0, 1.2, stamp.tone);
+        draw_icon(
+            stamp.icon,
+            Rect::new(x, rect.y + 2.0, 22.0, 22.0),
+            stamp.tone,
+        );
+        draw_ui_text_ex(
+            stamp.label,
+            x + 26.0,
+            rect.y + 17.0,
+            TextStyle::new(11.0, stamp.tone).params(),
         );
     }
 }
@@ -375,3 +531,6 @@ fn closest_locked(ctx: &UiContext<'_>) -> Option<(String, String)> {
         })
         .map(|award| (award.name.clone(), award.description.clone()))
 }
+
+#[cfg(test)]
+mod tests;

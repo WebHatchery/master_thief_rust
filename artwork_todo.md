@@ -66,23 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 8. Records and campaign marks
-
-Achievement identity is data-driven. Do not create a badge or label for a
-mechanic that is absent from `achievements.json`.
-
-- [ ] Enumerate the 82 current achievement IDs and group them into four lookup
-  batches of no more than 21 IDs.
-- [ ] Add the procedural badge renderer for locked, earned, and notable states.
-- [ ] Wire achievement lookup batch 1 to the badge renderer.
-- [ ] Wire achievement lookup batch 2 to the badge renderer.
-- [ ] Wire achievement lookup batch 3 to the badge renderer.
-- [ ] Wire achievement lookup batch 4 to the badge renderer.
-- [ ] Add campaign record stamps for first job, clean job, botched job,
-  legendary loot, retired outfit, heat peak, and long-running crew only when
-  each event exists in the simulation data.
-- [ ] Validate badge readability at 96 x 96, 48 x 48, and 24 x 24.
-
 ## 9. Accessibility, provenance, and asset rules
 
 - [ ] Express every decision-relevant state with at least two of icon, label,
