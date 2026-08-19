@@ -131,7 +131,7 @@ pub fn draw_tabs(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         .unwrap_or(usize::MAX);
 
     let clicked = tab_bar_styled_at(
-        Rect::new(18.0, 90.0, 500.0, 38.0),
+        Rect::new(18.0, 90.0, 600.0, 38.0),
         &labels,
         active,
         TabOrientation::Horizontal,
@@ -155,7 +155,7 @@ pub fn draw_tabs(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     {
         draw_icon(
             *icon,
-            Rect::new(22.0 + index as f32 * 100.0, 98.0, 18.0, 18.0),
+            Rect::new(22.0 + index as f32 * 120.0, 98.0, 18.0, 18.0),
             if index == active {
                 dark::ACCENT
             } else {
@@ -228,7 +228,7 @@ pub fn draw_footer(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         }
         draw_icon(
             icon,
-            Rect::new(button.x + 7.0, button.y + 8.0, 20.0, 20.0),
+            Rect::new(button.x + 4.0, rect.y + 1.0, 14.0, 14.0),
             if enabled { dark::TEXT } else { dark::TEXT_DIM },
         );
         x += width + 10.0;

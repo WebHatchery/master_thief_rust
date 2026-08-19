@@ -326,17 +326,8 @@ fn draw_awards(rect: Rect, ctx: &UiContext<'_>) {
         None,
     );
 
-    draw_badge_grid(Rect::new(rect.x, rect.y + 28.0, rect.w, 102.0), ctx);
-    draw_campaign_stamps(Rect::new(rect.x, rect.y + 132.0, rect.w, 28.0), ctx);
-
-    if let Some(next) = closest_locked(ctx) {
-        draw_ui_text_ex(
-            &format!("Next: {} — {}", next.0, next.1),
-            rect.x,
-            rect.bottom() - 8.0,
-            TextStyle::new(12.0, dark::TEXT_DIM).params(),
-        );
-    }
+    draw_badge_grid(Rect::new(rect.x, rect.y + 28.0, rect.w, 25.0), ctx);
+    draw_campaign_stamps(Rect::new(rect.x, rect.y + 54.0, rect.w, 20.0), ctx);
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -354,26 +345,31 @@ pub fn achievement_batch(index: usize) -> usize {
 
 fn draw_badge_grid(rect: Rect, ctx: &UiContext<'_>) {
     let size = 24.0;
-    let gap = 4.0;
-    let columns = ((rect.w + gap) / (size + gap)).floor().max(1.0) as usize;
-
-    for (index, award) in ctx.data.awards.iter().enumerate() {
-        let column = index % columns;
-        let row = index / columns;
-        let x = rect.x + column as f32 * (size + gap);
-        let y = rect.y + row as f32 * (size + gap);
-        if y + size > rect.bottom() {
-            break;
+    let gap = 12.0;
+    let mut slot = 0;
+    for batch in 0..4 {
+        for (index, award) in ctx
+            .data
+            .awards
+            .iter()
+            .enumerate()
+            .filter(|(index, _)| achievement_batch(*index) == batch)
+            .take(4)
+        {
+            let x = rect.x + slot as f32 * (size + gap);
+            if x + size > rect.right() {
+                break;
+            }
+            let state = if !ctx.session.achievements.is_unlocked(&award.id) {
+                AchievementBadgeState::Locked
+            } else if index % 21 == 0 {
+                AchievementBadgeState::Notable
+            } else {
+                AchievementBadgeState::Earned
+            };
+            draw_achievement_badge(Rect::new(x, rect.y, size, size), state, batch);
+            slot += 1;
         }
-        let earned = ctx.session.achievements.is_unlocked(&award.id);
-        let state = if !earned {
-            AchievementBadgeState::Locked
-        } else if index % 21 == 0 {
-            AchievementBadgeState::Notable
-        } else {
-            AchievementBadgeState::Earned
-        };
-        draw_achievement_badge(Rect::new(x, y, size, size), state, achievement_batch(index));
     }
 }
 
@@ -513,23 +509,6 @@ fn draw_campaign_stamps(rect: Rect, ctx: &UiContext<'_>) {
             TextStyle::new(11.0, stamp.tone).params(),
         );
     }
-}
-
-/// The locked achievement the campaign is furthest along towards.
-fn closest_locked(ctx: &UiContext<'_>) -> Option<(String, String)> {
-    ctx.data
-        .awards
-        .iter()
-        .filter(|award| !ctx.session.achievements.is_unlocked(&award.id))
-        .max_by(|a, b| {
-            let progress = |award: &crate::sim::AwardDef| {
-                award.progress(&ctx.session.tally, ctx.session, &ctx.data.config)
-            };
-            progress(a)
-                .partial_cmp(&progress(b))
-                .unwrap_or(std::cmp::Ordering::Equal)
-        })
-        .map(|award| (award.name.clone(), award.description.clone()))
 }
 
 #[cfg(test)]

@@ -2,6 +2,8 @@ use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use master_thief::ui::records::achievement_batch;
+
 fn project_file(relative: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join(relative)
 }
@@ -218,4 +220,94 @@ fn manifest_paths_keys_filters_and_accessibility_rules_are_valid() {
     assert_eq!(accessibility["filtering"]["flat_icons"], "nearest");
     assert_eq!(accessibility["filtering"]["portraits"], "linear");
     assert_eq!(accessibility["filtering"]["plates"], "linear");
+}
+
+#[test]
+fn every_achievement_id_and_floorplan_factor_has_a_documented_renderer() {
+    let manifest: Value = serde_json::from_str(
+        &fs::read_to_string(project_file("assets/artwork_manifest.json")).unwrap(),
+    )
+    .unwrap();
+    let achievement_ids = ids("assets/data/achievements.json");
+    assert_eq!(achievement_ids.len(), 82);
+    let mut batches = [0usize; 4];
+    for (index, id) in achievement_ids.iter().enumerate() {
+        assert!(!id.is_empty());
+        batches[achievement_batch(index)] += 1;
+    }
+    assert_eq!(batches, [21, 21, 21, 19]);
+    let renderers = manifest["procedural_renderers"].as_array().unwrap();
+    assert!(renderers.iter().any(|entry| {
+        entry["key_prefix"] == "achievement_"
+            && entry["coverage"]
+                .as_str()
+                .is_some_and(|coverage| coverage.contains("all achievement IDs"))
+    }));
+    let factor_ids = ids("assets/data/environment.json");
+    assert_eq!(factor_ids.len(), 16);
+    let floorplan_coverage = renderers
+        .iter()
+        .find(|entry| entry["key_prefix"] == "floorplan_")
+        .and_then(|entry| entry["coverage"].as_str())
+        .expect("floorplan renderer must document its coverage");
+    assert!(floorplan_coverage.contains("environment factors"));
+    assert!(floorplan_coverage.contains("fallback") || floorplan_coverage.contains("factors"));
+}
+
+#[test]
+fn generated_families_expand_to_every_runtime_texture() {
+    let manifest: Value = serde_json::from_str(
+        &fs::read_to_string(project_file("assets/artwork_manifest.json")).unwrap(),
+    )
+    .unwrap();
+    let families = manifest["generated_families"].as_array().unwrap();
+    for (prefix, registry, token) in [
+        ("portrait_", "assets/data/characters.json", "{character_id}"),
+        ("target_", "assets/data/targets.json", "{target_id}"),
+        ("item_", "assets/data/equipment.json", "{equipment_id}"),
+    ] {
+        let family = families
+            .iter()
+            .find(|family| family["key_prefix"] == prefix)
+            .expect("runtime family missing from artwork manifest");
+        let pattern = family["path_pattern"].as_str().unwrap();
+        let filter = family["filter"].as_str().unwrap();
+        assert!(matches!(filter, "nearest" | "linear"));
+        for id in ids(registry) {
+            let path = pattern.replace(token, &id);
+            assert!(
+                project_file(&path).is_file(),
+                "missing generated family path {path}"
+            );
+            assert!(!format!("{prefix}{id}").is_empty());
+        }
+    }
+}
+
+#[test]
+fn verification_captures_cover_every_primary_screen_at_1280x720() {
+    let manifest: Value = serde_json::from_str(
+        &fs::read_to_string(project_file("assets/artwork_manifest.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        manifest["verification"]["primary_capture_size"],
+        serde_json::json!([1280, 720])
+    );
+    let (thumbnail_width, thumbnail_height, _) = png_dimensions("catalog_thumbnail.png");
+    assert_eq!((thumbnail_width, thumbnail_height), (1280, 720));
+    assert!(manifest["verification"]["replace_same_state_capture"]
+        .as_bool()
+        .unwrap());
+    for screen in manifest["verification"]["screens"].as_array().unwrap() {
+        let screen = screen.as_str().unwrap();
+        let path = format!("docs/verification/ui_{screen}.png");
+        let (width, height, _) = png_dimensions(&path);
+        assert_eq!(width, 1280, "capture width changed for {screen}");
+        assert_eq!(height, 720, "capture height changed for {screen}");
+    }
+    for integration in manifest["screen_integration"].as_array().unwrap() {
+        assert!(integration["actions_labelled"].as_bool().unwrap());
+        assert!(!integration["art"].as_array().unwrap().is_empty());
+    }
 }
