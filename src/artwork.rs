@@ -5,7 +5,7 @@
 //! authored identity and atmosphere called for by `artwork_todo.md`.
 
 use crate::data::GameData;
-use crate::model::CharacterClass;
+use crate::model::{CharacterClass, EquipmentRarity};
 use macroquad::prelude::*;
 
 struct NamedTexture {
@@ -48,6 +48,18 @@ impl PortraitState {
             Self::Locked => "locked",
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ItemState {
+    Neutral,
+    Equipped,
+    Selected,
+    Locked,
+    NewlyFound,
+    Worn,
+    Broken,
+    Sold,
 }
 
 pub struct Artwork {
@@ -478,7 +490,17 @@ impl Artwork {
 
     /// Equipment uses authored bitmap icon art; rarity remains procedural so
     /// one recognizable object can carry five clear foils and state overlays.
-    pub fn draw_item_icon(&self, id: &str, rect: Rect, rarity: crate::model::EquipmentRarity) {
+    pub fn draw_item_icon(&self, id: &str, rect: Rect, rarity: EquipmentRarity) {
+        self.draw_item_icon_state(id, rect, rarity, ItemState::Neutral);
+    }
+
+    pub fn draw_item_icon_state(
+        &self,
+        id: &str,
+        rect: Rect,
+        rarity: EquipmentRarity,
+        state: ItemState,
+    ) {
         if let Some(item) = self.items.iter().find(|item| item.id == id) {
             draw_texture_ex(&item.texture, rect.x, rect.y, WHITE, dest_size(rect));
         } else {
@@ -490,7 +512,8 @@ impl Artwork {
                 Color::new(0.08, 0.12, 0.16, 1.0),
             );
         }
-        draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 2.0, rarity_color(rarity));
+        draw_rarity_treatment(rect, rarity);
+        draw_item_state_treatment(rect, state);
     }
 
     pub fn draw_slot_glyph(&self, slot: crate::model::EquipmentSlot, rect: Rect) {
@@ -537,13 +560,186 @@ fn dest_size(rect: Rect) -> DrawTextureParams {
     }
 }
 
-fn rarity_color(rarity: crate::model::EquipmentRarity) -> Color {
+fn rarity_color(rarity: EquipmentRarity) -> Color {
     match rarity {
         crate::model::EquipmentRarity::Basic => Color::new(0.55, 0.58, 0.64, 1.0),
         crate::model::EquipmentRarity::Improved => Color::new(0.36, 0.76, 0.54, 1.0),
         crate::model::EquipmentRarity::Advanced => Color::new(0.34, 0.66, 0.94, 1.0),
         crate::model::EquipmentRarity::Masterwork => Color::new(0.72, 0.50, 0.92, 1.0),
         crate::model::EquipmentRarity::Legendary => Color::new(0.95, 0.72, 0.30, 1.0),
+    }
+}
+
+fn draw_rarity_treatment(rect: Rect, rarity: EquipmentRarity) {
+    let color = rarity_color(rarity);
+    draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 1.5, color);
+    match rarity {
+        EquipmentRarity::Basic => {}
+        EquipmentRarity::Improved => {
+            draw_line(
+                rect.x + 4.0,
+                rect.bottom() - 4.0,
+                rect.right() - 4.0,
+                rect.bottom() - 4.0,
+                2.0,
+                color,
+            );
+        }
+        EquipmentRarity::Advanced => {
+            draw_rectangle_lines(
+                rect.x + 3.0,
+                rect.y + 3.0,
+                rect.w - 6.0,
+                rect.h - 6.0,
+                1.0,
+                color,
+            );
+        }
+        EquipmentRarity::Masterwork => {
+            draw_line(
+                rect.x + 4.0,
+                rect.y + 4.0,
+                rect.x + 10.0,
+                rect.y + 4.0,
+                2.0,
+                color,
+            );
+            draw_line(
+                rect.right() - 10.0,
+                rect.bottom() - 4.0,
+                rect.right() - 4.0,
+                rect.bottom() - 4.0,
+                2.0,
+                color,
+            );
+        }
+        EquipmentRarity::Legendary => {
+            draw_circle_lines(rect.x + 6.0, rect.y + 6.0, 3.0, 1.5, color);
+            draw_circle_lines(rect.right() - 6.0, rect.bottom() - 6.0, 3.0, 1.5, color);
+        }
+    }
+}
+
+fn draw_item_state_treatment(rect: Rect, state: ItemState) {
+    let cyan = Color::new(0.24, 0.72, 0.78, 0.95);
+    let mint = Color::new(0.45, 0.76, 0.63, 0.95);
+    let amber = Color::new(0.88, 0.61, 0.25, 0.95);
+    let red = Color::new(0.78, 0.28, 0.27, 0.95);
+    let dim = Color::new(0.03, 0.05, 0.08, 0.58);
+    match state {
+        ItemState::Neutral => {}
+        ItemState::Equipped => {
+            draw_circle(rect.right() - 7.0, rect.y + 7.0, 6.0, mint);
+            draw_line(
+                rect.right() - 10.0,
+                rect.y + 7.0,
+                rect.right() - 8.0,
+                rect.y + 10.0,
+                1.5,
+                dim,
+            );
+            draw_line(
+                rect.right() - 8.0,
+                rect.y + 10.0,
+                rect.right() - 4.0,
+                rect.y + 4.0,
+                1.5,
+                dim,
+            );
+        }
+        ItemState::Selected => {
+            draw_line(rect.x, rect.y + 8.0, rect.x, rect.y, 2.0, cyan);
+            draw_line(rect.x, rect.y, rect.x + 8.0, rect.y, 2.0, cyan);
+            draw_line(
+                rect.right() - 8.0,
+                rect.bottom(),
+                rect.right(),
+                rect.bottom(),
+                2.0,
+                cyan,
+            );
+            draw_line(
+                rect.right(),
+                rect.bottom() - 8.0,
+                rect.right(),
+                rect.bottom(),
+                2.0,
+                cyan,
+            );
+        }
+        ItemState::Locked => {
+            draw_rectangle(rect.x, rect.y, rect.w, rect.h, dim);
+            let lock = Rect::new(
+                rect.x + rect.w * 0.35,
+                rect.y + rect.h * 0.36,
+                rect.w * 0.30,
+                rect.h * 0.28,
+            );
+            draw_rectangle_lines(lock.x, lock.y, lock.w, lock.h, 2.0, amber);
+            draw_circle_lines(lock.x + lock.w * 0.5, lock.y, lock.w * 0.28, 2.0, amber);
+        }
+        ItemState::NewlyFound => {
+            draw_circle(rect.x + 7.0, rect.bottom() - 7.0, 5.0, cyan);
+            draw_line(
+                rect.x + 7.0,
+                rect.bottom() - 12.0,
+                rect.x + 7.0,
+                rect.bottom() - 2.0,
+                1.5,
+                dim,
+            );
+            draw_line(
+                rect.x + 2.0,
+                rect.bottom() - 7.0,
+                rect.x + 12.0,
+                rect.bottom() - 7.0,
+                1.5,
+                dim,
+            );
+        }
+        ItemState::Worn => {
+            for index in 0..3 {
+                let x = rect.x + 6.0 + index as f32 * rect.w * 0.22;
+                draw_line(x, rect.bottom() - 4.0, x + 12.0, rect.y + 4.0, 2.0, amber);
+            }
+        }
+        ItemState::Broken => {
+            draw_line(
+                rect.x + 8.0,
+                rect.y + 4.0,
+                rect.x + rect.w * 0.45,
+                rect.h * 0.52 + rect.y,
+                2.0,
+                red,
+            );
+            draw_line(
+                rect.x + rect.w * 0.45,
+                rect.h * 0.52 + rect.y,
+                rect.right() - 8.0,
+                rect.bottom() - 4.0,
+                2.0,
+                red,
+            );
+            draw_line(
+                rect.x + rect.w * 0.45,
+                rect.h * 0.52 + rect.y,
+                rect.right() - 8.0,
+                rect.y + 8.0,
+                1.5,
+                red,
+            );
+        }
+        ItemState::Sold => {
+            draw_rectangle(rect.x, rect.y, rect.w, rect.h, dim);
+            draw_line(
+                rect.x + 4.0,
+                rect.bottom() - 4.0,
+                rect.right() - 4.0,
+                rect.y + 4.0,
+                3.0,
+                red,
+            );
+        }
     }
 }
 

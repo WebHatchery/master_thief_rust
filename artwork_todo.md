@@ -66,41 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 4. Equipment and loot icons
-
-The current equipment registry has 67 items, five slot values (`accessory`,
-`armor`, `gadget`, `tool`, and `weapon`), and five rarity values
-(`basic`, `improved`, `advanced`, `masterwork`, and `legendary`).
-
-Use 64 x 64 RGBA runtime icons with the object centered in a 52 x 52 safe area,
-a consistent three-quarter view, no baked names/stats/prices, and a silhouette
-that remains recognizable at 24 x 24. Use the shared object drawing with
-procedural rarity and state overlays so bitmap variants do not multiply the
-art burden.
-
-### Slot and item inventory
-
-- [x] Generate one slot glyph for each of the five current slot values.
-- [ ] Generate item icons for equipment records 1–17.
-- [ ] Generate item icons for equipment records 18–34.
-- [ ] Generate item icons for equipment records 35–51.
-- [ ] Generate item icons for equipment records 52–67.
-- [ ] Validate all 67 item files for one-to-one ID parity, centered silhouette,
-  64 x 64 runtime dimensions, and recognition at 24 x 24.
-- [ ] Add `loot_unknown`, `loot_cash`, `loot_document`, and `loot_jewellery`
-  only when the results UI displays those categories.
-
-### Shared item treatments
-
-- [ ] Implement the `basic` and `improved` rarity treatments.
-- [ ] Implement the `advanced` and `masterwork` rarity treatments.
-- [ ] Implement the `legendary` rarity treatment.
-- [ ] Implement equipped and selected overlays.
-- [ ] Implement locked/level-gated and newly-found overlays.
-- [ ] Implement worn, broken, and sold overlays.
-- [ ] Add the item manifest validation so every equipment ID resolves to one
-  bitmap or one explicit procedural renderer, never both accidentally.
-
 ## 5. Floorplan, doors, and encounters
 
 The floorplan should read as a case-file blueprint. Keep node positions,

@@ -40,7 +40,7 @@
     { "key_prefix": "slot_", "path_pattern": "assets/images/icons/slot_{slot_id}.png", "ids": ["weapon", "armor", "accessory", "tool", "gadget"], "state": "neutral equipment slot glyph" }
   ],
   "procedural_renderers": [
-    { "key_prefix": "item_", "coverage": "all 67 equipment IDs plus loot_unknown, loot_cash, loot_document, loot_jewellery", "renderer": "Artwork::draw_item_glyph", "filter": "nearest" },
+    { "key_prefix": "item_", "coverage": "all 67 equipment IDs plus loot_unknown, loot_cash, loot_document, loot_jewellery when results exposes those categories", "renderer": "Artwork::draw_item_icon_state", "filter": "nearest", "states": ["basic", "improved", "advanced", "masterwork", "legendary", "equipped", "selected", "locked", "newly_found", "worn", "broken", "sold"] },
     { "key_prefix": "floorplan_", "coverage": "encounter trades, environment factors, node states, doors, routes, medallions, legend", "renderer": "ui::floorplan and ui::planning", "filter": "nearest" },
     { "key_prefix": "resolution_", "coverage": "d20 faces, modifier chips, door stamps, alarm, injury/fatigue, loot reveal", "renderer": "ui::run and ui::results", "filter": "nearest" },
     { "key_prefix": "portrait_state_", "coverage": "neutral, speaking, pleased, worried, injured, exhausted, arrested, unavailable, unknown, locked", "renderer": "Artwork::draw_portrait_state", "filter": "nearest" },

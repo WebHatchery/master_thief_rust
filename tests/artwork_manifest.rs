@@ -124,7 +124,7 @@ fn authored_png_deliveries_keep_runtime_dimensions_and_alpha() {
     for id in ids("assets/data/equipment.json") {
         assert_eq!(
             png_dimensions(&format!("assets/images/items/{id}.png")),
-            (128, 128, 6),
+            (64, 64, 6),
             "item delivery changed for {id}"
         );
     }

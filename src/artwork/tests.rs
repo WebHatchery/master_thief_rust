@@ -1,4 +1,4 @@
-use super::PortraitState;
+use super::{ItemState, PortraitState};
 use crate::model::CharacterClass;
 
 #[test]
@@ -39,5 +39,27 @@ fn class_badges_have_one_key_per_current_class() {
             .collect::<std::collections::BTreeSet<_>>()
             .len(),
         7
+    );
+}
+
+#[test]
+fn item_states_have_distinct_overlay_slots() {
+    let states = [
+        ItemState::Neutral,
+        ItemState::Equipped,
+        ItemState::Selected,
+        ItemState::Locked,
+        ItemState::NewlyFound,
+        ItemState::Worn,
+        ItemState::Broken,
+        ItemState::Sold,
+    ];
+    assert_eq!(states.len(), 8);
+    assert_eq!(
+        states
+            .iter()
+            .collect::<std::collections::BTreeSet<_>>()
+            .len(),
+        8
     );
 }

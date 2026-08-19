@@ -2,6 +2,7 @@
 
 use super::chrome::{draw_panel, empty_notice, list_card, stat_row};
 use super::{content_rect, UiAction, UiContext};
+use crate::artwork::ItemState;
 use crate::model::{EquipmentDef, EquipmentRarity, EquipmentSlot, Skill};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
@@ -226,6 +227,19 @@ fn draw_lockup(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
             )
             .params(),
         );
+        if let Some(def) = item {
+            let state = if ctx.session.kit_wear.get(&def.id).copied().unwrap_or(0) > 0 {
+                ItemState::Worn
+            } else {
+                ItemState::Equipped
+            };
+            ctx.artwork.draw_item_icon_state(
+                &def.id,
+                Rect::new(rect.right() - 140.0, rect.y + 4.0, 32.0, 32.0),
+                def.rarity,
+                state,
+            );
+        }
 
         if item.is_some()
             && button_rect_tone_at(
@@ -287,16 +301,32 @@ fn draw_lockup(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
 
         let usable = member.progression.level >= item.required_level
             && (item.required_class.is_empty() || item.required_class.contains(&member.class));
+        let wear = ctx.session.kit_wear.get(&item.id).copied().unwrap_or(0);
+        let icon_state = if !usable {
+            ItemState::Locked
+        } else if wear >= 12 {
+            ItemState::Broken
+        } else if wear > 0 {
+            ItemState::Worn
+        } else {
+            ItemState::Neutral
+        };
 
         list_card(rect, false, rarity_color(item.rarity), mouse);
+        ctx.artwork.draw_item_icon_state(
+            &item.id,
+            Rect::new(rect.x + 8.0, rect.y + 14.0, 32.0, 32.0),
+            item.rarity,
+            icon_state,
+        );
         draw_ui_text_ex(
             &item.name,
-            rect.x + 12.0,
+            rect.x + 48.0,
             rect.y + 22.0,
             TextStyle::new(15.0, dark::TEXT_BRIGHT).params(),
         );
         stat_row(
-            Rect::new(rect.x + 12.0, rect.y + 26.0, rect.w - 110.0, 18.0),
+            Rect::new(rect.x + 48.0, rect.y + 26.0, rect.w - 146.0, 18.0),
             item.slot.label(),
             "",
             13.0,
