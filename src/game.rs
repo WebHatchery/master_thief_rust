@@ -56,7 +56,7 @@ impl Game {
 
         let prefs = Preferences::load(&data.config.game_name);
         let sound = SoundBank::load(prefs.effective_volume()).await;
-        let artwork = Artwork::load().await;
+        let artwork = Artwork::load(&data).await;
 
         let session = GameSession::new(&data.config, &data, new_seed());
         let mut game = Self {

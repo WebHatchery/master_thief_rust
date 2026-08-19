@@ -66,23 +66,6 @@ label, pattern, border, shape, or motion change.
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
 
-## 1. Inventory and technical scaffolding
-
-- [ ] Read the IDs and relevant fields from `characters.json`,
-  `equipment.json`, `targets.json`, `encounters.json`, `environment.json`,
-  and `achievements.json`; refresh the explicit batch ranges below if the
-  registries change before beginning a batch.
-- [ ] Create or update the `assets/images/brand`, `portraits`, `targets`,
-  `environments`, `items`, `icons`, `achievements`, `effects`, and `ui`
-  folders needed by the current runtime.
-- [ ] Apply lowercase `snake_case` filenames with semantic identity first and
-  state last; keep prices, DCs, names, positions, and revision numbers out of
-  runtime filenames.
-- [ ] Add one shared generation prompt block and the palette to
-  `assets/artwork_manifest.json`.
-- [ ] Add manifest entries for every authored raster family and every
-  procedural renderer before adding new UI references.
-
 ## 2. Crew portraits and identity
 
 ### Registry and class assets

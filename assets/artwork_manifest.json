@@ -14,6 +14,8 @@
   },
   "textures": [
     { "key": "brand_master_thief_wordmark", "path": "assets/images/brand/master_thief_wordmark.png", "filter": "linear" },
+    { "key": "environment_night_city_clear", "path": "assets/images/environments/night_city_clear.png", "filter": "linear" },
+    { "key": "environment_night_city_fog", "path": "assets/images/environments/night_city_fog.png", "filter": "linear" },
     { "key": "environment_night_city_rain", "path": "assets/images/environments/night_city_rain.png", "filter": "linear" },
     { "key": "environment_safehouse_desk", "path": "assets/images/environments/safehouse_desk.png", "filter": "linear" },
     { "key": "slot_weapon", "path": "assets/images/icons/slot_weapon.png", "filter": "nearest" },
@@ -26,10 +28,10 @@
     { "key": "equipment_icon_sheet_authored_source", "path": "assets/images/items/equipment_icon_sheet.png", "filter": "linear" }
   ],
   "generated_families": [
-    { "key_prefix": "portrait_", "path_pattern": "assets/images/portraits/{character_id}_neutral.png", "ids_source": "assets/data/characters.json", "state": "neutral plus deterministic identity variants" },
-    { "key_prefix": "target_", "path_pattern": "assets/images/targets/{target_id}.png", "ids_source": "assets/data/targets.json", "state": "target thumbnail" },
-    { "key_prefix": "item_", "path_pattern": "assets/images/items/{equipment_id}.png", "ids_source": "assets/data/equipment.json", "state": "authored bitmap icon with procedural rarity/state overlay" },
-    { "key_prefix": "class_", "path_pattern": "assets/images/portraits/class_{class_id}_badge.png", "state": "class badge" },
+    { "key_prefix": "portrait_", "path_pattern": "assets/images/portraits/{character_id}_neutral.png", "small_path_pattern": "assets/images/portraits/{character_id}_neutral_small.png", "ids_source": "assets/data/characters.json", "filter": "linear", "state": "neutral source plus procedural condition states" },
+    { "key_prefix": "target_", "path_pattern": "assets/images/targets/{target_id}.png", "ids_source": "assets/data/targets.json", "filter": "linear", "state": "target thumbnail" },
+    { "key_prefix": "item_", "path_pattern": "assets/images/items/{equipment_id}.png", "ids_source": "assets/data/equipment.json", "filter": "nearest", "state": "authored bitmap icon with procedural rarity/state overlay" },
+    { "key_prefix": "class_", "path_pattern": "assets/images/portraits/class_{class_id}_badge.png", "filter": "nearest", "state": "class badge" },
     { "key_prefix": "portrait_state_", "path_pattern": "assets/images/portraits/portrait_{state}.png", "states": ["unknown", "locked"] },
     { "key_prefix": "slot_", "path_pattern": "assets/images/icons/slot_{slot_id}.png", "ids": ["weapon", "armor", "accessory", "tool", "gadget"], "state": "neutral equipment slot glyph" }
   ],
@@ -40,5 +42,5 @@
     { "key_prefix": "chrome_", "coverage": "tabs, save/load/delete, settings, accessibility, modal, tooltip and footer glyphs", "renderer": "macroquad-toolkit UI surfaces", "filter": "nearest" },
     { "key_prefix": "achievement_", "coverage": "all achievement IDs from achievements.json", "renderer": "ui::records badge/stamp treatment", "filter": "nearest" }
   ],
-  "prompt_notes": "Noir payday: rain-glossed streets, smoked glass, brass hardware, sodium lamps, paper case files, blue police rim light, and professional tradespeople. Avoid gore, militarized assault imagery, branded marks, readable baked UI text, watermarks, and celebrity likenesses. Slot glyph atlas generated with the OpenAI image generation tool on 2026-08-19; cropped to five 64x64 RGBA runtime icons and retained at source_art/slot_glyph_atlas.png."
+  "prompt_notes": "Noir payday: rain-glossed streets, smoked glass, brass hardware, sodium lamps, paper case files, blue police rim light, and professional tradespeople. Avoid gore, militarized assault imagery, branded marks, readable baked UI text, watermarks, and celebrity likenesses. Slot glyph atlas generated with the OpenAI image generation tool on 2026-08-19; cropped to five 64x64 RGBA runtime icons and retained at source_art/slot_glyph_atlas.png. Clear and fog city plates were generated with the OpenAI image generation tool on 2026-08-19, resized to 1920x1080 runtime plates, and kept text-safe in the lower third."
 }

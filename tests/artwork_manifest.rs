@@ -54,6 +54,8 @@ fn manifest_and_authored_atmosphere_are_shipped() {
     assert!(parsed["textures"].as_array().unwrap().len() >= 5);
     for path in [
         "assets/images/brand/master_thief_wordmark.png",
+        "assets/images/environments/night_city_clear.png",
+        "assets/images/environments/night_city_fog.png",
         "assets/images/environments/night_city_rain.png",
         "assets/images/environments/safehouse_desk.png",
         "assets/images/items/equipment_icon_sheet.png",
@@ -67,6 +69,20 @@ fn manifest_and_authored_atmosphere_are_shipped() {
             project_file(path).is_file(),
             "missing atmosphere asset {path}"
         );
+    }
+}
+
+#[test]
+fn authored_runtime_families_have_id_parity() {
+    for id in ids("assets/data/characters.json") {
+        assert!(project_file(&format!("assets/images/portraits/{id}_neutral.png")).is_file());
+        assert!(project_file(&format!("assets/images/portraits/{id}_neutral_small.png")).is_file());
+    }
+    for id in ids("assets/data/targets.json") {
+        assert!(project_file(&format!("assets/images/targets/{id}.png")).is_file());
+    }
+    for id in ids("assets/data/equipment.json") {
+        assert!(project_file(&format!("assets/images/items/{id}.png")).is_file());
     }
 }
 
