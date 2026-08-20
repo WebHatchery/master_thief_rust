@@ -1,9 +1,10 @@
-//! Watching the job happen.
+//! Watching a resolved job happen.
 //!
-//! The dice are already cast: `run_job` resolves the whole thing from the run's
-//! seeded RNG at the moment of commit, and this replays that report at a pace a
-//! person can read. Presentation never touches the outcome — which is the only
-//! way the dice can be given real weight without making them a lie (GDD 9).
+//! The dice are already cast: `run_job` resolves the whole thing from the
+//! run's seeded RNG at the moment of commit, and this replays that report at a
+//! pace a person can read. Presentation never touches the outcome — which is
+//! the only way the dice can be given real weight without making them a lie
+//! (GDD 9).
 
 use crate::rules::Outcome;
 use crate::sim::{DoorOutcome, JobReport};
@@ -68,7 +69,8 @@ impl RunPlayback {
         }
     }
 
-    /// Jump to the end. The report is unchanged — only the watching is skipped.
+    /// Jump to the end. The report is unchanged — only the watching is
+    /// skipped.
     pub fn skip_to_end(&mut self) {
         self.door = self.report.doors.len().saturating_sub(1);
         self.timeline.skip_to_end();

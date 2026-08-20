@@ -18,7 +18,7 @@ pub mod shop;
 
 use crate::artwork::Artwork;
 use crate::data::GameData;
-use crate::game::playback::RunPlayback;
+use crate::playback::RunPlayback;
 use crate::prefs::{Preferences, RunPacing};
 use crate::sim::{JobReport, PlanDraft};
 use crate::state::GameSession;

@@ -122,6 +122,15 @@ fn the_floorplan_only_lights_doors_that_have_resolved() {
 }
 
 #[test]
+fn a_verdict_is_reported_once_when_the_door_lands() {
+    let mut playback = RunPlayback::new(report(111));
+    playback.update(APPROACH + ROLL + TALLY + 0.01, false);
+
+    assert!(playback.verdict_just_landed(DoorPhase::Tally, 0));
+    assert!(!playback.verdict_just_landed(DoorPhase::Verdict, 0));
+}
+
+#[test]
 fn a_run_reaches_its_last_door_and_stops() {
     let mut playback = RunPlayback::new(report(107));
     let doors = playback.report().doors.len();

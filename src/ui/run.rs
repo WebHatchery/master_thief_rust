@@ -3,7 +3,7 @@
 use super::chrome::{draw_panel, empty_notice, panel_style, title_style};
 use super::floorplan::{self, FloorplanPalette, RoomState};
 use super::{content_rect, UiAction, UiContext};
-use crate::game::playback::{DoorPhase, RunPlayback};
+use crate::playback::{DoorPhase, RunPlayback};
 use crate::rules::Outcome;
 use macroquad::prelude::*;
 use macroquad_toolkit::paint::ScreenPainter;

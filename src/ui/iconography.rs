@@ -272,7 +272,12 @@ pub fn draw_icon(icon: Icon, rect: Rect, color: Color) {
         }
         Icon::Settings => {
             circle(12.0, 12.0, 4.0);
-            for angle in [0.0_f32, 1.57, 3.14, 4.71] {
+            for angle in [
+                0.0_f32,
+                std::f32::consts::FRAC_PI_2,
+                std::f32::consts::PI,
+                std::f32::consts::PI + std::f32::consts::FRAC_PI_2,
+            ] {
                 line(
                     (12.0 + angle.cos() * 6.0, 12.0 + angle.sin() * 6.0),
                     (12.0 + angle.cos() * 9.0, 12.0 + angle.sin() * 9.0),

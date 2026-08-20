@@ -10,6 +10,7 @@ pub mod data;
 pub mod game;
 pub mod heist_actions;
 pub mod model;
+pub mod playback;
 pub mod prefs;
 pub mod rules;
 pub mod sim;
