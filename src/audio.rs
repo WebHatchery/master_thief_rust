@@ -5,9 +5,9 @@
 //! makes about art. The set is small on purpose: a run is mostly quiet, and the
 //! dice have to be the loudest thing in it.
 
-use macroquad::audio::{load_sound_from_bytes, play_sound, PlaySoundParams, Sound};
+use macroquad::audio::PlaySoundParams;
+use macroquad_toolkit::audio::SoundManager;
 use macroquad_toolkit::synth::{render_wav, SynthConfig, Voice, Wave};
-use std::collections::HashMap;
 
 /// The whole vocabulary of the game's noise.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -111,7 +111,7 @@ fn voices_for(sfx: Sfx) -> Vec<Voice> {
 
 /// The rendered set, plus the volume the player asked for.
 pub struct SoundBank {
-    sounds: HashMap<Sfx, Sound>,
+    sounds: SoundManager<Sfx>,
     volume: f32,
     muted: bool,
 }
@@ -121,21 +121,19 @@ impl SoundBank {
     /// any platform where the audio device refuses to open.
     pub fn muted() -> Self {
         Self {
-            sounds: HashMap::new(),
+            sounds: SoundManager::new(),
             volume: 0.0,
             muted: true,
         }
     }
 
     pub async fn load(volume: f32) -> Self {
-        let mut sounds = HashMap::new();
+        let mut sounds = SoundManager::new();
 
         for (index, sfx) in Sfx::ALL.into_iter().enumerate() {
             let bytes = render_wav(&voices_for(sfx), &config(), 0x51F_7000_u64 + index as u64);
             // One effect failing to decode is not worth losing the rest.
-            if let Ok(sound) = load_sound_from_bytes(&bytes).await {
-                sounds.insert(sfx, sound);
-            }
+            let _ = sounds.load_sound_bytes(sfx, &bytes).await;
         }
 
         Self {
@@ -166,11 +164,8 @@ impl SoundBank {
         if self.muted || self.volume <= 0.0 {
             return;
         }
-        let Some(sound) = self.sounds.get(&sfx) else {
-            return;
-        };
-        play_sound(
-            sound,
+        self.sounds.play_raw(
+            sfx,
             PlaySoundParams {
                 looped: false,
                 volume: (self.volume * gain).clamp(0.0, 1.0),

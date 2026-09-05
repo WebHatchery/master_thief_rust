@@ -385,11 +385,16 @@ pub struct GameData {
 impl GameData {
     pub fn load() -> Result<Self, String> {
         let config = load_embedded_json_labeled("game_config", GAME_CONFIG_JSON)?;
-        let crew_pool = registry("characters", CHARACTERS_JSON)?;
-        let equipment = registry("equipment", EQUIPMENT_JSON)?;
-        let encounters = registry("encounters", ENCOUNTERS_JSON)?;
-        let targets = registry("targets", TARGETS_JSON)?;
-        let environment = registry("environment", ENVIRONMENT_JSON)?;
+        let crew_pool = DataRegistry::from_embedded_json(CHARACTERS_JSON, "id")
+            .map_err(|error| format!("characters: {error}"))?;
+        let equipment = DataRegistry::from_embedded_json(EQUIPMENT_JSON, "id")
+            .map_err(|error| format!("equipment: {error}"))?;
+        let encounters = DataRegistry::from_embedded_json(ENCOUNTERS_JSON, "id")
+            .map_err(|error| format!("encounters: {error}"))?;
+        let targets = DataRegistry::from_embedded_json(TARGETS_JSON, "id")
+            .map_err(|error| format!("targets: {error}"))?;
+        let environment = DataRegistry::from_embedded_json(ENVIRONMENT_JSON, "id")
+            .map_err(|error| format!("environment: {error}"))?;
         let outcomes = load_embedded_json_labeled("outcomes", OUTCOMES_JSON)?;
         let awards = load_embedded_json_labeled("achievements", ACHIEVEMENTS_JSON)?;
         let trait_rates = load_embedded_json_labeled("traits", TRAITS_JSON)?;
@@ -513,13 +518,6 @@ impl GameData {
             achievements: self.awards.len(),
         }
     }
-}
-
-fn registry<T>(label: &str, json: &str) -> Result<DataRegistry<T>, String>
-where
-    T: serde::de::DeserializeOwned + Clone,
-{
-    DataRegistry::from_embedded_json(json, "id").map_err(|err| format!("{}: {}", label, err))
 }
 
 #[cfg(test)]
