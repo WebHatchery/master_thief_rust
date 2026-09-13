@@ -1,7 +1,6 @@
 {
   "title": "Master Thief",
   "wasm": "master_thief",
-  "roost_slug": "rust_master_thief",
   "status": { "text": "In Development", "class": "in-development" },
   "canvas_rendering": "pixelated",
   "about": [
