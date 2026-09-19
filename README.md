@@ -107,7 +107,7 @@ tests and the distribution soak in `sim::job` rely on.
 | `src/ui/` | View layer only — returns `UiAction`, mutates nothing |
 | `src/audio.rs` | Every sound effect, rendered from `synth` voices at boot |
 | `src/prefs.rs` | Run pacing, sound, and hints — this game's own settings |
-| `src/ui/floorplan.rs` | The building, split from the panel and drawn through `paint` so a test can measure it |
+| `src/ui/floorplan.rs` | The building, split from the panel and drawn through `paint` |
 | `src/game/playback.rs` | Replaying a resolved job at a pace a person can read |
 | `src/heist_actions.rs` | The one place an intent becomes a change |
 | `assets/data/` | Every balance value, dossier, door, and narrative line |
@@ -147,3 +147,8 @@ vars wired in `src/main.rs`. Output lands in `docs/verification/`.
 `GAME_DEVELOPMENT_GUIDE.md` are synced copies of the canonical versions in
 `rust_management/docs/` — don't hand-edit them. Project-specific guidance goes
 here or in `gdd.md`.
+
+[`docs/ART_DIRECTION.md`](docs/ART_DIRECTION.md) describes the visual language
+and asset requirements. Testing follows `CODE_STANDARDS.md` §11: use public
+library APIs from the crate's `tests/` directory and review cases by cohesive
+feature. Migrate existing source-side tests separately before expanding coverage.

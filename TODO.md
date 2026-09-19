@@ -60,6 +60,4 @@
 - [ ] Add missing module-purpose docs to `src/game/{capture,persistence,runtime}.rs`
   and `src/artwork/render.rs`; correct the obsolete non-test-line wording in
   `tests/code_standards.rs` and the playback/content-floor paths in `README.md`.
-  Remove the stale all-work-complete claim/history from `gates_todo.md` and retain
-  artwork direction in a reference document rather than a task-free TODO file
   (§9, AGENTS shared/project documentation rules).

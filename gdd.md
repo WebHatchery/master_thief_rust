@@ -7,7 +7,7 @@
 > and every plan is only as good as a d20 you don't get to roll again.
 
 Sources: `game_apps/master_thief/` (React 19 + Zustand original),
-`rust_management/migration_candidates.md`, `rust_management/standing.md`,
+`rust_management/standing.md`,
 `rust_management/docs/GAME_DEVELOPMENT_GUIDE.md`, `rust_management/docs/CODE_STANDARDS.md`,
 `rust_management/docs/MACROQUAD_TOOLKIT.md`.
 
@@ -20,10 +20,10 @@ Sources: `game_apps/master_thief/` (React 19 + Zustand original),
   lines) and `utils/characterCalculations.ts` (318 lines) carry **1,433 lines of tests**
   between them — the most thoroughly tested source app in `game_apps/`.
 
-- **Why it was picked:** `migration_candidates.md` — *"Heist crew-dispatch sim —
-  automated-mission structure like `carriage_run`'s expedition meta-game, so art stays to
-  icons/UI. Distinct from anything shipped."* The crew-of-specialists-versus-a-fixed-
-  obstacle-sequence loop has no analogue in `standing.md`.
+- **Why it was picked:** Matching a crew of specialists to a fixed sequence of
+  obstacles gave the catalog a distinct planning loop when this port was
+  selected. Automated mission resolution, as in `carriage_run`'s expedition
+  management, keeps the presentation focused on dossiers, icons, and UI.
 
 - **Art-liability audit.** A full scan of the project for
   `.png/.jpg/.jpeg/.svg/.gif/.webp` returns **zero image files**. No `public/` art
@@ -40,13 +40,13 @@ Sources: `game_apps/master_thief/` (React 19 + Zustand original),
 
   **Nothing here requires an artist.** The one genuine visual design problem — making a
   floorplan legible without tile art — is a procedural drawing problem, and the toolkit's
-  `paint` module exists precisely so that kind of art can be golden-image tested.
+  `paint` module supports rendering it consistently for visual review.
 
 - **Mechanic carry-over table.**
 
   | Old mechanic | Disposition | Notes |
   | --- | --- | --- |
-  | d20 encounter resolution vs. a DC, with attribute modifiers, skill, equipment, condition, environment | **Keep verbatim** | The best asset in the codebase. `resolveEncounter` is a real, tested rules engine — port it as-is, tests and all. See §5.2 |
+  | d20 encounter resolution vs. a DC, with attribute modifiers, skill, equipment, condition, environment | **Keep verbatim** | Preserve the rules and useful regression coverage through focused public-API tests under `CODE_STANDARDS.md` §11. See §5.2 |
   | Six attributes (STR/DEX/INT/WIS/CHA/CON) → six derived skills | Keep as-is | Skill = attribute pair + training. Clean, tested |
   | Derived stats (health, stamina, initiative, carry, crit chance/multiplier) | Keep, **pruned** | Carry and the crit stats never came across. Stamina did, and turned out to be consumed by nothing but its own assertion — the instruction was "keep only what a rule consumes", and it took until now to actually apply it to the last one. Health and initiative remain |
   | Seven character classes, five rarity tiers | Keep | |
@@ -183,7 +183,8 @@ skills, each derived from an attribute pair plus training:
 | Hacking | INT + WIS |
 | Social | CHA + WIS |
 
-Ports directly from `characterCalculations.ts`, including its tests.
+Ports directly from `characterCalculations.ts`; retain useful regression
+coverage in focused public-API tests under `CODE_STANDARDS.md` §11.
 
 ### 5.2 Encounter Resolution — the d20 core
 
@@ -532,7 +533,7 @@ Flow: crew/shop/targets freely → planning → commit → run → results → a
 | Dev overlay | `debug` | Yes | |
 | Deterministic randomness | `rng` | **Yes — critical** | §5.7 |
 | Sprite animation | `sprite` | No | |
-| Procedural images | `raster` / `paint` | **Yes** | Floorplan drawing; `paint` makes it golden-image testable |
+| Procedural images | `raster` / `paint` | **Yes** | Floorplan drawing and reproducible visual captures |
 | Headless capture | `capture` | Yes (required) | `MASTER_THIEF_CAPTURE_*`, already wired |
 | Save/load | `persistence` | Yes | |
 | Tile grid / fog / pathing | `FlatGrid`, `FogState` | No | **Strip the template's grid/fog scaffolding** |
@@ -654,9 +655,9 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
 | Milestone | Contents | Done when |
 | --- | --- | --- |
 | **M0 — Skeleton** | Data model, JSON loaders, `GameSession`, save round-trip, state machine, capture scenes | Load + save/load round-trip tested |
-| **M1 — The rules engine** | `rules/` ported from `heistExecution.ts` + `characterCalculations.ts`, **with the original's 1,433 lines of tests translated** | A headless soak test runs 10,000 encounters and the outcome distribution matches expectation |
+| **M1 — The rules engine** | `rules/` ported from `heistExecution.ts` + `characterCalculations.ts`, preserving high-value behavior and regression coverage under `CODE_STANDARDS.md` §11 | A headless soak test runs 10,000 encounters and the outcome distribution matches expectation |
 | **M2 — One job** | Targets, encounters, planning screen with modifier breakdown, run resolution, results | A job can be planned, committed, and resolved end to end |
-| **M3 — The floorplan** | Procedural floorplan drawing, node layout, run visualisation, dice presentation | Golden-image tests cover the floorplan renderer |
+| **M3 — The floorplan** | Procedural floorplan drawing, node layout, run visualisation, dice presentation | Captures and interaction checks verify the floorplan's readability and controls |
 | **M4 — The campaign** | Weeks, crew progression, injuries/fatigue/rest, equipment shop and loot drops, reputation/notoriety/heat, chemistry | A 20-week campaign is playable and the crew visibly changes |
 | **M5 — Delegation** | Auto-assignment via the same engine, differential reporting | Delegated results are never better than a good manual plan |
 | **M6 — Content** | Content to the §8 full targets, especially outcome lines | A full campaign rarely repeats a narrative line |
@@ -666,9 +667,14 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
 
 ## 14. Verification
 
-- **Port the tests first.** The original's `characterCalculations.test.ts` (802 lines) and
-  `heistExecution.test.ts` (631 lines) are the specification. Translating them in M1
-  before writing new rules code is the single highest-value step in this port.
+- **Preserve behavior coverage.** Use the original rules tests to identify
+  important calculations and regressions. Keep tests simple and rule-like in
+  the crate's `tests/` directory, exercising intentional public APIs. Strongly
+  target five cases per major feature across its files; consolidate related
+  inputs with table-driven assertions without combining unrelated contracts
+  or removing useful coverage. Explain any feature that needs more than five
+  cases before committing. Migrate legacy `src/` tests separately before
+  expanding coverage (`CODE_STANDARDS.md` §11).
 - **Determinism test** — same seed + same plan → identical job history, *and* the same
   seed replayed against separately loaded content. The second half is the one with teeth:
   `DataRegistry` is backed by a `HashMap`, so every load iterates in a different order, and
@@ -681,5 +687,6 @@ challenges; a real-time action layer; character portraits; permadeath-free "safe
 - **No-dead-content test** — every encounter template reachable from some target, every
   equipment item purchasable or droppable, every outcome band having lines for every
   skill.
-- **Golden-image test** on the floorplan renderer via `paint`.
+- **Visual review** of the floorplan through captures and live interaction;
+  UI and rendering generally do not need unit tests.
 - **Screenshot capture** per screen via `scripts/capture_ui.ps1`.

@@ -2,7 +2,7 @@
 //!
 //! The floorplan, dice, chips, meters, and ordinary controls remain procedural
 //! so they stay crisp, accessible, and responsive. These textures provide the
-//! authored identity and atmosphere called for by `artwork_todo.md`.
+//! authored identity and atmosphere described in `docs/ART_DIRECTION.md`.
 
 use crate::data::GameData;
 use macroquad::prelude::*;

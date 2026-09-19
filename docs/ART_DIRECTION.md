@@ -1,25 +1,21 @@
-# Master Thief — AI Artwork TODO
+# Master Thief — Art Direction
 
-Status: agent-executable artwork, UI, and validation checklist
 Visual direction: **noir payday** — rain-glossed streets, smoked glass,
 brass hardware, sodium lamps, paper case files, and the quiet confidence of a
 crew that knows exactly what it is doing.
 
-This checklist contains work an AI agent can complete in this repository:
-generate raster artwork, implement procedural rendering, update manifests and
-tests, capture verification images, and run the project publisher. Every
-checkbox is intended to be one bounded task or one small batch of related
-assets. Use the current JSON registries as the source of truth for any future
-additions; the explicit batch ranges below reflect the current data snapshot.
+Use the current JSON registries as the source of truth for future artwork.
+Review assets through deterministic captures and interactive inspection;
+UI and rendering generally do not need unit tests (`CODE_STANDARDS.md` §11).
 
 This is a heist-planning game, not a real-time action game. Art must make the
 plan, the people, the building, and the dice legible before it makes them
 dramatic. No asset may hide a DC, modifier, assignment, injury, payout, or
 required tap target.
 
-The checklist does not track external commissions, human-only art direction or
-licensing approvals, or layered editable masters. Runtime PNGs, procedural
-renderers, metadata, and repeatable validation are the deliverables here.
+Runtime PNGs, procedural renderers, and metadata implement this direction.
+The source artwork and its provenance are documented in
+[`../source_art/README.md`](../source_art/README.md).
 
 ## Art direction
 
@@ -65,4 +61,3 @@ label, pattern, border, shape, or motion change.
   tabs, and ordinary UI chrome. Use raster art for identity, atmosphere, and
   authored content.
 - Design for the 1280 x 720 logical layout and narrow WebGL windows.
-
