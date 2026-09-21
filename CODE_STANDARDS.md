@@ -83,6 +83,7 @@ Each module/subdirectory owns a single conceptual domain:
 game_name/
 ├── Cargo.toml              # Project manifest
 ├── CODE_STANDARDS.md       # This file
+├── UI_STYLE.md             # Screen composition and visual review
 ├── src/
 │   ├── lib.rs              # Public game logic used by the binary and tests
 │   ├── main.rs             # Entry point and game loop
@@ -206,6 +207,10 @@ Use `eprintln!` for error conditions that should be visible during development b
 
 ## 7. UI Code (Macroquad-Toolkit)
 
+Read [UI_STYLE.md](UI_STYLE.md) before designing or changing a screen. It defines
+the required screen brief, visual hierarchy, progressive disclosure, template
+adaptation, and visual review. The rules below govern implementation.
+
 ### 7.1 UI Is Dumb
 UI code:  
 - Reads game state  
@@ -235,6 +240,7 @@ Use shared toolkit widgets, input helpers, and palettes. Prefer buttons that fir
 - Games are touch-first: starting, tutorials, core interactions, and recovery must work through visible tap/click controls without a physical keyboard.
 - Keyboard shortcuts may supplement controls. Player-facing shortcut text must also name the equivalent visible touch control.
 - Tutorial prompts name the exact visible control or gesture needed next, such as “Tap CONTINUE” or “Drag the map.”
+- Dismiss completed tutorial prompts and keep help reopenable; preserve visible, understandable controls during normal play (`UI_STYLE.md` §5).
 - Keep drawing separate from mutation. Support common desktop browser sizes and responsive scaling; use fixed positions only with an intentional virtual resolution.
 
 ## 8. Deployment & Web Standards
@@ -246,12 +252,29 @@ Every game must have these files for deployment:
 - `catalog_thumbnail.png` – Root-level catalog image
 
 ### 8.2 Build Targets
+Use the shared `..\rust_management\cargo.ps1` launcher for concurrent local builds, checks, tests and Clippy. It leases a bounded shared build slot and uses sccache when installed; it does not copy source or change workspace membership. Publishing and capture integrate it automatically. See `rust_management/docs/CARGO_WORKSPACE.md`.
+
 The game must build for:
-- **Windows**: `cargo build --release`
-- **Web/WASM**: `cargo build --release --target wasm32-unknown-unknown`
+- **Windows**: `..\rust_management\cargo.ps1 build --release`
+- **Web/WASM**: `..\rust_management\cargo.ps1 build --release --target wasm32-unknown-unknown`
 
 ### 8.3 Validation
 After meaningful game changes, run `.\publish.ps1` with no parameters from the affected project directory and report the result. If the script is missing, blocked, or fails for an unrelated environment reason, report that limitation. A local instance or dev server is not a substitute unless the user requests it.
+
+All validation must run against the actual project checkout being changed, with
+its real workspace and dependency configuration. Do not create or use isolated
+project copies, copied source trees, temporary clones, alternate manifests, or
+fabricated workspaces to get formatting, Clippy, source-size gates, tests, or
+publishing to pass. Do not detach a game from its workspace or change dependency
+paths merely to bypass a validation failure.
+
+For example, "Validation passed in the isolated project copy: formatting,
+clippy with `-D warnings`, source-size gate, and 15 gameplay tests" is not an
+acceptable substitute for validating the changed checkout. Even an honestly
+labelled isolated-copy result does not satisfy these requirements. Run the
+checks in the actual checkout; if its workspace cannot load, report that error
+and identify the blocked checks. Fix the real cause within the task's scope,
+then rerun validation there. Never claim completion based on a copied project.
 
 Use project-local asset paths and make missing assets and loading failures clear during publishing.
 
@@ -319,6 +342,23 @@ Focus tests on:
 
 ## 12. Verification Artifacts
 
+- For UI changes, follow the visual and interaction review in `UI_STYLE.md` §9; inspect normal and minimum supported sizes and relevant dense states. Compilation and geometry checks alone do not verify usability.
 - Store verification screenshots directly in `docs/verification/`.
 - Do not create screenshot subfolders under `docs/verification/`.
 - If a new capture represents the same screen or state as an existing screenshot, replace the existing image instead of keeping duplicates.
+- Do not create disposable review files, scratch projects, backup screenshots, or cleanup folders, either inside the workspace or elsewhere. Do not move files out of a repository to make Git status clean. Preserve existing work and report blockers instead.
+- Use existing tooling and direct command output. Established tools may manage their own internal capture manifests, logs, and normal build outputs; do not create an ad hoc parallel set of temporary artifacts.
+- Never fabricate a `Cargo.toml`, source file, or placeholder crate to bypass a workspace failure. A missing manifest in an unexpected directory is a workspace hygiene problem to investigate and report, not a request to invent a project.
+
+Correct capture workflow (from the game directory):
+
+```powershell
+# Capture required evidence directly to its stable, documented location.
+# Use scene names supported by this game; the wrapper is hidden by default.
+& ..\macroquad-toolkit\scripts\capture_ui.ps1 -Scenes gameplay -OutputDir docs\verification
+# Wait for completion and check the exit result before inspecting the image.
+if (-not $?) { throw 'Capture failed; investigate the reported error.' }
+# Re-capture to the same filename when iterating; do not create backup copies.
+# If workspace discovery fails, inspect/report the offending directory.
+# Never create a dummy Cargo.toml or move files into a sibling cleanup folder.
+```
