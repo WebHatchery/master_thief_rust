@@ -363,3 +363,7 @@ or introduce mid-run abort/re-roll controls to solve presentation problems.
   `docs/verification/`, replacing matching states. After each meaningful game
   implementation change run `./publish.ps1` without parameters and report the
   result/blocker; this TODO-only audit did not run publishing or runtime tests.
+
+## Settings and display
+
+- [ ] Add a Fullscreen control to the Settings panel and persist/apply the player's display preference.
