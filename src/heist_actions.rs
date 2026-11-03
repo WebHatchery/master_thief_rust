@@ -43,6 +43,9 @@ pub enum GameCommand {
     FinishRun,
     /// A preference changed; write it out and follow it.
     SavePreferences,
+    ToggleFullscreen,
+    KeepDisplay,
+    RevertDisplay,
 }
 
 pub struct Dispatch<'a> {
@@ -83,6 +86,9 @@ pub fn apply(action: UiAction, dispatch: Dispatch<'_>) -> Option<GameCommand> {
             selection.settings_open = false;
             return Some(GameCommand::SavePreferences);
         }
+        UiAction::ToggleFullscreen => return Some(GameCommand::ToggleFullscreen),
+        UiAction::KeepDisplay => return Some(GameCommand::KeepDisplay),
+        UiAction::RevertDisplay => return Some(GameCommand::RevertDisplay),
         UiAction::SetPacing(pacing) => {
             prefs.pacing = pacing;
             return Some(GameCommand::SavePreferences);

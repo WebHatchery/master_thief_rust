@@ -4,6 +4,7 @@
 //! type remains the composition root rather than another gameplay system.
 
 mod capture;
+mod display;
 mod persistence;
 mod runtime;
 
@@ -18,6 +19,7 @@ use crate::heist_actions::Selection;
 use crate::prefs::Preferences;
 use crate::state::GameSession;
 use crate::ui::UiAction;
+use display::DisplaySettings;
 use macroquad_toolkit::events::EventBus;
 use macroquad_toolkit::fx::FloatingTextLayer;
 use macroquad_toolkit::notifications::NotificationManager;
@@ -32,6 +34,7 @@ pub struct Game {
     /// Crit punctuation, hung over the room it happened in.
     floats: FloatingTextLayer,
     prefs: Preferences,
+    display_settings: DisplaySettings,
     sound: SoundBank,
     artwork: Artwork,
     notifications: NotificationManager,
@@ -53,6 +56,10 @@ impl Game {
         ));
 
         let prefs = Preferences::load(&data.config.game_name);
+        let display_settings = DisplaySettings::load(
+            &data.config.game_name,
+            macroquad_toolkit::capture::capture_requested("MASTER_THIEF"),
+        );
         let sound = SoundBank::load(prefs.effective_volume()).await;
         let artwork = Artwork::load(&data).await;
         let session = GameSession::new(&data.config, &data, new_seed());
@@ -63,6 +70,7 @@ impl Game {
             playback: None,
             floats: FloatingTextLayer::new(),
             prefs,
+            display_settings,
             sound,
             artwork,
             notifications,

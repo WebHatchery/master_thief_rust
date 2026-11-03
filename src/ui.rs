@@ -84,6 +84,12 @@ pub enum UiAction {
     ShowCrewTab(CrewTab),
     OpenSettings,
     CloseSettings,
+    /// Preview a fullscreen change from Settings.
+    ToggleFullscreen,
+    /// Keep the display mode shown during confirmation.
+    KeepDisplay,
+    /// Restore the previous display mode during confirmation.
+    RevertDisplay,
     SetPacing(RunPacing),
     SetSound(bool),
     SetVolume(f32),
@@ -182,6 +188,7 @@ pub struct UiContext<'a> {
     pub playback: Option<&'a RunPlayback>,
     pub last_report: Option<&'a JobReport>,
     pub prefs: &'a Preferences,
+    pub fullscreen: bool,
     pub artwork: &'a Artwork,
     /// True while the settings panel is covering everything.
     pub settings_open: bool,

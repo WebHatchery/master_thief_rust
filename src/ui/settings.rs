@@ -10,9 +10,9 @@ use macroquad_toolkit::ui::draw_ui_text_ex;
 pub fn panel_rect() -> Rect {
     Rect::new(
         LOGICAL_WIDTH * 0.5 - 260.0,
-        LOGICAL_HEIGHT * 0.5 - 190.0,
+        LOGICAL_HEIGHT * 0.5 - 225.0,
         520.0,
-        380.0,
+        450.0,
     )
 }
 
@@ -119,10 +119,31 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
         actions.push(UiAction::ShowHints(!prefs.hints));
     }
 
+    row(
+        content,
+        4,
+        Icon::Fullscreen,
+        "Display",
+        if ctx.fullscreen {
+            "Fullscreen"
+        } else {
+            "Windowed"
+        },
+    );
+    if button_rect_tone_at(
+        control(content, 4),
+        "Change",
+        true,
+        ButtonTone::Primary,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleFullscreen);
+    }
+
     draw_text_block(
         pacing_note(prefs.pacing),
         content.x,
-        content.y + 200.0,
+        content.y + 232.0,
         content.w,
         56.0,
         14.0,
@@ -139,6 +160,76 @@ pub fn draw(ctx: &UiContext<'_>, actions: &mut Vec<UiAction>) {
     ) {
         actions.push(UiAction::CloseSettings);
     }
+}
+
+pub fn draw_display_preview(ctx: &UiContext<'_>, remaining: f32) -> Option<UiAction> {
+    full_screen_overlay(0.86);
+
+    let rect = Rect::new(
+        LOGICAL_WIDTH * 0.5 - 260.0,
+        LOGICAL_HEIGHT * 0.5 - 112.0,
+        520.0,
+        224.0,
+    );
+    draw_surface(
+        rect,
+        &SurfaceStyle::new(Color::new(0.08, 0.09, 0.12, 1.0))
+            .with_border(1.0, dark::ACCENT)
+            .with_header(44.0, Color::new(0.11, 0.13, 0.17, 1.0))
+            .with_header_divider(1.0, Color::new(0.34, 0.40, 0.52, 0.5)),
+    );
+    draw_text_centered_in_box_ex(
+        "Confirm display",
+        rect.x,
+        rect.y,
+        rect.w,
+        44.0,
+        TextStyle::new(20.0, dark::TEXT_BRIGHT),
+    );
+    draw_text_block(
+        "Keep this fullscreen setting?",
+        rect.x + 28.0,
+        rect.y + 74.0,
+        rect.w - 56.0,
+        28.0,
+        17.0,
+        0.0,
+        dark::TEXT_BRIGHT,
+    );
+    draw_ui_text_ex(
+        &format!("Reverting in {:.0} seconds", remaining.ceil()),
+        rect.x + 28.0,
+        rect.y + 130.0,
+        TextStyle::new(15.0, dark::TEXT_DIM).params(),
+    );
+
+    let mouse = ctx.mouse();
+    let button_y = rect.y + 158.0;
+    let button_width = 210.0;
+    if button_rect_tone_at(
+        Rect::new(rect.x + 28.0, button_y, button_width, 40.0),
+        "Keep display",
+        true,
+        ButtonTone::Positive,
+        mouse,
+    ) {
+        return Some(UiAction::KeepDisplay);
+    }
+    if button_rect_tone_at(
+        Rect::new(
+            rect.right() - button_width - 28.0,
+            button_y,
+            button_width,
+            40.0,
+        ),
+        "Revert",
+        true,
+        ButtonTone::Secondary,
+        mouse,
+    ) {
+        return Some(UiAction::RevertDisplay);
+    }
+    None
 }
 
 fn pacing_note(pacing: RunPacing) -> &'static str {

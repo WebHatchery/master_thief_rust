@@ -366,4 +366,4 @@ or introduce mid-run abort/re-roll controls to solve presentation problems.
 
 ## Settings and display
 
-- [ ] Add a Fullscreen control to the Settings panel and persist/apply the player's display preference.
+- [x] Add a Fullscreen control to the Settings panel and persist/apply the player's display preference.

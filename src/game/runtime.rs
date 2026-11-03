@@ -11,35 +11,44 @@ use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_fr
 impl Game {
     pub fn update(&mut self, dt: f32) {
         self.notifications.update(dt);
+        if self.display_settings.update(dt) {
+            self.notifications
+                .warning("Fullscreen change reverted after 15 seconds");
+        }
         self.floats.update(dt);
-        self.advance_run(dt);
+        let display_preview = self.display_settings.is_previewing();
+        if !display_preview {
+            self.advance_run(dt);
+        }
 
-        if is_key_pressed(KeyCode::Tab) {
-            let next = match self.selection.screen {
-                Screen::Crew => Screen::Board,
-                Screen::Board => Screen::Shop,
-                Screen::Shop => Screen::Results,
-                Screen::Records => Screen::Crew,
-                // Tab never walks out of a plan under construction, and never
-                // out of a run in progress.
-                Screen::Planning => Screen::Planning,
-                Screen::Run => Screen::Run,
-                Screen::Results => Screen::Records,
-            };
-            self.events.push(UiAction::ShowScreen(next));
-        }
-        if is_key_pressed(KeyCode::Escape) {
-            self.events.push(if self.selection.settings_open {
-                UiAction::CloseSettings
-            } else {
-                UiAction::OpenSettings
-            });
-        }
-        if is_key_pressed(KeyCode::S) {
-            self.events.push(UiAction::Save);
-        }
-        if is_key_pressed(KeyCode::L) && self.save_exists {
-            self.events.push(UiAction::Load);
+        if !display_preview {
+            if is_key_pressed(KeyCode::Tab) {
+                let next = match self.selection.screen {
+                    Screen::Crew => Screen::Board,
+                    Screen::Board => Screen::Shop,
+                    Screen::Shop => Screen::Results,
+                    Screen::Records => Screen::Crew,
+                    // Tab never walks out of a plan under construction, and never
+                    // out of a run in progress.
+                    Screen::Planning => Screen::Planning,
+                    Screen::Run => Screen::Run,
+                    Screen::Results => Screen::Records,
+                };
+                self.events.push(UiAction::ShowScreen(next));
+            }
+            if is_key_pressed(KeyCode::Escape) {
+                self.events.push(if self.selection.settings_open {
+                    UiAction::CloseSettings
+                } else {
+                    UiAction::OpenSettings
+                });
+            }
+            if is_key_pressed(KeyCode::S) {
+                self.events.push(UiAction::Save);
+            }
+            if is_key_pressed(KeyCode::L) && self.save_exists {
+                self.events.push(UiAction::Load);
+            }
         }
 
         let actions: Vec<UiAction> = self.events.drain().collect();
@@ -52,7 +61,7 @@ impl Game {
         clear_background(dark::BACKGROUND);
 
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
-        let actions = ui::draw_game_ui(UiContext {
+        let ctx = UiContext {
             data: &self.data,
             session: &self.session,
             screen: self.selection.screen,
@@ -63,12 +72,22 @@ impl Game {
             playback: self.playback.as_ref(),
             last_report: self.selection.last_report.as_ref(),
             prefs: &self.prefs,
+            fullscreen: self.display_settings.fullscreen(),
             artwork: &self.artwork,
             settings_open: self.selection.settings_open,
             save_exists: self.save_exists,
             ui: &virtual_ui,
-        });
-        self.floats.draw();
+        };
+        let actions = match self.display_settings.preview_remaining() {
+            Some(remaining) => ui::settings::draw_display_preview(&ctx, remaining)
+                .into_iter()
+                .collect(),
+            None => {
+                let game_actions = ui::draw_game_ui(ctx);
+                self.floats.draw();
+                game_actions
+            }
+        };
         end_virtual_ui_frame();
 
         for action in actions {
@@ -107,6 +126,18 @@ impl Game {
             }
             Some(GameCommand::FinishRun) => self.finish_run(),
             Some(GameCommand::SavePreferences) => self.save_preferences(),
+            Some(GameCommand::ToggleFullscreen) => self.display_settings.begin_preview(),
+            Some(GameCommand::KeepDisplay) => match self.display_settings.keep_preview() {
+                Ok(()) => self.notifications.success("Fullscreen preference saved"),
+                Err(error) => {
+                    self.notifications
+                        .danger(format!("Could not save fullscreen preference: {error}"));
+                }
+            },
+            Some(GameCommand::RevertDisplay) => {
+                self.display_settings.revert_preview();
+                self.notifications.info("Fullscreen change reverted");
+            }
             None => {}
         }
     }
